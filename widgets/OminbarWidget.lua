@@ -50,8 +50,6 @@ function CreateOmniBarWidget(barKey, settings)
         Button:SetSize(36, 36)
         Button:SetPoint("CENTER")
 
-        OmniBar:MakeFrameDraggable(Button, OmniBarFrame)
-
         local Border = Button:CreateTexture("$parentBorder", "OVERLAY")
         Border:SetTexture("Interface\\AddOns\\OmniBar\\arts\\UI-ActionButton-Border.blp")
         Border:SetDrawLayer("ARTWORK", 1) -- z-index for textures.
@@ -60,7 +58,6 @@ function CreateOmniBarWidget(barKey, settings)
         Border:SetBlendMode("ADD") -- This makes the dark background in the image transperent
       -- Border:SetVertexColor(0.639, 0.207, 0.933, 1) -- purple color, kinda cool
       --. Border:SetTexCoord(0.2, 0.8, 0.2, 0.8)
-
 
         Border:Hide()   
         Button.border = Border
@@ -96,6 +93,7 @@ function CreateOmniBarWidget(barKey, settings)
    -- OmniBarFrame.button = button
     OmniBarFrame.iconsContainer = IconsContainer
     OmniBarFrame.CreateOmniBarIcon = CreateOmniBarIcon
+    OmniBarFrame.icons = {}
 
     -- Event registration
   --  OmniBar:SetScript("OnEvent", OmniBar_OnEvent) -- Assumes OmniBar_OnEvent is defined

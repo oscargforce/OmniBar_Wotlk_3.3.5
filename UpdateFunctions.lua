@@ -14,9 +14,7 @@ function OmniBar:UpdateScale(barFrame, barSettings)
 end
 
 function OmniBar:UpdateBorder(barFrame, barSettings)
-    viewTable(barFrame)
     for i, button in ipairs(barFrame.icons) do
-        print(#barFrame.icons)
         if barSettings.showBorder then
             button.icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
         else

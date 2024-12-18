@@ -67,12 +67,12 @@ function OmniBar:AddBarToOptions(barKey)
                 desc = "Set the name of the bar",
                 type = "input",
                 width = "double",
+                get = function() return self.db.profile.bars[barKey].name end,
                 set = function(info, state)
                     self.db.profile.bars[barKey].name = state
                     self.options.args[barKey].name = state
-                    self:UpdateBar(barKey)
+                    self:UpdateBar(barKey, "name")
                 end,
-                get = function() return self.db.profile.bars[barKey].name end,
                 order = 1,
             },
             trackUnit = {
@@ -84,10 +84,10 @@ function OmniBar:AddBarToOptions(barKey)
                     ["arena3"] = "Arena3",
                     ["All enemies"] = "All enemies",
                 },
+                get = function() return "All enemies" end,
                 set = function(info, state)
                     print(info)
                 end,
-                get = function() return "All enemies" end,
                 order = 2,
             },
             lineBreak1 = {
@@ -153,7 +153,7 @@ function OmniBar:AddBarToOptions(barKey)
                 get = function() return self.db.profile.bars[barKey].showBorder end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].showBorder = value
-                    self:UpdateBar(barKey)
+                    self:UpdateBar(barKey, "border")
                 end
             },
             highlightTarget = {
@@ -217,7 +217,7 @@ function OmniBar:AddBarToOptions(barKey)
                 set = function(info, value) 
                   --  local scaleRatio = value / 36 -- default size
                     self.db.profile.bars[barKey].scale = value 
-                    self:UpdateBar(barKey)
+                    self:UpdateBar(barKey, "scale")
                 end,
             },
             sizeDesc = {
@@ -236,7 +236,7 @@ function OmniBar:AddBarToOptions(barKey)
                 get = function() return self.db.profile.bars[barKey].maxIconsPerRow end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].maxIconsPerRow = value
-                    self:UpdateBar(barKey)
+                    self:UpdateBar(barKey, "arrangeIcons")
                 end,
                 order = 18,
             },
@@ -276,7 +276,7 @@ function OmniBar:AddBarToOptions(barKey)
                 get = function() return self.db.profile.bars[barKey].margin end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].margin = value
-                    self:UpdateBar(barKey)
+                    self:UpdateBar(barKey, "arrangeIcons")
                 end,
                 order = 22,
             },

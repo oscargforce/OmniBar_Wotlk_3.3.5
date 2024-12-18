@@ -1,7 +1,6 @@
 local addonName, addon = ...
 
 addon.trackedCooldowns = {
-    --[[
     ["General"] = {
         ["Berserking"] = { isTracking = false, duration = 180, spellId = 26297 },
         ["Blood Fury"] = { isTracking = false, duration = 120, spellId = 20572 },
@@ -126,7 +125,7 @@ addon.trackedCooldowns = {
         ["Dismantle"] = { isTracking = false, duration = 60, spellId = 51722 },
         ["Cold Blood"] = { isTracking = false, duration = 180, spellId = 14177 },
     },
-    ]]
+
     
     ["Shaman"] = {
         ["Nature's Swiftness"] = { isTracking = false, duration = 120, spellId = 16188 },
@@ -148,7 +147,7 @@ addon.trackedCooldowns = {
         ["Demonic Circle: Teleport"] = { isTracking = false, duration = 26, spellId = 48020 },
         ["Shadow Fury"] = { isTracking = false, duration = 20, spellId = 47847 },
     },
---[[
+
     ["Warrior"] = {
         ["Spell Reflection"] = { isTracking = false, duration = 10, spellId = 23920 },
         ["Pummel"] = { isTracking = false, duration = 10, spellId = 6552 },
@@ -165,7 +164,6 @@ addon.trackedCooldowns = {
         ["Intimidating Shout"] = { isTracking = false, duration = 120, spellId = 5246 },
         ["Intimidating Shout"] = { isTracking = false, duration = 60, spellId = 676 },
     },
-    ]]
 }
 
 

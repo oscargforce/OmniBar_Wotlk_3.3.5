@@ -3,18 +3,20 @@ local addonName, addon = ...
 local GetSpellInfo = GetSpellInfo
 local GetItemInfo = GetItemInfo
 
-local DEFAULT_BAR_SETTINGS = {
-   name = "OmniBar",
-   anchorWidth = 80,
-   scale = 1,
-   position = { point = "CENTER", relativePoint = "CENTER", x = 0, y = 0 },
-   showBorder = true,
-   isRowGrowingUpwards = true,
-   maxIconsPerRow = 15,
-   maxIconsTotal = 30,
-   margin = 4,
-   cooldowns = addon.trackedCooldowns,
-}
+local function GetDefaultBarSettings() 
+    return {
+        name = "OmniBar",
+        anchorWidth = 80,
+        scale = 1,
+        position = { point = "CENTER", relativePoint = "CENTER", x = 0, y = 0 },
+        showBorder = true,
+        isRowGrowingUpwards = true,
+        maxIconsPerRow = 15,
+        maxIconsTotal = 30,
+        margin = 4,
+        cooldowns = addon.trackedCooldowns,
+    }
+end
 
 local function AddIconsToTrackedCooldownsTable()
     for _, spellTable in pairs(addon.trackedCooldowns) do
@@ -108,23 +110,24 @@ end
 
 function OmniBar:InitializeBar(barKey, settings)
     if (not self.db.profile.bars[barKey]) then
-		self.db.profile.bars[barKey] = { name = barKey }
-		for a,b in pairs(DEFAULT_BAR_SETTINGS) do
+        self.db.profile.bars[barKey] = {}
+
+        local defaultBarSettings = GetDefaultBarSettings()
+		for a,b in pairs(defaultBarSettings) do
 			self.db.profile.bars[barKey][a] = b
 		end
+
+        self.db.profile.bars[barKey].name = barKey 
 	end
 
     local barSettings = settings or self.db.profile.bars[barKey]
     local barFrame = CreateOmniBarWidget(barKey, barSettings)
 
-    barFrame.icons = barFrame.icons or {}
-
     -- Create and add icons to the bar if "isTracking" is true
     self:CreateIconsToBar(barFrame, barSettings)
      
-    -- add icons here
     self.barFrames[barKey] = barFrame
-   -- viewTable(DEFAULT_BAR_SETTINGS)
+   
 end
 
 function OmniBar:CreateIconsToBar(barFrame, barSettings)
@@ -150,11 +153,13 @@ function OmniBar:GetIconFromPool(barFrame)
         local icon = table.remove(self.iconPool)
         icon:SetParent(barFrame.iconsContainer)
         icon:Show()
+        self:MakeFrameDraggable(icon, barFrame)
         return icon
     end
 
     -- Otherwise, create a new icon
     local icon = barFrame.CreateOmniBarIcon()
+    self:MakeFrameDraggable(icon, barFrame)
     return icon
 end
 
@@ -225,7 +230,9 @@ function OmniBar:ResetIcons(barFrame)
     wipe(barFrame.icons) -- Efficiently clears a table
 end
 
-function OmniBar:UpdateBar(barKey)
+--[[
+
+function OmniBar:dwqdq(barKey)
     local barFrame = self.barFrames[barKey]
     local barSettings  = self.db.profile.bars[barKey]
     
@@ -235,6 +242,42 @@ function OmniBar:UpdateBar(barKey)
     self:CreateIconsToBar(barFrame, barSettings)
     self:UpdateBorder(barFrame, barSettings)
 end
+]]
+
+function OmniBar:UpdateBar(barKey, specificUpdate)
+    local barFrame = self.barFrames[barKey]
+    local barSettings = self.db.profile.bars[barKey]
+
+    -- Lookup table for update operations
+    local updateOperations = {
+        name = function() self:UpdateBarName(barFrame, barSettings) end,
+        scale = function() self:UpdateScale(barFrame, barSettings) end,
+        resetIcons = function() self:ResetIcons(barFrame) end,
+        createIcons = function() self:CreateIconsToBar(barFrame, barSettings) end,
+        border = function() self:UpdateBorder(barFrame, barSettings) end,
+        arrangeIcons = function() self:ArrangeIcons(barFrame, barSettings) end,
+    }
+
+    if specificUpdate then
+        local operation = updateOperations[specificUpdate]
+
+        if not operation then
+            print(string.format("OmniBar: Invalid update operation '%s' for bar '%s'", specificUpdate, barKey))
+            return
+        end 
+
+        operation()
+        return  
+    end
+    
+    -- Perform all updates if no specific update is provided
+    local operationOrder = {"name", "scale", "resetIcons", "createIcons", "border"}
+    for _, key in ipairs(operationOrder) do
+        local operation = updateOperations[key]
+        operation()
+    end
+end
+
 
 function OmniBar:CreateBar() 
     local barKey = self:GenerateUniqueKey()
@@ -246,20 +289,20 @@ function OmniBar:CreateBar()
     print("Bar created with key:", barKey)
 end
 
-function OmniBar:MakeFrameDraggable(iconFrame, parentBarFrame)
-    iconFrame:SetMovable(true)
-    iconFrame:EnableMouse(true)
-    iconFrame:SetScript("OnMouseDown", function(self, button)
+function OmniBar:MakeFrameDraggable(icon, barFrame)
+    icon:SetMovable(true)
+    icon:EnableMouse(true)
+    icon:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" then
-            parentBarFrame:StartMoving()
+            barFrame:StartMoving()
         end
     end)
-    iconFrame:SetScript("OnMouseUp", function(self, button)
+    icon:SetScript("OnMouseUp", function(self, button)
         if button == "LeftButton" then
-            parentBarFrame:StopMovingOrSizing()
+            barFrame:StopMovingOrSizing()
             -- Save position
-            local point, _, relativePoint, x, y = parentBarFrame:GetPoint()
-            OmniBar:SetPosition(parentBarFrame, { point = point, relativePoint = relativePoint, x = x, y = y })
+            local point, _, relativePoint, x, y = barFrame:GetPoint()
+            OmniBar:SetPosition(barFrame, { point = point, relativePoint = relativePoint, x = x, y = y })
         end
     end)
 end
