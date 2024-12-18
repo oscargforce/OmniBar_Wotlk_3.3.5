@@ -1,0 +1,20 @@
+## Interface: 30300
+## Title: OmniBar - 3.3.5
+## Notes: Tracks enemy cooldowns
+## Version: 3.3.5a Version
+## Author: Oscargforce
+## SavedVariables: OMNIBAR_TEST
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+embeds.xml
+
+ViewTable.lua
+TrackedCooldowns.lua
+OmniBar.lua
+widgets\OminbarWidget.lua
+options\BarManager.lua
+Omnibar-options.lua
+UpdateFunctions.lua
+
+
