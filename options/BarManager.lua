@@ -79,14 +79,19 @@ function OmniBar:AddBarToOptions(barKey)
                 name = "Track",
                 type = "select",
                 values = {
+                    ["enemy"] = "All Enemies",
+                    ["target"] = "Target",
+                    ["focus"] = "Focus",
                     ["arena1"] = "Arena1", 
                     ["arena2"] = "Arena2",
                     ["arena3"] = "Arena3",
-                    ["All enemies"] = "All enemies",
+                    ["party1"] = "Party1",
+                    ["party2"] = "Party2",
+                    ["party3"] = "Party3",
                 },
-                get = function() return "All enemies" end,
-                set = function(info, state)
-                    print(info)
+                get = function() return self.db.profile.bars[barKey].trackUnit end,
+                set = function(info, value)
+                    self.db.profile.bars[barKey].trackUnit = value
                 end,
                 order = 2,
             },
@@ -102,15 +107,17 @@ function OmniBar:AddBarToOptions(barKey)
                 type = "toggle",
                 order = 4,
             },
-            showUnused = {
+            showUnusedIcons = {
                 name = "Show Unused Icons",
                 desc = "Icons will always remain visible",
                 width = "normal",
                 type = "toggle",
-                order = 5,
-                set = function(info, state)
-                    print(info)
+                get = function() return self.db.profile.bars[barKey].showUnusedIcons end,
+                set = function(info, value)
+                    self.db.profile.bars[barKey].showUnusedIcons = value
+                    self:UpdateBar(barKey, "iconVisibility")
                 end,
+                order = 5,
             },
             adaptive = {
                 name = "As Enemies Appear",
@@ -127,12 +134,12 @@ function OmniBar:AddBarToOptions(barKey)
                 desc = "Toggle the grow direction of the icons",
                 width = "normal",
                 type = "toggle",
-                order = 7,
                 get = function() return self.db.profile.bars[barKey].isRowGrowingUpwards end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].isRowGrowingUpwards = value
                     self:UpdateBar(barKey)
                 end,
+                order = 7,
             },
             cooldownCount = {
                 name = "Countdown Count",

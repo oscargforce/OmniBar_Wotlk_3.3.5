@@ -179,3 +179,15 @@ addon.CLASS_NAME_TO_TCOORDS_KEY = {
     ["Warlock"] = "WARLOCK",
     ["Warrior"] = "WARRIOR",
 }
+
+function addon.DeepCopyTable(tbl)
+    local copy = {}
+    for k, v in pairs(tbl) do
+        if type(v) == "table" then
+            copy[k] = addon.DeepCopyTable(v)  -- Recursively copy tables
+        else
+            copy[k] = v
+        end
+    end
+    return copy
+end

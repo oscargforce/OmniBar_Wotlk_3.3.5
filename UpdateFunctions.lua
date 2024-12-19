@@ -23,3 +23,16 @@ function OmniBar:UpdateBorder(barFrame, barSettings)
 
     end
 end
+
+function OmniBar:UpdateIconVisibility(barFrame, barSettings)
+    local showUnusedIcons = barSettings.showUnusedIcons
+
+    if showUnusedIcons then
+        barFrame.iconsContainer:Show()  -- Show the entire container
+    else
+        barFrame.iconsContainer:Hide()  -- Hide the entire container
+    end
+
+    -- Rearrange icons after visibility update
+    --self:ArrangeIcons(barFrame, barSettings)
+end
