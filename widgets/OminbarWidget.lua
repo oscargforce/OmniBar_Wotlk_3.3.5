@@ -107,14 +107,7 @@ end
  --[[ EXAMPLE WHAT THE TABLE BAR1 TABLE WOULD LOOK LIKE
 self.barFrames = {
  ["OmniBar1"] = {
-    settings = {
-        locked = false,
-        position = {
-            x = 0,
-            y = 0,
-        },
-    },
-    button = {
+    icons = {
         [0] = {
             icon = {
                 [0] = userdata: 0xE7AF150,

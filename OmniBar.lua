@@ -1,4 +1,4 @@
-OmniBar = LibStub("AceAddon-3.0"):NewAddon("OmniBar", "AceConsole-3.0")
+OmniBar = LibStub("AceAddon-3.0"):NewAddon("OmniBar", "AceConsole-3.0", "AceEvent-3.0")
 local addonName, addon = ...
 local GetSpellInfo = GetSpellInfo
 local GetItemInfo = GetItemInfo
@@ -15,12 +15,12 @@ local DEFAULT_BAR_SETTINGS = {
     margin = 4,
     showUnusedIcons = true,
     trackUnit = "enemy",
-    cooldowns = addon.trackedCooldowns,
+    cooldowns = addon.cooldownsTable,
 }
  
 
-local function AddIconsToTrackedCooldownsTable()
-    for _, spellTable in pairs(addon.trackedCooldowns) do
+local function AddIconsToCooldownsTable()
+    for _, spellTable in pairs(addon.cooldownsTable) do
         for _, spellData in pairs(spellTable) do
             local icon
             if not spellData.item then 
@@ -41,12 +41,16 @@ function OmniBar:OnInitialize()
     self.barFrames = {}
     self.barIndex = 1
     self.iconPool = {}
+    self.trackedCooldowns = {}
+    self.activeCooldowns = {}
     self.db.RegisterCallback(self, "OnProfileChanged", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
+    self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
     self:SetupOptions()
     AddIconsToTrackedCooldownsTable()
 end
+
 
 -- runs after OmniBar:OnInitialize()
 function OmniBar:OnEnable()
@@ -75,8 +79,6 @@ function OmniBar:OnEnable()
     for barKey, _ in pairs(self.db.profile.bars) do
         self:AddBarToOptions(barKey)
     end
-   
-    --self:Refresh(true)
 
 end
 
@@ -130,7 +132,7 @@ function OmniBar:InitializeBar(barKey, settings)
      
     self.barFrames[barKey] = barFrame
 
-    self:UpdateIconVisibility(barFrame, barSettings)
+    self:UpdateShowUnusedIcons(barFrame, barSettings)
    
 end
 
@@ -260,7 +262,7 @@ function OmniBar:UpdateBar(barKey, specificUpdate)
         createIcons = function() self:CreateIconsToBar(barFrame, barSettings) end,
         border = function() self:UpdateBorder(barFrame, barSettings) end,
         arrangeIcons = function() self:ArrangeIcons(barFrame, barSettings) end,
-        iconVisibility = function() self:UpdateIconVisibility(barFrame, barSettings) end,
+        showUnusedIcons = function() self:UpdateShowUnusedIcons(barFrame, barSettings) end,
     }
 
     if specificUpdate then

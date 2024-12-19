@@ -24,7 +24,7 @@ function OmniBar:UpdateBorder(barFrame, barSettings)
     end
 end
 
-function OmniBar:UpdateIconVisibility(barFrame, barSettings)
+function OmniBar:UpdateShowUnusedIcons(barFrame, barSettings)
     local showUnusedIcons = barSettings.showUnusedIcons
 
     if showUnusedIcons then

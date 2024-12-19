@@ -1,6 +1,6 @@
 local addonName, addon = ...
 
-addon.trackedCooldowns = {
+addon.cooldownsTable = {
     ["General"] = {
         ["Berserking"] = { isTracking = false, duration = 180, spellId = 26297 },
         ["Blood Fury"] = { isTracking = false, duration = 120, spellId = 20572 },
@@ -36,7 +36,7 @@ addon.trackedCooldowns = {
         ["Unbreakable Armor"] = { isTracking = false, duration = 60, spellId = 51271 },
         ["Hysteria"] = { isTracking = false, duration = 180, spellId = 49016 },
     },
-
+    
     ["Druid"] = {
         ["Innervate"] = { isTracking = false, duration = 240, spellId = 29166 },
         ["Barkskin"] = { isTracking = true, duration = 60, spellId = 22812 },

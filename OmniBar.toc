@@ -16,5 +16,6 @@ widgets\OminbarWidget.lua
 options\BarManager.lua
 Omnibar-options.lua
 UpdateFunctions.lua
+EventHandlers.lua
 
 
