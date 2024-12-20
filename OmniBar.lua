@@ -1,5 +1,6 @@
 OmniBar = LibStub("AceAddon-3.0"):NewAddon("OmniBar", "AceConsole-3.0", "AceEvent-3.0")
 local addonName, addon = ...
+local cooldownsTable = addon.cooldownsTable
 local GetSpellInfo = GetSpellInfo
 local GetItemInfo = GetItemInfo
 
@@ -15,12 +16,12 @@ local DEFAULT_BAR_SETTINGS = {
     margin = 4,
     showUnusedIcons = true,
     trackUnit = "enemy",
-    cooldowns = addon.cooldownsTable,
+    cooldowns = {},
 }
  
 
 local function AddIconsToCooldownsTable()
-    for _, spellTable in pairs(addon.cooldownsTable) do
+    for _, spellTable in pairs(cooldownsTable) do
         for _, spellData in pairs(spellTable) do
             local icon
             if not spellData.item then 
@@ -48,7 +49,7 @@ function OmniBar:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
     self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
     self:SetupOptions()
-    AddIconsToTrackedCooldownsTable()
+    AddIconsToCooldownsTable()
 end
 
 
@@ -79,7 +80,7 @@ function OmniBar:OnEnable()
     for barKey, _ in pairs(self.db.profile.bars) do
         self:AddBarToOptions(barKey)
     end
-
+    
 end
 
 function OmniBar:Delete(barKey, barFrame, keepProfile)
@@ -138,8 +139,11 @@ end
 
 function OmniBar:CreateIconsToBar(barFrame, barSettings)
     for className, cooldowns in pairs(barSettings.cooldowns) do
-        for cooldownName, cooldownData in pairs(cooldowns) do
-            if cooldownData.isTracking == true then
+        for cooldownName, isTracking in pairs(cooldowns) do
+            if isTracking then
+               local cooldownData = cooldownsTable[className][cooldownName]
+               -- change this later to if cooldownData then... and remove the print
+               if not cooldownData then print(cooldownName,"Does not exist in cooldownsTable") end
 
                local icon = self:GetIconFromPool(barFrame)
                icon.icon:SetTexture(cooldownData.icon)

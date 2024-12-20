@@ -20,8 +20,8 @@ function OmniBar:UpdateBorder(barFrame, barSettings)
         else
             button.icon:SetTexCoord(0.07, 0.9, 0.07, 0.9) 
         end
-
     end
+    print("Icons left in pool:", #self.iconPool)
 end
 
 function OmniBar:UpdateShowUnusedIcons(barFrame, barSettings)
@@ -32,7 +32,7 @@ function OmniBar:UpdateShowUnusedIcons(barFrame, barSettings)
     else
         barFrame.iconsContainer:Hide()  -- Hide the entire container
     end
-
+    viewTable(barSettings)
     -- Rearrange icons after visibility update
     --self:ArrangeIcons(barFrame, barSettings)
 end

@@ -1,4 +1,5 @@
 local addonName, addon = ...
+local cooldownsTable = addon.cooldownsTable
 
 local function isEmptyString(s)
     return s:gsub("^%s*(.-)%s*$", "%1") == ""
@@ -329,7 +330,7 @@ function OmniBar:AddBarToOptions(barKey)
 
     local trackedCooldowns = self.db.profile.bars[barKey].cooldowns 
     local i = 1;
-    for className, cooldowns in pairs(trackedCooldowns) do
+    for className, cooldowns in pairs(cooldownsTable) do
         local tcordKey = addon.CLASS_NAME_TO_TCOORDS_KEY[className]
         self.options.args[barKey].args[className] = {
             type="group",
@@ -371,9 +372,30 @@ function OmniBar:AddBarToOptions(barKey)
                    return tooltip
                   -- return spellDescription..extra
                 end,
-                get = function() return cooldownData.isTracking end,
+                get = function()  
+                    local bar = self.db.profile.bars[barKey]
+    
+                    -- If the class table doesn't exist yet, just return the default value without creating any structures
+                    if not bar.cooldowns[className] then
+                        return false
+                    end
+                    
+                    -- If the specific cooldown doesn't exist yet, return the default value without creating it
+                    if bar.cooldowns[className][cooldownName] == nil then
+                        return false
+                    end
+                
+                    -- Return the saved value if it exists
+                    return bar.cooldowns[className][cooldownName]
+                end,
                 set = function(info, value) 
-                    cooldownData.isTracking = value
+                    local bar = self.db.profile.bars[barKey]
+                    if not bar.cooldowns[className] then
+                        bar.cooldowns[className] = {}
+                    end
+
+                    -- Set the value for this cooldownName
+                    bar.cooldowns[className][cooldownName] = value
                     self:UpdateBar(barKey)
                 end
             }
