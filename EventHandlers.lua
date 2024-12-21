@@ -35,7 +35,7 @@ function OmniBar:OnUnitSpellCastSucceded(barFrame, event, unitId, spellName, spe
 
     -- Get or create icon for this spell
     local icon = self:GetIconFromPool(barFrame)
-    icon.spellName = spellName -- maybe not need???
+    icon.cooldownName = spellName -- maybe not need???
     icon.icon:SetTexture(cooldownData.icon)
     icon.cooldown:SetCooldown(now, cooldownData.duration)
     icon:Show()
@@ -51,6 +51,15 @@ function OmniBar:OnUnitSpellCastSucceded(barFrame, event, unitId, spellName, spe
     local barKey = barFrame.key
     viewTable(self.db.profile.bars[barKey])
     self:ArrangeIcons(barFrame, self.db.profile.bars[barKey])
+end
+
+function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName)
+    if barSettings.showUnusedIcons then
+        for i, icon in ipairs(barFrame.icons) do
+            if icon.cooldownName == spellName
+        end
+    end
+
 end
 
 --[[

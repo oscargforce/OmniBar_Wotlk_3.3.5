@@ -1,6 +1,6 @@
 local addonName, addon = ...
 
-addon.cooldownsTable = {
+addon.abilityTable = {
     ["General"] = {
         ["Berserking"] = { isTracking = false, duration = 180, spellId = 26297 },
         ["Blood Fury"] = { isTracking = false, duration = 120, spellId = 20572 },

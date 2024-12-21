@@ -77,7 +77,7 @@ function OmniBar:OnEnable()
     for barKey, _ in pairs(self.db.profile.bars) do
         self:AddBarToOptions(barKey)
     end
-    
+    print("OnEnabled: Icons left in pool:", #self.iconPool)
 end
 
 function OmniBar:Delete(barKey, barFrame, keepProfile)
@@ -136,12 +136,26 @@ function OmniBar:InitializeBar(barKey, settings)
 
     -- Populate barFrame.trackedCooldowns table with tracked cds
     self:UpdateCooldownTrackingForBar(barFrame, barSettings)
-    -- Render the icon to the bar
-    self:CreateIconsToBar(barFrame, barSettings)
+
+    if barSettings.showUnusedIcons then
+        self:CreateIconsToBar(barFrame, barSettings)
+    else
+        self:CreateIconsToPool(barFrame)
+    end  
      
     -- Hide/show icons
     self:UpdateShowUnusedIcons(barFrame, barSettings)
    
+end
+
+function OmniBar:CreateIconsToPool(barFrame)
+    for cooldownName, cooldownData in pairs(barFrame.trackedCooldowns) do
+        -- change this later to if cooldownData then... and remove the print
+        if not cooldownData then print(cooldownName,"Does not exist in cooldownsTable") end
+
+        local icon = barFrame.CreateOmniBarIcon()
+        self:ReturnIconToPool(icon)
+    end
 end
  
 function OmniBar:CreateIconsToBar(barFrame, barSettings)
@@ -151,6 +165,7 @@ function OmniBar:CreateIconsToBar(barFrame, barSettings)
 
         local icon = self:GetIconFromPool(barFrame)
         icon.icon:SetTexture(cooldownData.icon)
+        icon.cooldownName = cooldownName
         icon:Show()
         
         table.insert(barFrame.icons, icon)
@@ -176,7 +191,7 @@ function OmniBar:GetIconFromPool(barFrame)
     return icon
 end
 
-function OmniBar:ArrangeIcons(barFrame, barSettings, onylActiveIcons)
+function OmniBar:ArrangeIcons(barFrame, barSettings)
     local maxIconsPerRow = barSettings.maxIconsPerRow
     local isRowGrowingUpwards = barSettings.isRowGrowingUpwards
     local maxIconsTotal = barSettings.maxIconsTotal
@@ -188,8 +203,6 @@ function OmniBar:ArrangeIcons(barFrame, barSettings, onylActiveIcons)
     local rowIndex = 0  -- Icons placed in the current row
     local iconCount = 0  -- Icons placed in the current row
     local padding = 36 -- 36px spacing between icons
-
-    local iconsToArrange = onylActiveIcons and barFrame.activeCooldonws or barFrame.icons
     
     -- Loop through all active icons in the bar
     for i, icon in ipairs(barFrame.icons) do
