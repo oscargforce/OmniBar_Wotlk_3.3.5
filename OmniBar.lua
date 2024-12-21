@@ -1,4 +1,4 @@
-OmniBar = LibStub("AceAddon-3.0"):NewAddon("OmniBar", "AceConsole-3.0", "AceEvent-3.0")
+OmniBar = LibStub("AceAddon-3.0"):NewAddon("OmniBar", "AceConsole-3.0")
 local addonName, addon = ...
 local cooldownsTable = addon.cooldownsTable
 local GetSpellInfo = GetSpellInfo
@@ -42,12 +42,9 @@ function OmniBar:OnInitialize()
     self.barFrames = {}
     self.barIndex = 1
     self.iconPool = {}
-    self.trackedCooldowns = {}
-    self.activeCooldowns = {}
     self.db.RegisterCallback(self, "OnProfileChanged", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
-    self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
     self:SetupOptions()
     AddIconsToCooldownsTable()
 end
@@ -127,32 +124,38 @@ function OmniBar:InitializeBar(barKey, settings)
 
     local barSettings = settings or self.db.profile.bars[barKey]
     local barFrame = CreateOmniBarWidget(barKey, barSettings)
-
-    -- Create and add icons to the bar if "isTracking" is true
-    self:CreateIconsToBar(barFrame, barSettings)
-     
+    barFrame.key = barKey
+    barFrame.icons = {}
+    barFrame.trackedCooldowns = {}
+    barFrame.activeCooldowns = {}
+    barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    barFrame:SetScript("OnEvent", function (...) 
+        self:OnUnitSpellCastSucceded(...)
+    end)
     self.barFrames[barKey] = barFrame
 
+    -- Populate barFrame.trackedCooldowns table with tracked cds
+    self:UpdateCooldownTrackingForBar(barFrame, barSettings)
+    -- Render the icon to the bar
+    self:CreateIconsToBar(barFrame, barSettings)
+     
+    -- Hide/show icons
     self:UpdateShowUnusedIcons(barFrame, barSettings)
    
 end
-
+ 
 function OmniBar:CreateIconsToBar(barFrame, barSettings)
-    for className, cooldowns in pairs(barSettings.cooldowns) do
-        for cooldownName, isTracking in pairs(cooldowns) do
-            if isTracking then
-               local cooldownData = cooldownsTable[className][cooldownName]
-               -- change this later to if cooldownData then... and remove the print
-               if not cooldownData then print(cooldownName,"Does not exist in cooldownsTable") end
+    for cooldownName, cooldownData in pairs(barFrame.trackedCooldowns) do
+        -- change this later to if cooldownData then... and remove the print
+        if not cooldownData then print(cooldownName,"Does not exist in cooldownsTable") end
 
-               local icon = self:GetIconFromPool(barFrame)
-               icon.icon:SetTexture(cooldownData.icon)
-               icon:Show()
-              
-               table.insert(barFrame.icons, icon)
-            end
-        end
+        local icon = self:GetIconFromPool(barFrame)
+        icon.icon:SetTexture(cooldownData.icon)
+        icon:Show()
+        
+        table.insert(barFrame.icons, icon)
     end
+    
 
     self:ArrangeIcons(barFrame, barSettings)
 end
@@ -166,14 +169,14 @@ function OmniBar:GetIconFromPool(barFrame)
         self:MakeFrameDraggable(icon, barFrame)
         return icon
     end
-
+    print("creating new icon")
     -- Otherwise, create a new icon
     local icon = barFrame.CreateOmniBarIcon()
     self:MakeFrameDraggable(icon, barFrame)
     return icon
 end
 
-function OmniBar:ArrangeIcons(barFrame, barSettings)
+function OmniBar:ArrangeIcons(barFrame, barSettings, onylActiveIcons)
     local maxIconsPerRow = barSettings.maxIconsPerRow
     local isRowGrowingUpwards = barSettings.isRowGrowingUpwards
     local maxIconsTotal = barSettings.maxIconsTotal
@@ -186,6 +189,8 @@ function OmniBar:ArrangeIcons(barFrame, barSettings)
     local iconCount = 0  -- Icons placed in the current row
     local padding = 36 -- 36px spacing between icons
 
+    local iconsToArrange = onylActiveIcons and barFrame.activeCooldonws or barFrame.icons
+    
     -- Loop through all active icons in the bar
     for i, icon in ipairs(barFrame.icons) do
         if icon:IsShown() then
@@ -237,58 +242,8 @@ function OmniBar:ResetIcons(barFrame)
     end
 
     -- Clear the icons table (reuse pool instead of removing actual icons)
-    wipe(barFrame.icons) -- Efficiently clears a table
+    wipe(barFrame.icons) 
 end
-
---[[
-
-function OmniBar:dwqdq(barKey)
-    local barFrame = self.barFrames[barKey]
-    local barSettings  = self.db.profile.bars[barKey]
-    
-    self:UpdateBarName(barFrame, barSettings)
-    self:UpdateScale(barFrame, barSettings)
-    self:ResetIcons(barFrame)
-    self:CreateIconsToBar(barFrame, barSettings)
-    self:UpdateBorder(barFrame, barSettings)
-end
-]]
-
-function OmniBar:UpdateBar(barKey, specificUpdate)
-    local barFrame = self.barFrames[barKey]
-    local barSettings = self.db.profile.bars[barKey]
-
-    -- Lookup table for update operations
-    local updateOperations = {
-        name = function() self:UpdateBarName(barFrame, barSettings) end,
-        scale = function() self:UpdateScale(barFrame, barSettings) end,
-        resetIcons = function() self:ResetIcons(barFrame) end,
-        createIcons = function() self:CreateIconsToBar(barFrame, barSettings) end,
-        border = function() self:UpdateBorder(barFrame, barSettings) end,
-        arrangeIcons = function() self:ArrangeIcons(barFrame, barSettings) end,
-        showUnusedIcons = function() self:UpdateShowUnusedIcons(barFrame, barSettings) end,
-    }
-
-    if specificUpdate then
-        local operation = updateOperations[specificUpdate]
-
-        if not operation then
-            print(string.format("OmniBar: Invalid update operation '%s' for bar '%s'", specificUpdate, barKey))
-            return
-        end 
-
-        operation()
-        return  
-    end
-    
-    -- Perform all required updates if no specific update is provided
-    local operationOrder = {"name", "scale", "resetIcons", "createIcons", "border"}
-    for _, key in ipairs(operationOrder) do
-        local operation = updateOperations[key]
-        operation()
-    end
-end
-
 
 function OmniBar:CreateBar() 
     local barKey = self:GenerateUniqueKey()

@@ -4,7 +4,6 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 function CreateOmniBarWidget(barKey, settings)
     -- Create the main frame (OmniBar)
     local OmniBarFrame = CreateFrame("Frame", barKey, UIParent)
-    OmniBarFrame.key = barKey
     OmniBarFrame:SetSize(1, 1)  -- Placeholder size
 
     local position = settings.position
@@ -65,7 +64,6 @@ function CreateOmniBarWidget(barKey, settings)
         local Icon = Button:CreateTexture("$parentIcon", "ARTWORK")
         Icon:SetTexture(iconPath)
         Icon:SetDrawLayer("ARTWORK", 20) -- put it above the Border
-      --  Icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
         Icon:SetAllPoints(Button) -- sets SetPoint and Size to match button:)
         Button.icon = Icon
     
@@ -76,8 +74,7 @@ function CreateOmniBarWidget(barKey, settings)
 		end
         
         local Cooldown = CreateFrame("Cooldown", "$parentCooldown", Button, "CooldownFrameTemplate")
-        Cooldown:SetSize(36, 36)
-        Cooldown:SetPoint("CENTER", 0, -1)
+        Cooldown:SetAllPoints(Button)
         Cooldown:SetReverse(true)
         Button.cooldown = Cooldown
 
@@ -93,7 +90,6 @@ function CreateOmniBarWidget(barKey, settings)
    -- OmniBarFrame.button = button
     OmniBarFrame.iconsContainer = IconsContainer
     OmniBarFrame.CreateOmniBarIcon = CreateOmniBarIcon
-    OmniBarFrame.icons = {}
 
     -- Event registration
   --  OmniBar:SetScript("OnEvent", OmniBar_OnEvent) -- Assumes OmniBar_OnEvent is defined
@@ -105,11 +101,27 @@ end
    --local mt = getmetatable(Border)
     --viewTable(mt)
  --[[ EXAMPLE WHAT THE TABLE BAR1 TABLE WOULD LOOK LIKE
+
 self.barFrames = {
  ["OmniBar1"] = {
+    key = "OmniBar1",
+    CreateOmniBarIcon = function:1234,
+    trackedCooldowns = {
+        ["Mind Freeze"] = {
+            duration = 120,
+            icon = path,
+        },
+    },
+    activeCooldowns = {
+        ["Mind Freeze"] = { endTime = 140 }
+        ["Berserking"] = { endTime = 140 }
+    }, 
     icons = {
-        [0] = {
+        [1] = {
             icon = {
+                [0] = userdata: 0xE7AF150,
+            },
+            border = {
                 [0] = userdata: 0xE7AF150,
             },
             cooldown = {
@@ -118,6 +130,9 @@ self.barFrames = {
         },
     },
     anchor = {
+        [0] = userdata: 0xE5994B0,
+    },
+    iconsContainer = {
         [0] = userdata: 0xE5994B0,
     },
     background = {
@@ -129,4 +144,5 @@ self.barFrames = {
     },
 }
 }
+
 ]]
