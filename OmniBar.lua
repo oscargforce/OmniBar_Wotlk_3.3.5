@@ -1,6 +1,6 @@
 OmniBar = LibStub("AceAddon-3.0"):NewAddon("OmniBar", "AceConsole-3.0")
 local addonName, addon = ...
-local cooldownsTable = addon.cooldownsTable
+local spellTable = addon.spellTable
 local GetSpellInfo = GetSpellInfo
 local GetItemInfo = GetItemInfo
 
@@ -20,9 +20,9 @@ local DEFAULT_BAR_SETTINGS = {
 }
  
 
-local function AddIconsToCooldownsTable()
-    for _, spellTable in pairs(cooldownsTable) do
-        for _, spellData in pairs(spellTable) do
+local function AddIconsToSpellTable()
+    for className, spells in pairs(spellTable) do
+        for _, spellData in pairs(spells) do
             local icon
             if not spellData.item then 
                 local _, _, spellIcon = GetSpellInfo(spellData.spellId)  
@@ -46,7 +46,7 @@ function OmniBar:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
     self:SetupOptions()
-    AddIconsToCooldownsTable()
+    AddIconsToSpellTable()
 end
 
 
@@ -126,16 +126,16 @@ function OmniBar:InitializeBar(barKey, settings)
     local barFrame = CreateOmniBarWidget(barKey, barSettings)
     barFrame.key = barKey
     barFrame.icons = {}
-    barFrame.trackedCooldowns = {}
-    barFrame.activeCooldowns = {}
+    barFrame.trackedSpells = {}
+    barFrame.activeSpells = {}
     barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
     barFrame:SetScript("OnEvent", function (...) 
         self:OnUnitSpellCastSucceded(...)
     end)
     self.barFrames[barKey] = barFrame
 
-    -- Populate barFrame.trackedCooldowns table with tracked cds
-    self:UpdateCooldownTrackingForBar(barFrame, barSettings)
+    -- Populate barFrame.trackedSpells table with tracked cds
+    self:UpdateSpellTrackingForBar(barFrame, barSettings)
 
     if barSettings.showUnusedIcons then
         self:CreateIconsToBar(barFrame, barSettings)
@@ -149,9 +149,9 @@ function OmniBar:InitializeBar(barKey, settings)
 end
 
 function OmniBar:CreateIconsToPool(barFrame)
-    for cooldownName, cooldownData in pairs(barFrame.trackedCooldowns) do
-        -- change this later to if cooldownData then... and remove the print
-        if not cooldownData then print(cooldownName,"Does not exist in cooldownsTable") end
+    for spellName, spellData in pairs(barFrame.trackedSpells) do
+        -- change this later to if spellData then... and remove the print
+        if not spellData then print(spellName,"Does not exist in spellTable") end
 
         local icon = barFrame.CreateOmniBarIcon()
         self:ReturnIconToPool(icon)
@@ -159,13 +159,13 @@ function OmniBar:CreateIconsToPool(barFrame)
 end
  
 function OmniBar:CreateIconsToBar(barFrame, barSettings)
-    for cooldownName, cooldownData in pairs(barFrame.trackedCooldowns) do
-        -- change this later to if cooldownData then... and remove the print
-        if not cooldownData then print(cooldownName,"Does not exist in cooldownsTable") end
+    for spellName, spellData in pairs(barFrame.trackedSpells) do
+        -- change this later to if spellData then... and remove the print
+        if not spellData then print(spellName,"Does not exist in spellTable") end
 
         local icon = self:GetIconFromPool(barFrame)
-        icon.icon:SetTexture(cooldownData.icon)
-        icon.cooldownName = cooldownName
+        icon.icon:SetTexture(spellData.icon)
+        icon.spellName = spellName
         icon:Show()
         
         table.insert(barFrame.icons, icon)

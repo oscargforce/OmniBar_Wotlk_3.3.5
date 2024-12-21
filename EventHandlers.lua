@@ -3,7 +3,7 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 --[[    
 Example tables        
 
-barFrame.trackedCooldowns = {
+barFrame.trackedAbilities = {
     ["Mind Freeze"] = {
         duration = 120,
         icon = path,
@@ -14,7 +14,7 @@ barFrame.trackedCooldowns = {
     },
 }
 
-barFrame.activeCooldowns = {
+barFrame.activeAbilitiess = {
         ["Mind Freeze"] = { endTime = 140, icon = frameRef }
         ["Berserking"] = { endTime = 140, icon = frameRef }
 } 
@@ -28,24 +28,24 @@ function OmniBar:OnUnitSpellCastSucceded(barFrame, event, unitId, spellName, spe
   --  if not unitId:match("arena%d") then return end
     if not unitId:match("party%d") then return end
    
-    local cooldownData = barFrame.trackedCooldowns[spellName]
-    if not cooldownData then return end
+    local spellData = barFrame.trackedSpells[spellName]
+    if not spellData then return end
 
     local now = GetTime()
 
     -- Get or create icon for this spell
     local icon = self:GetIconFromPool(barFrame)
-    icon.cooldownName = spellName -- maybe not need???
-    icon.icon:SetTexture(cooldownData.icon)
-    icon.cooldown:SetCooldown(now, cooldownData.duration)
+    icon.spellName = spellName -- maybe not need???
+    icon.icon:SetTexture(spellData.icon)
+    icon.cooldown:SetCooldown(now, spellData.duration)
     icon:Show()
     -- need to sort on bar based on time left, we prob need a new function
     
     table.insert(barFrame.icons, icon)
      -- Update or create spell tracking
 
-     barFrame.activeCooldowns[spellName] = {
-        endTime = now + cooldownData.duration,
+     barFrame.activeSpells[spellName] = {
+        endTime = now + spellData.duration,
         icon = icon
     }
     local barKey = barFrame.key
@@ -56,7 +56,7 @@ end
 function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName)
     if barSettings.showUnusedIcons then
         for i, icon in ipairs(barFrame.icons) do
-            if icon.cooldownName == spellName
+            
         end
     end
 
