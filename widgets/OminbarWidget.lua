@@ -57,13 +57,22 @@ function CreateOmniBarWidget(barKey, settings)
         Border:SetBlendMode("ADD") -- This makes the dark background in the image transperent
       -- Border:SetVertexColor(0.639, 0.207, 0.933, 1) -- purple color, kinda cool
       --. Border:SetTexCoord(0.2, 0.8, 0.2, 0.8)
-
         Border:Hide()   
         Button.border = Border
+
+        local CountdownFrame = CreateFrame("Frame", "$parentCountdown", Button, "BackdropTemplate")
+        CountdownFrame:SetAllPoints(Button)
+        CountdownFrame:SetFrameLevel(7) 
+        local CountdownText = CountdownFrame:CreateFontString("$parentCountdown", "OVERLAY", "GameFontNormalLarge")
+        CountdownText:SetPoint("CENTER", CountdownFrame, "CENTER", 0, 0)
+        CountdownText:SetFont("Fonts\\FRIZQT__.TTF", 15)
+        CountdownText:SetText("") 
+        CountdownText:SetTextColor(1, 1, 1, 1) 
+        Button.countdownText = CountdownText
        
         local Icon = Button:CreateTexture("$parentIcon", "ARTWORK")
         Icon:SetTexture(iconPath)
-        Icon:SetDrawLayer("ARTWORK", 20) -- put it above the Border
+        Icon:SetDrawLayer("ARTWORK", 2) -- put it above the Border
         Icon:SetAllPoints(Button) -- sets SetPoint and Size to match button:)
         Button.icon = Icon
     
@@ -74,32 +83,28 @@ function CreateOmniBarWidget(barKey, settings)
 		end
         
         local Cooldown = CreateFrame("Cooldown", "$parentCooldown", Button, "CooldownFrameTemplate")
-        Cooldown:SetAllPoints(Button)
+        Cooldown:SetAllPoints(Icon)
         Cooldown:SetReverse(true)
+        Cooldown:SetFrameLevel(6) 
         Button.cooldown = Cooldown
 
+        local TimerFrame = CreateFrame("Frame")
+        TimerFrame:Hide()
+        Button.timerFrame = TimerFrame
+
+        -- add this in initializeBar?
         -- Scripts for cooldown finish and interaction
      --   Cooldown:SetScript("OnHide", OmniBar_CooldownFinish) -- Assumes OmniBar_CooldownFinish is defined
 
         return Button
     end
 
-    -- Example of creating buttons dynamically
-  --  local button = CreateOmniBarIcon(IconsContainer)
-    --button:Hide()
-   -- OmniBarFrame.button = button
     OmniBarFrame.iconsContainer = IconsContainer
     OmniBarFrame.CreateOmniBarIcon = CreateOmniBarIcon
-
-    -- Event registration
-  --  OmniBar:SetScript("OnEvent", OmniBar_OnEvent) -- Assumes OmniBar_OnEvent is defined
 
     return OmniBarFrame
 end
 
-
-   --local mt = getmetatable(Border)
-    --viewTable(mt)
  --[[ EXAMPLE WHAT THE TABLE BAR1 TABLE WOULD LOOK LIKE
 
 self.barFrames = {
@@ -126,6 +131,9 @@ self.barFrames = {
             },
             cooldown = {
                 [0] = userdata: 0xDE2FDAC,
+            },
+             countdownText = {
+                 [0] = userdata: 0xD865A98,   
             },
         },
     },
