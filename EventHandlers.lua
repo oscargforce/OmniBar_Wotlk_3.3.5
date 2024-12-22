@@ -1,52 +1,28 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 
---[[    
-Example tables        
-
-barFrame.trackedAbilities = {
-    ["Mind Freeze"] = {
-        duration = 120,
-        icon = path,
-    },
-    ["Kick"] = {
-        duration = 15,
-        icon = path,
-    },
-}
-
-barFrame.activeAbilitiess = {
-        ["Mind Freeze"] = { endTime = 140, icon = frameRef }
-        ["Berserking"] = { endTime = 140, icon = frameRef }
-} 
-
-]]
-
-
--- fix later
-function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unitId, spellName, spellRank)
-    -- Quick fails
-  --  if not unitId:match("arena%d") then return end
+-- Death knights death coil has same name as warlock spell :/ need to use some if statement on that spell
+function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unitId, spellName, spellRank,a,b,c,d,f,e,g)
+    --if not unitId:match("arena%d") then return end
     if not unitId:match("party%d") then return end
-   
+    print("a:", spellRank)
+
     local spellData = barFrame.trackedSpells[spellName]
     if not spellData then return end
-
+    if spellName == "Death Coil" and spellRank ~="Rank 6" then return end
+    print("PASSED:", spellName)
     self:OnCooldownUsed(barFrame, barFrame.key, spellName, spellData)
 end
 
 function OmniBar:OnCooldownUsed(barFrame, barKey, spellName, spellData)
     local barSettings = self.db.profile.bars[barKey]
-    local now = GetTime()
 
     if barSettings.showUnusedIcons then
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName then
                 icon:SetAlpha(1.0)
-                icon.endTime = now + spellData.duration
-                self:StartCooldownShading(icon, spellData.duration, barSettings.showUnusedIcons, barFrame, spellName)
+                self:StartCooldownShading(icon, spellData.duration, barSettings, barFrame, spellName)
                 return
-            end
-            
+            end  
         end
     end
 
@@ -54,66 +30,78 @@ function OmniBar:OnCooldownUsed(barFrame, barKey, spellName, spellData)
     local icon = self:GetIconFromPool(barFrame)
     icon.spellName = spellName 
     icon.icon:SetTexture(spellData.icon)
-    icon.endTime = now + spellData.duration
-    self:StartCooldownShading(icon, spellData.duration, spellData.showUnusedIcons, barFrame, spellName)
-
     table.insert(barFrame.icons, icon)
-    -- Update or create spell tracking
 
-    barFrame.activeSpells[spellName] = {
-        endTime = now + spellData.duration,
-        icon = icon
-    }
+    self:StartCooldownShading(icon, spellData.duration, barSettings, barFrame, spellName)
     
-    self:ArrangeIcons(barFrame, self.db.profile.bars[barKey])
-
+    self:ArrangeIcons(barFrame, barSettings)
 end
 
-function OmniBar:StartCooldownShading(icon, duration, showUnusedIcons, barFrame, spellName)
-    icon:Show()
+local COLORS = {
+    WHITE = "|cFFFFFFFF",
+    YELLOW = "|cFFFFFF00",
+    RED = "|cFFFF0000",
+    END_TAG = "|r"
+}
+
+local function formatTimeText(timeLeft)
+    local color
+    if timeLeft >= 60 then
+        -- Show minutes (e.g., 1m, 2m, etc.)
+        local minutes = math.floor((timeLeft / 60) + 0.5) -- math.round hack in lua, now it matches omnicc timer :)
+        color = COLORS.WHITE
+        return string.format("%s%dm%s", color, minutes, COLORS.END_TAG)
+    elseif timeLeft > 5 then
+        color = COLORS.YELLOW
+    else
+        color = COLORS.RED
+    end
+    return string.format("%s%.0f%s", color, timeLeft, COLORS.END_TAG)
+end
+
+function OmniBar:OnCooldownEnd(icon, barFrame, barSettings, spellName)
+    icon.countdownText:SetText("") 
+    icon.timerFrame:Hide() 
+    icon.timerFrame:SetScript("OnUpdate", nil) -- Delete the timer
+    if barSettings.showUnusedIcons then 
+        icon.cooldown:Hide() 
+    else 
+        self:ReturnIconToPool(icon) 
+        for i = #barFrame.icons, 1, -1 do
+            if barFrame.icons[i] == icon then
+                print("Removed", barFrame.icons[i].spellName, "from barFrame.icons")
+                table.remove(barFrame.icons, i) -- maybe add this to self:ArrangeIcons ?? Need tp remove the icon from the icons table after cd is done
+                break
+            end
+        end
+    end
+    print("ARRANGE ICONS")
+    self:ArrangeIcons(barFrame, barSettings)
+end
+
+function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame, spellName)
     local startTime = GetTime()
     local endTime = startTime + duration
+
+    icon.endTime = endTime
+    icon:Show()
 
     icon.cooldown:SetCooldown(startTime, duration)
     icon.cooldown:SetAlpha(1)
 
-    local function SetFormattedTime(timeLeft)
-        if timeLeft >= 60 then
-            -- Show minutes (e.g., 1m, 2m, etc.)
-            local minutes = math.floor((timeLeft / 60) + 0.5) -- math.round hack in lua, now it matches omnicc timer :)
-            icon.countdownText:SetText(string.format("%dm", minutes))
-        else
-            -- Less than 60 seconds, show countdown in single digits (e.g., 9, 10, 11, 12)
-            icon.countdownText:SetText(string.format("%.0f", timeLeft))
-        end
-    end
-    
+    print("Icons pool OnUpdate", #self.iconPool)
     local lastUpdate = 0
-    icon.timerFrame:Show() -- Must show the frame to start the OnUpdate script
+    icon.timerFrame:Show() 
     icon.timerFrame:SetScript("OnUpdate", function(self, elapsed)
         lastUpdate = lastUpdate + elapsed
         if lastUpdate >= 0.2 then
             local timeLeft = endTime - GetTime()
             if timeLeft > 0 then
                 -- need to add condition here, if barSettings.noCountdown, return early
-                SetFormattedTime(timeLeft)
+                icon.countdownText:SetText(formatTimeText(timeLeft))
             else
-                icon.countdownText:SetText("") 
-                icon.timerFrame:Hide() 
-                icon.timerFrame:SetScript("OnUpdate", nil) -- Delete the timer
-                print("Num icons", #barFrame.icons)
-                if showUnusedIcons then 
-                    icon.cooldown:Hide() 
-                else 
-                    OmniBar:ReturnIconToPool(icon) 
-                    for i, icon in ipairs(barFrame.icons) do
-                        if icon.spellName == spellName then
-                            barFrame.icons[i] = nil -- maybe add this to self:ArrangeIcons ?? Need tp remove the icon from the icons table after cd is done
-                        end
-                    end
-                end
-                print("Num icons", #barFrame.icons)
-                viewTable(barFrame)
+                OmniBar:OnCooldownEnd(icon, barFrame, barSettings, spellName)
+                print("BarFrame icons num:", #barFrame.icons)
             end
             lastUpdate = 0
         end

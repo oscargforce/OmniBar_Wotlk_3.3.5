@@ -60,7 +60,7 @@ function CreateOmniBarWidget(barKey, settings)
         Border:Hide()   
         Button.border = Border
 
-        local CountdownFrame = CreateFrame("Frame", "$parentCountdownFrame", Button, "BackdropTemplate")
+        local CountdownFrame = CreateFrame("Frame", "$parentCountdownFrame", Button)
         CountdownFrame:SetAllPoints(Button)
         CountdownFrame:SetFrameLevel(7) 
         local CountdownText = CountdownFrame:CreateFontString("$parentCountdown", "OVERLAY", "GameFontNormalLarge")

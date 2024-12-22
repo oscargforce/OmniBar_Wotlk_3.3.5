@@ -157,6 +157,8 @@ function OmniBar:CreateIconsToPool(barFrame)
 end
  
 function OmniBar:CreateIconsToBar(barFrame, barSettings)
+    if not barSettings.showUnusedIcons then return end
+    
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         -- change this later to if spellData then... and remove the print
         if not spellData then print(spellName,"Does not exist in spellTable") end

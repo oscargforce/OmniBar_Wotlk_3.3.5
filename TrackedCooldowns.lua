@@ -71,7 +71,7 @@ addon.spellTable = {
     },
 
     ["Mage"] = {
-        ["Counter Spell"] = { isTracking = false, duration = 24, spellId = 2139 },
+        ["Counterspell"] = { isTracking = false, duration = 24, spellId = 2139 },
         ["Evocation"] = { isTracking = false, duration = 240, spellId = 12051 },
         ["Deep Freeze"] = { isTracking = false, duration = 30, spellId = 44572 },
         ["Cold Snap"] = { isTracking = false, duration = 480, spellId = 11958 },
@@ -83,7 +83,7 @@ addon.spellTable = {
         ["Pet Nova (Freeze)"] = { isTracking = false, duration = 25, spellId = 33395 },
         ["Mana gem"] = { isTracking = false, duration = 120, spellId = 42987 },
         ["Invisibility"] = { isTracking = false, duration = 126, spellId = 66 },
-        ["Blink"] = { isTracking = false, duration = 24, spellId = 43039 },
+        ["Blink"] = { isTracking = false, duration = 24, spellId = 1953 },
     },
     
     ["Paladin"] = {
@@ -96,6 +96,7 @@ addon.spellTable = {
         ["Hand of Freedom"] = { isTracking = false, duration = 25, spellId = 1044 },
         ["Hand of Protection"] = { isTracking = false, duration = 180, spellId = 10278 },
         ["Avenging Wrath"] = { isTracking = false, duration = 120, spellId = 31884 },
+        ["Holy Shock"] = { isTracking = false, duration = 5, spellId = 48825 },
     },
 
     ["Priest"] = {
@@ -107,8 +108,8 @@ addon.spellTable = {
         ["Fear Ward"] = { isTracking = false, duration = 180, spellId = 6346 },
         ["Silence"] = { isTracking = false, duration = 45, spellId = 15487 },
         ["Power Infusion"] = { isTracking = false, duration = 96, spellId = 10060 },
-        ["SWD"] = { isTracking = false, duration = 12, spellId = 48158 },
-        ["DP"] = { isTracking = false, duration = 12, spellId = 48173 },
+        ["Shadow Word: Death"] = { isTracking = false, duration = 12, spellId = 48158 },
+        ["Desperate Prayer"] = { isTracking = false, duration = 12, spellId = 48173 },
     },
 
     ["Rogue"] = {
@@ -162,7 +163,6 @@ addon.spellTable = {
         ["Concussive Blow"] = { isTracking = false, duration = 30, spellId = 12809 },
         ["Recklessness"] = { isTracking = false, duration = 300, spellId = 1719 },
         ["Intimidating Shout"] = { isTracking = false, duration = 120, spellId = 5246 },
-        ["Intimidating Shout"] = { isTracking = false, duration = 60, spellId = 676 },
     },
 }
 
