@@ -23,7 +23,7 @@ barFrame.activeAbilitiess = {
 
 
 -- fix later
-function OmniBar:OnUnitSpellCastSucceded(barFrame, event, unitId, spellName, spellRank)
+function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unitId, spellName, spellRank)
     -- Quick fails
   --  if not unitId:match("arena%d") then return end
     if not unitId:match("party%d") then return end
@@ -41,72 +41,83 @@ function OmniBar:OnCooldownUsed(barFrame, barKey, spellName, spellData)
     if barSettings.showUnusedIcons then
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName then
-                self:StartCooldownShading(icon, spellData.duration)
+                icon:SetAlpha(1.0)
+                icon.endTime = now + spellData.duration
+                self:StartCooldownShading(icon, spellData.duration, barSettings.showUnusedIcons, barFrame, spellName)
                 return
             end
             
         end
     end
 
-        -- Get or create icon for this spell
-        local icon = self:GetIconFromPool(barFrame)
-        icon.spellName = spellName -- maybe not need???
-        icon.icon:SetTexture(spellData.icon)
-        icon.cooldown:SetCooldown(now, spellData.duration)
-        icon:Show()
+    -- Get or create icon for this spell
+    local icon = self:GetIconFromPool(barFrame)
+    icon.spellName = spellName 
+    icon.icon:SetTexture(spellData.icon)
+    icon.endTime = now + spellData.duration
+    self:StartCooldownShading(icon, spellData.duration, spellData.showUnusedIcons, barFrame, spellName)
 
-        table.insert(barFrame.icons, icon)
-        -- Update or create spell tracking
-   
-        barFrame.activeSpells[spellName] = {
-           endTime = now + spellData.duration,
-           icon = icon
-       }
-        
-        self:ArrangeIcons(barFrame, self.db.profile.bars[barKey])
+    table.insert(barFrame.icons, icon)
+    -- Update or create spell tracking
+
+    barFrame.activeSpells[spellName] = {
+        endTime = now + spellData.duration,
+        icon = icon
+    }
+    
+    self:ArrangeIcons(barFrame, self.db.profile.bars[barKey])
 
 end
 
-function OmniBar:StartCooldownShading(icon, duration)
-        icon:Show()
-        local startTime = GetTime()
-        local endTime = startTime + duration
-    
-        icon.cooldown:SetCooldown(startTime, duration)
-        icon.cooldown:SetAlpha(1)
+function OmniBar:StartCooldownShading(icon, duration, showUnusedIcons, barFrame, spellName)
+    icon:Show()
+    local startTime = GetTime()
+    local endTime = startTime + duration
 
-        local function SetFormattedTime(timeLeft)
-            if timeLeft >= 60 then
-                -- Show minutes (e.g., 1m, 2m, etc.)
-                local minutes = math.floor((timeLeft / 60) + 0.5) -- math.round hack in lua, now it matches omnicc timer :)
-                icon.countdownText:SetText(string.format("%dm", minutes))
-            elseif timeLeft >= 10 then
-                -- Less than 60 seconds, but more than 10 seconds, show seconds (e.g., 59, 58, 57)
-                icon.countdownText:SetText(string.format("%.0f", timeLeft))
-            else
-                -- Less than 10 seconds, show countdown in single digits (e.g., 9, 8, 7)
-                icon.countdownText:SetText(string.format("%.0f", timeLeft))
-            end
+    icon.cooldown:SetCooldown(startTime, duration)
+    icon.cooldown:SetAlpha(1)
+
+    local function SetFormattedTime(timeLeft)
+        if timeLeft >= 60 then
+            -- Show minutes (e.g., 1m, 2m, etc.)
+            local minutes = math.floor((timeLeft / 60) + 0.5) -- math.round hack in lua, now it matches omnicc timer :)
+            icon.countdownText:SetText(string.format("%dm", minutes))
+        else
+            -- Less than 60 seconds, show countdown in single digits (e.g., 9, 10, 11, 12)
+            icon.countdownText:SetText(string.format("%.0f", timeLeft))
         end
-        
-        local lastUpdate = 0
-        icon.timerFrame:Show() -- Must show the frame to start the OnUpdate script
-        icon.timerFrame:SetScript("OnUpdate", function(self, elapsed)
-            lastUpdate = lastUpdate + elapsed
-            if lastUpdate >= 0.2 then
-                local timeLeft = endTime - GetTime()
-                if timeLeft > 0 then
-                    -- need to add condition here, if barSettings.noCountdown, return early
-                    SetFormattedTime(timeLeft)
-                else
-                    icon:Hide()  
-                    icon.countdownText:SetText("") 
-                    icon.timerFrame:Hide() 
-                    icon.timerFrame:SetScript("OnUpdate", nil) -- Delete the timer
+    end
+    
+    local lastUpdate = 0
+    icon.timerFrame:Show() -- Must show the frame to start the OnUpdate script
+    icon.timerFrame:SetScript("OnUpdate", function(self, elapsed)
+        lastUpdate = lastUpdate + elapsed
+        if lastUpdate >= 0.2 then
+            local timeLeft = endTime - GetTime()
+            if timeLeft > 0 then
+                -- need to add condition here, if barSettings.noCountdown, return early
+                SetFormattedTime(timeLeft)
+            else
+                icon.countdownText:SetText("") 
+                icon.timerFrame:Hide() 
+                icon.timerFrame:SetScript("OnUpdate", nil) -- Delete the timer
+                print("Num icons", #barFrame.icons)
+                if showUnusedIcons then 
+                    icon.cooldown:Hide() 
+                else 
+                    OmniBar:ReturnIconToPool(icon) 
+                    for i, icon in ipairs(barFrame.icons) do
+                        if icon.spellName == spellName then
+                            barFrame.icons[i] = nil -- maybe add this to self:ArrangeIcons ?? Need tp remove the icon from the icons table after cd is done
+                        end
+                    end
                 end
-                lastUpdate = 0
+                print("Num icons", #barFrame.icons)
+                viewTable(barFrame)
             end
-        end) 
+            lastUpdate = 0
+        end
+    end) 
 end
 
 --[[

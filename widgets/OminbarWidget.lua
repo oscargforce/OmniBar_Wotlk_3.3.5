@@ -19,9 +19,8 @@ function CreateOmniBarWidget(barKey, settings)
     Anchor:SetPoint("CENTER")
     Anchor:EnableMouse(true)
     Anchor:SetClampedToScreen(true)
-    Anchor:SetScale(settings.scale)
     OmniBarFrame.anchor = Anchor
-
+  
     -- Background texture for the anchor
     local Background = Anchor:CreateTexture("$parentBackground", "BACKGROUND")
     Background:SetAllPoints()
@@ -39,9 +38,10 @@ function CreateOmniBarWidget(barKey, settings)
     OmniBar:MakeFrameDraggable(Anchor, OmniBarFrame)
 
     -- Create the icons container
-    local IconsContainer = CreateFrame("Frame", "$parentIcons", Anchor)
+    local IconsContainer = CreateFrame("Frame", "$parentIcons", OmniBarFrame)
     IconsContainer:SetSize(1, 1)  -- Placeholder size
     IconsContainer:SetPoint("LEFT", Anchor)
+    IconsContainer:SetScale(settings.scale)
 
     -- Button template (action buttons for OmniBar)
     local function CreateOmniBarIcon(iconPath)
@@ -60,7 +60,7 @@ function CreateOmniBarWidget(barKey, settings)
         Border:Hide()   
         Button.border = Border
 
-        local CountdownFrame = CreateFrame("Frame", "$parentCountdown", Button, "BackdropTemplate")
+        local CountdownFrame = CreateFrame("Frame", "$parentCountdownFrame", Button, "BackdropTemplate")
         CountdownFrame:SetAllPoints(Button)
         CountdownFrame:SetFrameLevel(7) 
         local CountdownText = CountdownFrame:CreateFontString("$parentCountdown", "OVERLAY", "GameFontNormalLarge")

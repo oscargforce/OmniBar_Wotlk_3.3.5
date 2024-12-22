@@ -130,21 +130,19 @@ function OmniBar:InitializeBar(barKey, settings)
     barFrame.activeSpells = {}
     barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
     barFrame:SetScript("OnEvent", function (...) 
-        self:OnUnitSpellCastSucceded(...)
+        self:OnUnitSpellCastSucceeded(...)
     end)
     self.barFrames[barKey] = barFrame
 
     -- Populate barFrame.trackedSpells table with tracked cds
     self:UpdateSpellTrackingForBar(barFrame, barSettings)
 
+     -- Hide/show icons
     if barSettings.showUnusedIcons then
         self:CreateIconsToBar(barFrame, barSettings)
     else
         self:CreateIconsToPool(barFrame)
     end  
-     
-    -- Hide/show icons
-    self:UpdateShowUnusedIcons(barFrame, barSettings)
    
 end
 
@@ -246,10 +244,6 @@ function OmniBar:ReturnIconToPool(icon)
 end
 
 function OmniBar:ResetIcons(barFrame)
-    if not barFrame or not barFrame.icons or next(barFrame.icons) == nil then
-        return 
-    end
-
     for _, icon in ipairs(barFrame.icons) do
         self:ReturnIconToPool(icon)
     end

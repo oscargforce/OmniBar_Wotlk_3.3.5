@@ -47,7 +47,7 @@ function OmniBar:UpdateBarName(barFrame, barSettings)
 end
 
 function OmniBar:UpdateScale(barFrame, barSettings)
-    barFrame.anchor:SetScale(barSettings.scale)
+    barFrame.iconsContainer:SetScale(barSettings.scale)
 end
 
 function OmniBar:UpdateBorder(barFrame, barSettings)
@@ -65,10 +65,15 @@ function OmniBar:UpdateShowUnusedIcons(barFrame, barSettings)
     local showUnusedIcons = barSettings.showUnusedIcons
 
     if showUnusedIcons then
-        barFrame.iconsContainer:Show()  -- Show the entire container
+        -- not needed but good to have, will create dublicate if icons already exists
+        wipe(barFrame.icons)
+        print("Update BarFrame icons left:", #barFrame.icons)
+        self:CreateIconsToBar(barFrame, barSettings)
+        print("Update BarFrame icons left:", #barFrame.icons)
     else
-        barFrame.iconsContainer:Hide()  -- Hide the entire container
+        self:ResetIcons(barFrame) --back to pool
     end
+    print("Icons left in pool:", #self.iconPool)
 end
 
 function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
