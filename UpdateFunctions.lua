@@ -10,11 +10,13 @@ function OmniBar:UpdateBar(barKey, specificUpdate)
         name = function() self:UpdateBarName(barFrame, barSettings) end,
         scale = function() self:UpdateScale(barFrame, barSettings) end,
         resetIcons = function() self:ResetIcons(barFrame) end,
-        updateCooldowns = function() self:UpdateCooldownTrackingForBar(barFrame, barSettings) end,
+        updateSpellTracking = function() self:UpdateSpellTrackingForBar(barFrame, barSettings) end,
         createIcons = function() self:CreateIconsToBar(barFrame, barSettings) end,
         border = function() self:UpdateBorder(barFrame, barSettings) end,
         arrangeIcons = function() self:ArrangeIcons(barFrame, barSettings) end,
         showUnusedIcons = function() self:UpdateShowUnusedIcons(barFrame, barSettings) end,
+        unusedAlpha = function() self:UpdateUnusedAlpha(barFrame, barSettings) end,
+        swipeAlpha = function() self:UpdateSwipeAlpha(barFrame, barSettings) end,
     }
 
     if specificUpdate then
@@ -30,7 +32,7 @@ function OmniBar:UpdateBar(barKey, specificUpdate)
     end
     
     -- Perform all required updates if no specific update is provided
-    local operationOrder = {"name", "scale", "resetIcons", "updateCooldowns", "createIcons", "border"}
+    local operationOrder = {"name", "scale", "resetIcons", "updateSpellTracking", "createIcons", "unusedAlpha","border"}
     for _, key in ipairs(operationOrder) do
         local operation = updateOperations[key]
         operation()
@@ -47,7 +49,7 @@ function OmniBar:UpdateBarName(barFrame, barSettings)
 end
 
 function OmniBar:UpdateScale(barFrame, barSettings)
-    barFrame.anchor:SetScale(barSettings.scale)
+    barFrame.iconsContainer:SetScale(barSettings.scale)
 end
 
 function OmniBar:UpdateBorder(barFrame, barSettings)
@@ -58,38 +60,79 @@ function OmniBar:UpdateBorder(barFrame, barSettings)
             button.icon:SetTexCoord(0.07, 0.9, 0.07, 0.9) 
         end
     end
-    print("Icons left in pool:", #self.iconPool)
 end
 
 function OmniBar:UpdateShowUnusedIcons(barFrame, barSettings)
     local showUnusedIcons = barSettings.showUnusedIcons
 
     if showUnusedIcons then
-        barFrame.iconsContainer:Show()  -- Show the entire container
+        -- not needed but good to have, will create dublicate if icons already exists
+        wipe(barFrame.icons)
+        self:CreateIconsToBar(barFrame, barSettings)
+        self:UpdateUnusedAlpha(barFrame, barSettings)
     else
-        barFrame.iconsContainer:Hide()  -- Hide the entire container
+        self:ResetIcons(barFrame)
     end
 end
 
--- MAYBE NOT STORE THE ICON PATH IN THE FRAME? CANT SEE A USE CASE FOR IT. UPDATE CREATEICONS TO LOOP OVER ADDONS.COOLDOWNSTABLE ISNTEAD
-function OmniBar:UpdateCooldownTrackingForBar(barFrame, barSettings)
-    local trackedCooldowns = barFrame.trackedCooldowns
-    wipe(trackedCooldowns)
+function OmniBar:UpdateUnusedAlpha(barFrame, barSettings, singleIconUpdate)
+    if not barSettings.showUnusedIcons then return end
+
+    local unusedAlpha = barSettings.unusedAlpha
+
+    if not singleIconUpdate then
+        for _, icon in ipairs(barFrame.icons) do
+            icon:SetAlpha(unusedAlpha)
+        end
+        return
+    end
+    singleIconUpdate:SetAlpha(unusedAlpha)
+end
+
+local function getCorrectedSpellName(spellName)
+    local nameMapping = {
+        ["Bauble of True Blood"] = "Release of Light",
+        ["Corroded Skeleton Key"] = "Hardened Skin",
+    }
+
+    return nameMapping[spellName] or spellName
+end
+
+function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
+    local trackedSpells = barFrame.trackedSpells
+    wipe(trackedSpells)
     
-    local cooldownsTable = addon.cooldownsTable
+    local spellTable = addon.spellTable
     
-    for className, cooldowns in pairs(barSettings.cooldowns) do
-        for cooldownName, isTracking in pairs(cooldowns) do
+    for className, spells in pairs(barSettings.cooldowns) do
+        for spellName, isTracking in pairs(spells) do
             if isTracking then
-                local cooldownData = cooldownsTable[className][cooldownName]
-                
-                if not trackedCooldowns[cooldownName] then
-                    trackedCooldowns[cooldownName] = {
-                        duration = cooldownData.duration,
-                        icon = cooldownData.icon, -- ??
+                local spellData = spellTable[className][spellName]
+
+                if not spellData then print(spellName, "does not exist") end
+
+                spellName = getCorrectedSpellName(spellName)
+
+                if not trackedSpells[spellName] then
+                    trackedSpells[spellName] = {
+                        duration = spellData.duration,
+                        icon = spellData.icon,
                     }
                 end
             end
         end
     end
+end
+
+function OmniBar:UpdateSwipeAlpha(barFrame, barSettings, singleIconUpdate)
+    local swipeAlpha = barSettings.swipeAlpha
+
+    if not singleIconUpdate then
+        for _, icon in ipairs(barFrame.icons) do
+            icon.cooldown:SetAlpha(swipeAlpha)
+        end
+        return
+    end
+
+    singleIconUpdate:SetAlpha(swipeAlpha)
 end

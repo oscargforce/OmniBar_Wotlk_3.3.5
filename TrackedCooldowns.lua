@@ -1,6 +1,6 @@
 local addonName, addon = ...
 
-addon.cooldownsTable = {
+addon.spellTable = { 
     ["General"] = {
         ["Berserking"] = { isTracking = false, duration = 180, spellId = 26297 },
         ["Blood Fury"] = { isTracking = false, duration = 120, spellId = 20572 },
@@ -14,6 +14,7 @@ addon.cooldownsTable = {
         ["Sindragosa's Flawless Fang"] = { isTracking = false, duration = 60, spellId = 50364, item = true },
         ["Corroded Skeleton Key"] = { isTracking = false, duration = 120, spellId = 50356, item = true },
         ["PvP Trinket"] = { isTracking = false, duration = 120, spellId = 51377, item = true },
+        ["Every Man for Himself"] = { isTracking = false, duration = 120, spellId = 59752 },
     },
 
     ["Death Knight"] = {
@@ -71,7 +72,7 @@ addon.cooldownsTable = {
     },
 
     ["Mage"] = {
-        ["Counter Spell"] = { isTracking = false, duration = 24, spellId = 2139 },
+        ["Counterspell"] = { isTracking = false, duration = 24, spellId = 2139 },
         ["Evocation"] = { isTracking = false, duration = 240, spellId = 12051 },
         ["Deep Freeze"] = { isTracking = false, duration = 30, spellId = 44572 },
         ["Cold Snap"] = { isTracking = false, duration = 480, spellId = 11958 },
@@ -83,7 +84,7 @@ addon.cooldownsTable = {
         ["Pet Nova (Freeze)"] = { isTracking = false, duration = 25, spellId = 33395 },
         ["Mana gem"] = { isTracking = false, duration = 120, spellId = 42987 },
         ["Invisibility"] = { isTracking = false, duration = 126, spellId = 66 },
-        ["Blink"] = { isTracking = false, duration = 24, spellId = 43039 },
+        ["Blink"] = { isTracking = false, duration = 24, spellId = 1953 },
     },
     
     ["Paladin"] = {
@@ -96,6 +97,7 @@ addon.cooldownsTable = {
         ["Hand of Freedom"] = { isTracking = false, duration = 25, spellId = 1044 },
         ["Hand of Protection"] = { isTracking = false, duration = 180, spellId = 10278 },
         ["Avenging Wrath"] = { isTracking = false, duration = 120, spellId = 31884 },
+        ["Holy Shock"] = { isTracking = false, duration = 5, spellId = 48825 },
     },
 
     ["Priest"] = {
@@ -107,8 +109,8 @@ addon.cooldownsTable = {
         ["Fear Ward"] = { isTracking = false, duration = 180, spellId = 6346 },
         ["Silence"] = { isTracking = false, duration = 45, spellId = 15487 },
         ["Power Infusion"] = { isTracking = false, duration = 96, spellId = 10060 },
-        ["SWD"] = { isTracking = false, duration = 12, spellId = 48158 },
-        ["DP"] = { isTracking = false, duration = 12, spellId = 48173 },
+        ["Shadow Word: Death"] = { isTracking = false, duration = 12, spellId = 48158 },
+        ["Desperate Prayer"] = { isTracking = false, duration = 12, spellId = 48173 },
     },
 
     ["Rogue"] = {
@@ -162,7 +164,6 @@ addon.cooldownsTable = {
         ["Concussive Blow"] = { isTracking = false, duration = 30, spellId = 12809 },
         ["Recklessness"] = { isTracking = false, duration = 300, spellId = 1719 },
         ["Intimidating Shout"] = { isTracking = false, duration = 120, spellId = 5246 },
-        ["Intimidating Shout"] = { isTracking = false, duration = 60, spellId = 676 },
     },
 }
 
@@ -190,4 +191,24 @@ function addon.DeepCopyTable(tbl)
         end
     end
     return copy
+end
+
+-- Filter function: returns a new array with elements that satisfy the predicate
+function addon.Filter(array, predicate)
+    local result = {}
+    for i, value in ipairs(array) do
+        if predicate(value, i) then
+            table.insert(result, value)
+        end
+    end
+    return result
+end
+
+-- Map function: returns a new array with elements transformed by the mapper function
+function addon.Map(array, mapper)
+    local result = {}
+    for i, value in ipairs(array) do
+        table.insert(result, mapper(value, i))
+    end
+    return result
 end

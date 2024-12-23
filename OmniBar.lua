@@ -1,6 +1,6 @@
 OmniBar = LibStub("AceAddon-3.0"):NewAddon("OmniBar", "AceConsole-3.0")
 local addonName, addon = ...
-local cooldownsTable = addon.cooldownsTable
+local spellTable = addon.spellTable
 local GetSpellInfo = GetSpellInfo
 local GetItemInfo = GetItemInfo
 
@@ -15,14 +15,16 @@ local DEFAULT_BAR_SETTINGS = {
     maxIconsTotal = 30,
     margin = 4,
     showUnusedIcons = true,
+    unusedAlpha = 0.45,
+    swipeAlpha = 0.65,
     trackUnit = "enemy",
     cooldowns = {},
 }
  
 
-local function AddIconsToCooldownsTable()
-    for _, spellTable in pairs(cooldownsTable) do
-        for _, spellData in pairs(spellTable) do
+local function AddIconsToSpellTable()
+    for className, spells in pairs(spellTable) do
+        for _, spellData in pairs(spells) do
             local icon
             if not spellData.item then 
                 local _, _, spellIcon = GetSpellInfo(spellData.spellId)  
@@ -46,7 +48,7 @@ function OmniBar:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
     self:SetupOptions()
-    AddIconsToCooldownsTable()
+    AddIconsToSpellTable()
 end
 
 
@@ -77,7 +79,7 @@ function OmniBar:OnEnable()
     for barKey, _ in pairs(self.db.profile.bars) do
         self:AddBarToOptions(barKey)
     end
-    
+    print("OnEnabled: Icons left in pool:", #self.iconPool)
 end
 
 function OmniBar:Delete(barKey, barFrame, keepProfile)
@@ -126,31 +128,47 @@ function OmniBar:InitializeBar(barKey, settings)
     local barFrame = CreateOmniBarWidget(barKey, barSettings)
     barFrame.key = barKey
     barFrame.icons = {}
-    barFrame.trackedCooldowns = {}
-    barFrame.activeCooldowns = {}
+    barFrame.trackedSpells = {}
+    barFrame.activeSpells = {}
     barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
     barFrame:SetScript("OnEvent", function (...) 
-        self:OnUnitSpellCastSucceded(...)
+        self:OnUnitSpellCastSucceeded(...)
     end)
     self.barFrames[barKey] = barFrame
 
-    -- Populate barFrame.trackedCooldowns table with tracked cds
-    self:UpdateCooldownTrackingForBar(barFrame, barSettings)
-    -- Render the icon to the bar
-    self:CreateIconsToBar(barFrame, barSettings)
-     
-    -- Hide/show icons
-    self:UpdateShowUnusedIcons(barFrame, barSettings)
+    -- Populate barFrame.trackedSpells table with tracked cds
+    self:UpdateSpellTrackingForBar(barFrame, barSettings)
+
+     -- Hide/show icons
+    if barSettings.showUnusedIcons then
+        self:CreateIconsToBar(barFrame, barSettings)
+        self:UpdateUnusedAlpha(barFrame, barSettings)
+    else
+        self:CreateIconsToPool(barFrame)
+    end  
    
+end
+
+function OmniBar:CreateIconsToPool(barFrame)
+    for spellName, spellData in pairs(barFrame.trackedSpells) do
+        -- change this later to if spellData then... and remove the print
+        if not spellData then print(spellName,"Does not exist in spellTable") end
+
+        local icon = barFrame.CreateOmniBarIcon()
+        self:ReturnIconToPool(icon)
+    end
 end
  
 function OmniBar:CreateIconsToBar(barFrame, barSettings)
-    for cooldownName, cooldownData in pairs(barFrame.trackedCooldowns) do
-        -- change this later to if cooldownData then... and remove the print
-        if not cooldownData then print(cooldownName,"Does not exist in cooldownsTable") end
+    if not barSettings.showUnusedIcons then return end
+    
+    for spellName, spellData in pairs(barFrame.trackedSpells) do
+        -- change this later to if spellData then... and remove the print
+        if not spellData then print(spellName,"Does not exist in spellTable") end
 
         local icon = self:GetIconFromPool(barFrame)
-        icon.icon:SetTexture(cooldownData.icon)
+        icon.icon:SetTexture(spellData.icon)
+        icon.spellName = spellName
         icon:Show()
         
         table.insert(barFrame.icons, icon)
@@ -176,7 +194,7 @@ function OmniBar:GetIconFromPool(barFrame)
     return icon
 end
 
-function OmniBar:ArrangeIcons(barFrame, barSettings, onylActiveIcons)
+function OmniBar:ArrangeIcons(barFrame, barSettings)
     local maxIconsPerRow = barSettings.maxIconsPerRow
     local isRowGrowingUpwards = barSettings.isRowGrowingUpwards
     local maxIconsTotal = barSettings.maxIconsTotal
@@ -188,8 +206,6 @@ function OmniBar:ArrangeIcons(barFrame, barSettings, onylActiveIcons)
     local rowIndex = 0  -- Icons placed in the current row
     local iconCount = 0  -- Icons placed in the current row
     local padding = 36 -- 36px spacing between icons
-
-    local iconsToArrange = onylActiveIcons and barFrame.activeCooldonws or barFrame.icons
     
     -- Loop through all active icons in the bar
     for i, icon in ipairs(barFrame.icons) do
@@ -233,10 +249,6 @@ function OmniBar:ReturnIconToPool(icon)
 end
 
 function OmniBar:ResetIcons(barFrame)
-    if not barFrame or not barFrame.icons or next(barFrame.icons) == nil then
-        return 
-    end
-
     for _, icon in ipairs(barFrame.icons) do
         self:ReturnIconToPool(icon)
     end

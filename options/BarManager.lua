@@ -1,5 +1,5 @@
 local addonName, addon = ...
-local cooldownsTable = addon.cooldownsTable
+local spellTable = addon.spellTable
 
 local function isEmptyString(s)
     return s:gsub("^%s*(.-)%s*$", "%1") == ""
@@ -100,13 +100,6 @@ function OmniBar:AddBarToOptions(barKey)
                 name = "",
                 type = "description",
                 order = 3,
-            },
-            center = {
-                name = "Center Lock",
-                desc = "Keep the bar centered horizontally",
-                width = "normal",
-                type = "toggle",
-                order = 4,
             },
             showUnusedIcons = {
                 name = "Show Unused Icons",
@@ -303,6 +296,12 @@ function OmniBar:AddBarToOptions(barKey)
                 step = 0.01,
                 width = "double",
                 order = 24,
+                get = function() return self.db.profile.bars[barKey].unusedAlpha end,
+                set = function(info, value)
+                    self.db.profile.bars[barKey].unusedAlpha = value
+                    self:UpdateBar(barKey, "unusedAlpha")
+                end,
+                disabled = function() return not self.db.profile.bars[barKey].showUnusedIcons end,  -- Disable if classicons is false
             },
             unusedAlphaDesc = {
                 name = "Set the transparency of unused icons" .. "\n",
@@ -319,6 +318,11 @@ function OmniBar:AddBarToOptions(barKey)
                 step = 0.01,
                 width = "double",
                 order = 26,
+                get = function() return self.db.profile.bars[barKey].swipeAlpha end,
+                set = function(info, value)
+                    self.db.profile.bars[barKey].swipeAlpha = value
+                    self:UpdateBar(barKey, "swipeAlpha")
+                end,
             },
             swipeAlphaDesc = {
                 name = "Set the transparency of the swipe animation" .. "\n",
@@ -328,9 +332,8 @@ function OmniBar:AddBarToOptions(barKey)
         }
     }
 
-    local trackedCooldowns = self.db.profile.bars[barKey].cooldowns 
     local i = 1;
-    for className, cooldowns in pairs(cooldownsTable) do
+    for className, spells in pairs(spellTable) do
         local tcordKey = addon.CLASS_NAME_TO_TCOORDS_KEY[className]
         self.options.args[barKey].args[className] = {
             type="group",
@@ -347,26 +350,26 @@ function OmniBar:AddBarToOptions(barKey)
 			self.options.args[barKey].args[className]["order"] = 0
         end
 
-        for cooldownName, cooldownData in pairs(cooldowns) do
-            self.options.args[barKey].args[className].args[cooldownName]= {
+        for spellName, spellData in pairs(spells) do
+            self.options.args[barKey].args[className].args[spellName]= {
                 type = "toggle",
                 width = "normal",
                 name = function()
-                    return format("|T%s:20|t %s", cooldownData.icon, cooldownName)
+                    return format("|T%s:20|t %s", spellData.icon, spellName)
                 end,
                 desc = function(self)
-                    local isItem = cooldownData.item or false
-                    local spellDescription = GetSpellTooltipDescription(cooldownData.spellId, isItem) or "No description available"
-                    local cooldownText = cooldownData.duration > 0 and SecondsToTime(cooldownData.duration) or "Instant"
+                    local isItem = spellData.item or false
+                    local spellDescription = GetSpellTooltipDescription(spellData.spellId, isItem) or "No description available"
+                    local cooldownText = spellData.duration > 0 and SecondsToTime(spellData.duration) or "Instant"
                     
                     local extra = "\n\n|cffffd700 ".."Cooldown:".."|r "..cooldownText..
-                    "\n\n|cffffd700 ".."Spell ID:".."|r "..cooldownData.spellId
+                    "\n\n|cffffd700 ".."Spell ID:".."|r "..spellData.spellId
                     
                     local tooltip = string.format(
                         "\n|cffffd700Cooldown:|r %s\n\n%s\n\n|cffffd700Spell ID:|r %d",
                         cooldownText,
                         spellDescription,
-                        cooldownData.spellId
+                        spellData.spellId
                     )
 
                    return tooltip
@@ -381,12 +384,12 @@ function OmniBar:AddBarToOptions(barKey)
                     end
                     
                     -- If the specific cooldown doesn't exist yet, return the default value without creating it
-                    if bar.cooldowns[className][cooldownName] == nil then
+                    if bar.cooldowns[className][spellName] == nil then
                         return false
                     end
                 
                     -- Return the saved value if it exists
-                    return bar.cooldowns[className][cooldownName]
+                    return bar.cooldowns[className][spellName]
                 end,
                 set = function(info, value) 
                     local bar = self.db.profile.bars[barKey]
@@ -394,8 +397,8 @@ function OmniBar:AddBarToOptions(barKey)
                         bar.cooldowns[className] = {}
                     end
 
-                    -- Set the value for this cooldownName
-                    bar.cooldowns[className][cooldownName] = value
+                    -- Set the value for this spellName
+                    bar.cooldowns[className][spellName] = value
                     self:UpdateBar(barKey)
                 end
             }
