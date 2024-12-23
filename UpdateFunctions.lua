@@ -89,6 +89,15 @@ function OmniBar:UpdateUnusedAlpha(barFrame, barSettings, singleIconUpdate)
     singleIconUpdate:SetAlpha(unusedAlpha)
 end
 
+local function getCorrectedSpellName(spellName)
+    local nameMapping = {
+        ["Bauble of True Blood"] = "Release of Light",
+        ["Corroded Skeleton Key"] = "Hardened Skin",
+    }
+
+    return nameMapping[spellName] or spellName
+end
+
 function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
     local trackedSpells = barFrame.trackedSpells
     wipe(trackedSpells)
@@ -101,6 +110,8 @@ function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
                 local spellData = spellTable[className][spellName]
 
                 if not spellData then print(spellName, "does not exist") end
+
+                spellName = getCorrectedSpellName(spellName)
 
                 if not trackedSpells[spellName] then
                     trackedSpells[spellName] = {

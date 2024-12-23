@@ -1,6 +1,6 @@
 local addonName, addon = ...
 
-addon.spellTable = {
+addon.spellTable = { 
     ["General"] = {
         ["Berserking"] = { isTracking = false, duration = 180, spellId = 26297 },
         ["Blood Fury"] = { isTracking = false, duration = 120, spellId = 20572 },
@@ -14,6 +14,7 @@ addon.spellTable = {
         ["Sindragosa's Flawless Fang"] = { isTracking = false, duration = 60, spellId = 50364, item = true },
         ["Corroded Skeleton Key"] = { isTracking = false, duration = 120, spellId = 50356, item = true },
         ["PvP Trinket"] = { isTracking = false, duration = 120, spellId = 51377, item = true },
+        ["Every Man for Himself"] = { isTracking = false, duration = 120, spellId = 59752 },
     },
 
     ["Death Knight"] = {
