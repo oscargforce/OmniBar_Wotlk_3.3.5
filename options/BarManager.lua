@@ -101,13 +101,6 @@ function OmniBar:AddBarToOptions(barKey)
                 type = "description",
                 order = 3,
             },
-            center = {
-                name = "Center Lock",
-                desc = "Keep the bar centered horizontally",
-                width = "normal",
-                type = "toggle",
-                order = 4,
-            },
             showUnusedIcons = {
                 name = "Show Unused Icons",
                 desc = "Icons will always remain visible",
@@ -303,6 +296,12 @@ function OmniBar:AddBarToOptions(barKey)
                 step = 0.01,
                 width = "double",
                 order = 24,
+                get = function() return self.db.profile.bars[barKey].unusedAlpha end,
+                set = function(info, value)
+                    self.db.profile.bars[barKey].unusedAlpha = value
+                    self:UpdateBar(barKey, "unusedAlpha")
+                end,
+                disabled = function() return not self.db.profile.bars[barKey].showUnusedIcons end,  -- Disable if classicons is false
             },
             unusedAlphaDesc = {
                 name = "Set the transparency of unused icons" .. "\n",
@@ -319,6 +318,11 @@ function OmniBar:AddBarToOptions(barKey)
                 step = 0.01,
                 width = "double",
                 order = 26,
+                get = function() return self.db.profile.bars[barKey].swipeAlpha end,
+                set = function(info, value)
+                    self.db.profile.bars[barKey].swipeAlpha = value
+                    self:UpdateBar(barKey, "swipeAlpha")
+                end,
             },
             swipeAlphaDesc = {
                 name = "Set the transparency of the swipe animation" .. "\n",

@@ -4,11 +4,11 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unitId, spellName, spellRank,a,b,c,d,f,e,g)
     --if not unitId:match("arena%d") then return end
     if not unitId:match("party%d") then return end
-    print("a:", spellRank)
 
     local spellData = barFrame.trackedSpells[spellName]
     if not spellData then return end
     if spellName == "Death Coil" and spellRank ~="Rank 6" then return end
+
     print("PASSED:", spellName)
     self:OnCooldownUsed(barFrame, barFrame.key, spellName, spellData)
 end
@@ -19,7 +19,7 @@ function OmniBar:OnCooldownUsed(barFrame, barKey, spellName, spellData)
     if barSettings.showUnusedIcons then
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName then
-                icon:SetAlpha(1.0)
+                icon:SetAlpha(1)
                 self:StartCooldownShading(icon, spellData.duration, barSettings, barFrame, spellName)
                 return
             end  
@@ -64,13 +64,14 @@ function OmniBar:OnCooldownEnd(icon, barFrame, barSettings, spellName)
     icon.timerFrame:Hide() 
     icon.timerFrame:SetScript("OnUpdate", nil) -- Delete the timer
     if barSettings.showUnusedIcons then 
-        icon.cooldown:Hide() 
+        icon.cooldown:Hide()
+        self:UpdateUnusedAlpha(barFrame, barSettings, icon) 
     else 
         self:ReturnIconToPool(icon) 
         for i = #barFrame.icons, 1, -1 do
             if barFrame.icons[i] == icon then
                 print("Removed", barFrame.icons[i].spellName, "from barFrame.icons")
-                table.remove(barFrame.icons, i) -- maybe add this to self:ArrangeIcons ?? Need tp remove the icon from the icons table after cd is done
+                table.remove(barFrame.icons, i) -- maybe add this to self:ArrangeIcons ?? Need to remove the icon from the icons table after cd is done
                 break
             end
         end
@@ -87,7 +88,8 @@ function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame, spe
     icon:Show()
 
     icon.cooldown:SetCooldown(startTime, duration)
-    icon.cooldown:SetAlpha(1)
+    print(barSettings.swipeAlpha)
+    icon.cooldown:SetAlpha(barSettings.swipeAlpha)
 
     print("Icons pool OnUpdate", #self.iconPool)
     local lastUpdate = 0

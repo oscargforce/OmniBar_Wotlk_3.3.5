@@ -15,6 +15,8 @@ local DEFAULT_BAR_SETTINGS = {
     maxIconsTotal = 30,
     margin = 4,
     showUnusedIcons = true,
+    unusedAlpha = 0.45,
+    swipeAlpha = 0.65,
     trackUnit = "enemy",
     cooldowns = {},
 }
@@ -140,6 +142,7 @@ function OmniBar:InitializeBar(barKey, settings)
      -- Hide/show icons
     if barSettings.showUnusedIcons then
         self:CreateIconsToBar(barFrame, barSettings)
+        self:UpdateUnusedAlpha(barFrame, barSettings)
     else
         self:CreateIconsToPool(barFrame)
     end  
