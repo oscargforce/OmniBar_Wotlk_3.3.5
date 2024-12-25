@@ -76,7 +76,7 @@ function OmniBar:AddBarToOptions(barKey)
                 end,
                 order = 1,
             },
-            trackUnit = {
+            trackedUnit = {
                 name = "Track",
                 type = "select",
                 values = {
@@ -90,9 +90,9 @@ function OmniBar:AddBarToOptions(barKey)
                     ["party2"] = "Party2",
                     ["party3"] = "Party3",
                 },
-                get = function() return self.db.profile.bars[barKey].trackUnit end,
+                get = function() return self.db.profile.bars[barKey].trackedUnit end,
                 set = function(info, value)
-                    self.db.profile.bars[barKey].trackUnit = value
+                    self.db.profile.bars[barKey].trackedUnit = value
                 end,
                 order = 2,
             },

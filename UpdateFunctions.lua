@@ -110,15 +110,17 @@ function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
             if isTracking then
                 local spellData = spellTable[className][spellName]
 
-                if not spellData then print(spellName, "does not exist") end
-
-                spellName = getCorrectedSpellName(spellName)
-
-                if not trackedSpells[spellName] then
-                    trackedSpells[spellName] = {
-                        duration = spellData.duration,
-                        icon = spellData.icon,
-                    }
+                if spellData then  
+                    spellName = getCorrectedSpellName(spellName)
+    
+                    if not trackedSpells[spellName] then
+                        trackedSpells[spellName] = {
+                            duration = spellData.duration,
+                            icon = spellData.icon,
+                        }
+                    end
+                else
+                    print(spellName, "does not exist")
                 end
             end
         end

@@ -1,7 +1,25 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 
+local allEnemyUnits = {
+    ["enemy"] = true,
+    ["target"] = true,
+    ["focus"] = true,
+    ["arena1"] = true,
+    ["arena2"] = true,
+    ["arena3"] = true,
+}
+
+function OmniBar:UnitMatchesTrackedUnit(unitId)
+    local trackedUnit = self.db.profile.bars[barKey].trackedUnit
+
+    if trackedUnit == "enemy" then return allEnemyUnits[unitId] or false end
+
+    return unitId == trackedUnit
+end
+
 -- Death knights death coil has same name as warlock spell :/ need to use some if statement on that spell
 function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unitId, spellName, spellRank)
+    print("unit", unitId)
     if not unitId:match("arena%d") then return end
     --if not unitId:match("party%d") then return end
     
@@ -21,6 +39,7 @@ function OmniBar:OnCooldownUsed(barFrame, barKey, spellName, spellData)
             if icon.spellName == spellName then
                 icon:SetAlpha(1)
                 self:StartCooldownShading(icon, spellData.duration, barSettings, barFrame, spellName)
+                self:ArrangeIcons(barFrame, barSettings)
                 return
             end  
         end

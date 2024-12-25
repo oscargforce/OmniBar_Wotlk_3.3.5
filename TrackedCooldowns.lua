@@ -147,7 +147,7 @@ addon.spellTable = {
         ["Death Coil"] = { isTracking = false, duration = 120, spellId = 47860 },
         ["Howl of Terror"] = { isTracking = false, duration = 32, spellId = 17928 },
         ["Demonic Circle: Teleport"] = { isTracking = false, duration = 26, spellId = 48020 },
-        ["Shadow Fury"] = { isTracking = false, duration = 20, spellId = 47847 },
+        ["Shadowfury"] = { isTracking = false, duration = 20, spellId = 47847 },
     },
 
     ["Warrior"] = {
