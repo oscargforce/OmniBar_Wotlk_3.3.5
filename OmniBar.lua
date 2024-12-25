@@ -194,7 +194,7 @@ function OmniBar:GetIconFromPool(barFrame)
     return icon
 end
 
-function OmniBar:ArrangeIcons(barFrame, barSettings)
+--[[ function OmniBar:ArrangeIcons(barFrame, barSettings)
     local maxIconsPerRow = barSettings.maxIconsPerRow
     local isRowGrowingUpwards = barSettings.isRowGrowingUpwards
     local maxIconsTotal = barSettings.maxIconsTotal
@@ -206,6 +206,8 @@ function OmniBar:ArrangeIcons(barFrame, barSettings)
     local rowIndex = 0  -- Icons placed in the current row
     local iconCount = 0  -- Icons placed in the current row
     local padding = 36 -- 36px spacing between icons
+
+    local activeIcons = #barFrame.icons
     
     -- Loop through all active icons in the bar
     for i, icon in ipairs(barFrame.icons) do
@@ -239,7 +241,48 @@ function OmniBar:ArrangeIcons(barFrame, barSettings)
             end
         end
     end
-end
+end  ]]
+
+ function OmniBar:ArrangeIcons(barFrame, barSettings)
+    local maxIconsPerRow = barSettings.maxIconsPerRow
+    local maxIconsTotal = barSettings.maxIconsTotal
+    local margin = barSettings.margin
+    local BASE_ICON_SIZE = 36 -- 36px spacing between icons
+    local totalIconsDisplayed = 0 
+
+    local iconsPerRow, rows = 0, 1
+    local growDirection = barSettings.isRowGrowingUpwards and 1 or -1 
+
+
+    for i, icon in ipairs(barFrame.icons) do
+        if totalIconsDisplayed >= maxIconsTotal then 
+            self:ReturnIconToPool(icon)
+            barFrame.icons[i] = nil 
+        else
+         -- Position the icon
+            icon:ClearAllPoints()
+
+            if i > 1 then
+                iconsPerRow = iconsPerRow + 1
+                if iconsPerRow >= maxIconsPerRow then
+                    icon:SetPoint("CENTER", barFrame.iconsContainer, "CENTER", 
+                                (-BASE_ICON_SIZE - margin) * (maxIconsPerRow - 1) / 2, 
+                                (BASE_ICON_SIZE + margin) * rows * growDirection)
+                    iconsPerRow = 0
+                    rows = rows + 1
+                else
+                    icon:SetPoint("TOPLEFT", barFrame.icons[i-1], "TOPRIGHT", margin, 0)
+                end
+            else
+                icon:SetPoint("CENTER", barFrame.iconsContainer, "CENTER", 
+                                (-BASE_ICON_SIZE - margin) * (maxIconsPerRow - 1) / 2, 0)
+            end
+            totalIconsDisplayed = totalIconsDisplayed + 1
+        end
+    end
+end  
+
+
 
 function OmniBar:ReturnIconToPool(icon)
     icon:Hide()

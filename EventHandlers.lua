@@ -2,8 +2,8 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 
 -- Death knights death coil has same name as warlock spell :/ need to use some if statement on that spell
 function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unitId, spellName, spellRank)
-    --if not unitId:match("arena%d") then return end
-    if not unitId:match("party%d") then return end
+    if not unitId:match("arena%d") then return end
+    --if not unitId:match("party%d") then return end
     
     local spellData = barFrame.trackedSpells[spellName]
     if not spellData then return end
@@ -24,6 +24,7 @@ function OmniBar:OnCooldownUsed(barFrame, barKey, spellName, spellData)
                 return
             end  
         end
+        -- If icon not found then we need to add it manually to the bar since we exceeded the totalMaxIconsToDisplay, and remove a unused bar.
     end
 
     -- Get or create icon for this spell

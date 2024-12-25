@@ -40,7 +40,7 @@ function CreateOmniBarWidget(barKey, settings)
     -- Create the icons container
     local iconsContainer = CreateFrame("Frame", "$parentIcons", omniBarFrame)
     iconsContainer:SetSize(1, 1)  -- Placeholder size
-    iconsContainer:SetPoint("LEFT", anchor)
+    iconsContainer:SetPoint("CENTER", anchor)
     iconsContainer:SetScale(settings.scale)
 
     -- Button template (action buttons for OmniBar)
