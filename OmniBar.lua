@@ -1,4 +1,4 @@
-OmniBar = LibStub("AceAddon-3.0"):NewAddon("OmniBar", "AceConsole-3.0")
+OmniBar = LibStub("AceAddon-3.0"):NewAddon("OmniBar", "AceConsole-3.0", "AceEvent-3.0")
 local addonName, addon = ...
 local spellTable = addon.spellTable
 local GetSpellInfo = GetSpellInfo
@@ -47,10 +47,10 @@ function OmniBar:OnInitialize()
     self.db.RegisterCallback(self, "OnProfileChanged", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
+    self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:SetupOptions()
     AddIconsToSpellTable()
 end
-
 
 -- runs after OmniBar:OnInitialize()
 function OmniBar:OnEnable()

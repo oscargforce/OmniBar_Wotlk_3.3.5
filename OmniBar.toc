@@ -16,6 +16,7 @@ widgets\OminbarWidget.lua
 options\Panel.lua
 options\BarManager.lua
 UpdateFunctions.lua
-EventHandlers.lua
+events\EventHandlers.lua
+events\UnitMatchStrategy.lua
 
 

@@ -1,38 +1,28 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 
-local allEnemyUnits = {
-    ["enemy"] = true,
-    ["target"] = true,
-    ["focus"] = true,
-    ["arena1"] = true,
-    ["arena2"] = true,
-    ["arena3"] = true,
-}
-
-function OmniBar:UnitMatchesTrackedUnit(unitId)
-    local trackedUnit = self.db.profile.bars[barKey].trackedUnit
-
-    if trackedUnit == "enemy" then return allEnemyUnits[unitId] or false end
-
-    return unitId == trackedUnit
+function OmniBar:PLAYER_ENTERING_WORLD()
+    local _, zone = IsInInstance()
+    self.zone = zone
+    for _, barFrame in ipairs(self.barFrames) do
+        self:UpdateBar(barFrame.key)
+    end
 end
 
 -- Death knights death coil has same name as warlock spell :/ need to use some if statement on that spell
-function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unitId, spellName, spellRank)
-    print("unit", unitId)
-    if not unitId:match("arena%d") then return end
-    --if not unitId:match("party%d") then return end
-    
+function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spellRank)
+    local barSettings = self.db.profile.bars[barFrame.key]
+
+    if not self:UnitMatchesTrackedUnit(unit, barSettings.trackedUnit) then return end
+
     local spellData = barFrame.trackedSpells[spellName]
     if not spellData then return end
     if spellName == "Death Coil" and spellRank ~="Rank 6" then return end
 
     print("PASSED:", spellName)
-    self:OnCooldownUsed(barFrame, barFrame.key, spellName, spellData)
+    self:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
 end
 
-function OmniBar:OnCooldownUsed(barFrame, barKey, spellName, spellData)
-    local barSettings = self.db.profile.bars[barKey]
+function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
 
     if barSettings.showUnusedIcons then
         for i, icon in ipairs(barFrame.icons) do
