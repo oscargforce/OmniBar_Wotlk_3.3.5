@@ -259,6 +259,7 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].maxIconsTotal = value
                     self:UpdateBar(barKey)
                 end,
+
                 order = 20,
             },
             maxIconsDesc = {

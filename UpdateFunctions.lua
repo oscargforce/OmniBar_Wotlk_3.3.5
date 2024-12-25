@@ -13,7 +13,7 @@ function OmniBar:UpdateBar(barKey, specificUpdate)
         updateSpellTracking = function() self:UpdateSpellTrackingForBar(barFrame, barSettings) end,
         createIcons = function() self:CreateIconsToBar(barFrame, barSettings) end,
         border = function() self:UpdateBorder(barFrame, barSettings) end,
-        arrangeIcons = function() self:ArrangeIcons(barFrame, barSettings) end,
+        arrangeIcons = function() self:ArrangeIcons(barFrame, barSettings, true) end,
         showUnusedIcons = function() self:UpdateShowUnusedIcons(barFrame, barSettings) end,
         unusedAlpha = function() self:UpdateUnusedAlpha(barFrame, barSettings) end,
         swipeAlpha = function() self:UpdateSwipeAlpha(barFrame, barSettings) end,

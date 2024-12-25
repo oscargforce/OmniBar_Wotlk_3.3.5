@@ -194,101 +194,60 @@ function OmniBar:GetIconFromPool(barFrame)
     return icon
 end
 
---[[  function OmniBar:ArrangeIcons(barFrame, barSettings)
-    local maxIconsPerRow = barSettings.maxIconsPerRow
-    local isRowGrowingUpwards = barSettings.isRowGrowingUpwards
-    local maxIconsTotal = barSettings.maxIconsTotal
-    local margin = barSettings.margin
-
-    -- Variables to track positioning
-    local xOffset = 0
-    local yOffset = 0
-    local rowIndex = 0  -- Icons placed in the current row
-    local iconCount = 0  -- Icons placed in the current row
-    local padding = 36 -- 36px spacing between icons
-
-    local activeIcons = #barFrame.icons
-    
-    -- Loop through all active icons in the bar
-    for i, icon in ipairs(barFrame.icons) do
-        if icon:IsShown() then
-
-            if iconCount >= maxIconsTotal then 
-                self:ReturnIconToPool(icon)
-                barFrame.icons[i] = nil  -- Remove reference from the table
-            end
-
-            -- Position the icon
-            icon:ClearAllPoints()
-            icon:SetPoint("LEFT", barFrame.iconsContainer, "LEFT", xOffset, yOffset)
-
-            -- Update xOffset for the next icon in the row
-            iconCount = iconCount + 1
-            rowIndex = rowIndex + 1
-            xOffset = rowIndex * (padding + margin)
-
-            -- Check if we reached the max icons per row
-            if rowIndex >= maxIconsPerRow then
-                rowIndex = 0
-                xOffset = 0  -- Reset horizontal position
-
-                -- Adjust yOffset to move to the next row
-                if isRowGrowingUpwards then
-                    yOffset = yOffset + (padding + margin)  -- Move up
-                else
-                    yOffset = yOffset - (padding + margin)  -- Move down
-                end
-            end
-        end
-    end
-end   ]]
+function OmniBar:SortIcons(barFrame)
+       -- Sort icons based on endTime (or default to math.huge)
+       table.sort(barFrame.icons, function(a, b)
+        local aEndTime = a.endTime or math.huge
+        local bEndTime = b.endTime or math.huge 
+        return aEndTime < bEndTime
+    end) 
+end
 
 local BASE_ICON_SIZE = 36
- function OmniBar:ArrangeIcons(barFrame, barSettings)
+function OmniBar:ArrangeIcons(barFrame, barSettings, skipSort)
     local maxIconsPerRow = barSettings.maxIconsPerRow
     local maxIconsTotal = barSettings.maxIconsTotal
     local margin = barSettings.margin
-    local totalIconsDisplayed = 0 
 
     local iconsPerRow, rows = 0, 1
     local growDirection = barSettings.isRowGrowingUpwards and 1 or -1 
-    
     local numActive = #barFrame.icons
+
+    if not skipSort then self:SortIcons(barFrame) end
+
+     -- Remove excess icons if necessary
+    if numActive > maxIconsTotal then
+        local excessIcons = numActive - maxIconsTotal
+        for i = 1, excessIcons do
+            local icon = barFrame.icons[#barFrame.icons] 
+            barFrame.icons[#barFrame.icons] = nil
+            self:ReturnIconToPool(icon)
+        end
+    end 
+
+    numActive = #barFrame.icons
     local columns = maxIconsPerRow < numActive and maxIconsPerRow or numActive
 
-    table.sort(barFrame.icons, function(a, b)
-        local aEndTime = a.endTime or math.huge
-        local bEndTime = b.endTime or math.huge
-        return aEndTime < bEndTime
-    end)
-
     for i, icon in ipairs(barFrame.icons) do
-        if totalIconsDisplayed >= maxIconsTotal then 
-            self:ReturnIconToPool(icon)
-            barFrame.icons[i] = nil 
-        else
-         -- Position the icon
-            icon:ClearAllPoints()
-
-            if i > 1 then
-                iconsPerRow = iconsPerRow + 1
-                if iconsPerRow >= columns then
-                    icon:SetPoint("CENTER", barFrame.iconsContainer, "CENTER", 
-                                (-BASE_ICON_SIZE - margin) * (columns - 1) / 2, 
-                                (BASE_ICON_SIZE + margin) * rows * growDirection)
-                    iconsPerRow = 0
-                    rows = rows + 1
-                else
-                    icon:SetPoint("TOPLEFT", barFrame.icons[i-1], "TOPRIGHT", margin, 0)
-                end
-            else
+        icon:ClearAllPoints()
+    
+        if i > 1 then
+            iconsPerRow = iconsPerRow + 1
+            if iconsPerRow >= columns then
                 icon:SetPoint("CENTER", barFrame.iconsContainer, "CENTER", 
-                                (-BASE_ICON_SIZE - margin) * (columns - 1) / 2, 0)
+                            (-BASE_ICON_SIZE - margin) * (columns - 1) / 2, 
+                            (BASE_ICON_SIZE + margin) * rows * growDirection)
+                iconsPerRow = 0
+                rows = rows + 1
+            else
+                icon:SetPoint("TOPLEFT", barFrame.icons[i-1], "TOPRIGHT", margin, 0)
             end
-            totalIconsDisplayed = totalIconsDisplayed + 1
+        else
+            icon:SetPoint("CENTER", barFrame.iconsContainer, "CENTER", 
+                            (-BASE_ICON_SIZE - margin) * (columns - 1) / 2, 0)
         end
     end
-end   
+end
 
 
 function OmniBar:ReturnIconToPool(icon)
