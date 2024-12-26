@@ -23,12 +23,13 @@ function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spel
 end
 
 function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
-
     if barSettings.showUnusedIcons then
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName then
                 icon:SetAlpha(1)
-                self:StartCooldownShading(icon, spellData.duration, barSettings, barFrame, spellName)
+                barFrame.activeIcons[spellName] = icon
+                self:ToggleAnchorVisibility(barFrame)
+                self:StartCooldownShading(icon, spellData.duration, barSettings, barFrame)
                 self:ArrangeIcons(barFrame, barSettings)
                 return
             end  
@@ -41,8 +42,9 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
     icon.spellName = spellName 
     icon.icon:SetTexture(spellData.icon)
     table.insert(barFrame.icons, icon)
+    self:ToggleAnchorVisibility(barFrame)
 
-    self:StartCooldownShading(icon, spellData.duration, barSettings, barFrame, spellName)
+    self:StartCooldownShading(icon, spellData.duration, barSettings, barFrame)
     
     self:ArrangeIcons(barFrame, barSettings)
 end
@@ -69,28 +71,7 @@ local function formatTimeText(timeLeft)
     return string.format("%s%.0f%s", color, timeLeft, COLORS.END_TAG)
 end
 
-function OmniBar:OnCooldownEnd(icon, barFrame, barSettings, spellName)
-    icon.countdownText:SetText("") 
-    icon.timerFrame:Hide() 
-    icon.timerFrame:SetScript("OnUpdate", nil) -- Delete the timer
-    if barSettings.showUnusedIcons then 
-        icon.cooldown:Hide()
-        self:UpdateUnusedAlpha(barFrame, barSettings, icon) 
-    else 
-        self:ReturnIconToPool(icon) 
-        for i = #barFrame.icons, 1, -1 do
-            if barFrame.icons[i] == icon then
-                print("Removed", barFrame.icons[i].spellName, "from barFrame.icons")
-                table.remove(barFrame.icons, i) -- maybe add this to self:ArrangeIcons ?? Need to remove the icon from the icons table after cd is done
-                break
-            end
-        end
-    end
-    print("ARRANGE ICONS")
-    self:ArrangeIcons(barFrame, barSettings)
-end
-
-function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame, spellName)
+function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame)
     local startTime = GetTime()
     local endTime = startTime + duration
 
@@ -112,12 +93,35 @@ function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame, spe
                 -- need to add condition here, if barSettings.noCountdown, return early
                 icon.countdownText:SetText(formatTimeText(timeLeft))
             else
-                OmniBar:OnCooldownEnd(icon, barFrame, barSettings, spellName)
+                OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
                 print("BarFrame icons num:", #barFrame.icons)
             end
             lastUpdate = 0
         end
     end) 
+end
+
+function OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
+    icon.countdownText:SetText("") 
+    icon.timerFrame:Hide() 
+    icon.timerFrame:SetScript("OnUpdate", nil) -- Delete the timer
+    if barSettings.showUnusedIcons then 
+        icon.cooldown:Hide()
+        barFrame.activeIcons[icon.spellName] = nil
+        self:UpdateUnusedAlpha(barFrame, barSettings, icon) 
+    else 
+        self:ReturnIconToPool(icon) 
+        for i = #barFrame.icons, 1, -1 do
+            if barFrame.icons[i] == icon then
+                print("Removed", barFrame.icons[i].spellName, "from barFrame.icons")
+                table.remove(barFrame.icons, i) -- maybe add this to self:ArrangeIcons ?? Need to remove the icon from the icons table after cd is done
+                break
+            end
+        end
+    end
+    print("ARRANGE ICONS")
+    self:ArrangeIcons(barFrame, barSettings)
+    self:ToggleAnchorVisibility(barFrame)
 end
 
 --[[

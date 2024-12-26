@@ -3,6 +3,7 @@ local addonName, addon = ...
 local spellTable = addon.spellTable
 local GetSpellInfo = GetSpellInfo
 local GetItemInfo = GetItemInfo
+local wipe = wipe
 
 local DEFAULT_BAR_SETTINGS = {
     name = "OmniBar",
@@ -128,8 +129,8 @@ function OmniBar:InitializeBar(barKey, settings)
     local barFrame = CreateOmniBarWidget(barKey, barSettings)
     barFrame.key = barKey
     barFrame.icons = {}
+    barFrame.activeIcons = {} -- only used if show unused icons is enabled.
     barFrame.trackedSpells = {}
-    barFrame.activeSpells = {}
     barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
     barFrame:SetScript("OnEvent", function (...) 
         self:OnUnitSpellCastSucceeded(...)
@@ -241,6 +242,7 @@ function OmniBar:ArrangeIcons(barFrame, barSettings, skipSort)
                 rows = rows + 1
             else
                 icon:SetPoint("TOPLEFT", barFrame.icons[i-1], "TOPRIGHT", margin, 0)
+                -- icon:SetPoint("TOPRIGHT", barFrame.icons[i-1], "TOPLEFT", -1 * margin, 0) Aling right, but not working with margin.
             end
         else
             icon:SetPoint("CENTER", barFrame.iconsContainer, "CENTER", 
@@ -248,7 +250,6 @@ function OmniBar:ArrangeIcons(barFrame, barSettings, skipSort)
         end
     end
 end
-
 
 function OmniBar:ReturnIconToPool(icon)
     icon:Hide()
@@ -310,42 +311,13 @@ function OmniBar:SetPosition(barFrame, newPosition)
     position.y = newPosition.y
 end
 
-
-
-
-
-
-
-
--- should i keep?
-function OmniBar:RefreshAllBars(full)
-	for barKey, barSettings in pairs(self.db.profile.bars) do
-		local frame = self.barFrames[barKey]
-		if not frame then return end
-        frame.text:SetText(barSettings.name)
-	end
+function OmniBar:ToggleAnchorVisibility(barFrame)
+    if #barFrame.icons > 0 or next(barFrame.activeIcons) then
+        barFrame.anchor:Hide()
+    else
+        barFrame.anchor:Show()
+    end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

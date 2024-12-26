@@ -74,6 +74,8 @@ function OmniBar:UpdateShowUnusedIcons(barFrame, barSettings)
     else
         self:ResetIcons(barFrame)
     end
+
+    self:ToggleAnchorVisibility(barFrame)
 end
 
 function OmniBar:UpdateUnusedAlpha(barFrame, barSettings, singleIconUpdate)
