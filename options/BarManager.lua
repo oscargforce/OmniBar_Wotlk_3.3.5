@@ -80,7 +80,7 @@ function OmniBar:AddBarToOptions(barKey)
                 name = "Track",
                 type = "select",
                 values = {
-                    ["enemy"] = "All Enemies",
+                    ["enemies"] = "All Enemies",
                     ["target"] = "Target",
                     ["focus"] = "Focus",
                     ["arena1"] = "Arena1", 

@@ -1,7 +1,7 @@
 --[[ 
     UNIT_CAST_SUCCEEDED can fire multiple times for the same spell if the same player targets multiple units (e.g., target, focus, arena1). 
     Without optimization, this would create multiple icons for the same spell. 
-    In arenas, to improve performance, we only track arena1, arena2, and arena3 if the bar is set to track all enemies.
+    In arenas, to improve performance, we only track arena1-5 if the bar is set to track all enemies.
 ]]
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 
@@ -22,7 +22,7 @@ local nonArenaEnemyUnits = {
 }
 
 local function MatchesArenaUnit(unit, trackedUnit)
-    if trackedUnit == "enemy" then
+    if trackedUnit == "enemies" then
         return arenaUnits[unit] or false
     end
 
@@ -30,7 +30,7 @@ local function MatchesArenaUnit(unit, trackedUnit)
 end
 
 local function MatchesGeneralUnit(unit, trackedUnit)
-    if trackedUnit == "enemy" then
+    if trackedUnit == "enemies" then
 
         if not nonArenaEnemyUnits[unit] then
             return false

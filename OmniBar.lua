@@ -18,7 +18,7 @@ local DEFAULT_BAR_SETTINGS = {
     showUnusedIcons = true,
     unusedAlpha = 0.45,
     swipeAlpha = 0.65,
-    trackedUnit = "enemy",
+    trackedUnit = "enemies",
     cooldowns = {},
 }
  
@@ -50,6 +50,8 @@ function OmniBar:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("CHAT_MSG_SYSTEM")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED")
+    self:RegisterEvent("PLAYER_REGEN_DISABLED")
     self:SetupOptions()
     AddIconsToSpellTable()
 end
