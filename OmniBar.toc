@@ -13,9 +13,10 @@ ViewTable.lua
 TrackedCooldowns.lua
 OmniBar.lua
 widgets\OminbarWidget.lua
+options\Panel.lua
 options\BarManager.lua
-Omnibar-options.lua
 UpdateFunctions.lua
-EventHandlers.lua
+events\EventHandlers.lua
+events\UnitMatchStrategy.lua
 
 

@@ -76,7 +76,7 @@ function OmniBar:AddBarToOptions(barKey)
                 end,
                 order = 1,
             },
-            trackUnit = {
+            trackedUnit = {
                 name = "Track",
                 type = "select",
                 values = {
@@ -86,13 +86,17 @@ function OmniBar:AddBarToOptions(barKey)
                     ["arena1"] = "Arena1", 
                     ["arena2"] = "Arena2",
                     ["arena3"] = "Arena3",
+                    ["arena4"] = "Arena4",
+                    ["arena5"] = "Arena5",
                     ["party1"] = "Party1",
                     ["party2"] = "Party2",
                     ["party3"] = "Party3",
+                    ["party4"] = "Party4",
+                    ["party5"] = "Party5",
                 },
-                get = function() return self.db.profile.bars[barKey].trackUnit end,
+                get = function() return self.db.profile.bars[barKey].trackedUnit end,
                 set = function(info, value)
-                    self.db.profile.bars[barKey].trackUnit = value
+                    self.db.profile.bars[barKey].trackedUnit = value
                 end,
                 order = 2,
             },
@@ -259,6 +263,7 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].maxIconsTotal = value
                     self:UpdateBar(barKey)
                 end,
+
                 order = 20,
             },
             maxIconsDesc = {

@@ -147,7 +147,7 @@ addon.spellTable = {
         ["Death Coil"] = { isTracking = false, duration = 120, spellId = 47860 },
         ["Howl of Terror"] = { isTracking = false, duration = 32, spellId = 17928 },
         ["Demonic Circle: Teleport"] = { isTracking = false, duration = 26, spellId = 48020 },
-        ["Shadow Fury"] = { isTracking = false, duration = 20, spellId = 47847 },
+        ["Shadowfury"] = { isTracking = false, duration = 20, spellId = 47847 },
     },
 
     ["Warrior"] = {
@@ -191,24 +191,4 @@ function addon.DeepCopyTable(tbl)
         end
     end
     return copy
-end
-
--- Filter function: returns a new array with elements that satisfy the predicate
-function addon.Filter(array, predicate)
-    local result = {}
-    for i, value in ipairs(array) do
-        if predicate(value, i) then
-            table.insert(result, value)
-        end
-    end
-    return result
-end
-
--- Map function: returns a new array with elements transformed by the mapper function
-function addon.Map(array, mapper)
-    local result = {}
-    for i, value in ipairs(array) do
-        table.insert(result, mapper(value, i))
-    end
-    return result
 end

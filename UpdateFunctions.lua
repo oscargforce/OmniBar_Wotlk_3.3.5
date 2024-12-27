@@ -13,7 +13,7 @@ function OmniBar:UpdateBar(barKey, specificUpdate)
         updateSpellTracking = function() self:UpdateSpellTrackingForBar(barFrame, barSettings) end,
         createIcons = function() self:CreateIconsToBar(barFrame, barSettings) end,
         border = function() self:UpdateBorder(barFrame, barSettings) end,
-        arrangeIcons = function() self:ArrangeIcons(barFrame, barSettings) end,
+        arrangeIcons = function() self:ArrangeIcons(barFrame, barSettings, true) end,
         showUnusedIcons = function() self:UpdateShowUnusedIcons(barFrame, barSettings) end,
         unusedAlpha = function() self:UpdateUnusedAlpha(barFrame, barSettings) end,
         swipeAlpha = function() self:UpdateSwipeAlpha(barFrame, barSettings) end,
@@ -67,13 +67,14 @@ function OmniBar:UpdateShowUnusedIcons(barFrame, barSettings)
     local showUnusedIcons = barSettings.showUnusedIcons
 
     if showUnusedIcons then
-        -- not needed but good to have, will create dublicate if icons already exists
-        wipe(barFrame.icons)
+        self:ResetIcons(barFrame)
         self:CreateIconsToBar(barFrame, barSettings)
         self:UpdateUnusedAlpha(barFrame, barSettings)
     else
         self:ResetIcons(barFrame)
     end
+ 
+    self:ToggleAnchorVisibility(barFrame)
 end
 
 function OmniBar:UpdateUnusedAlpha(barFrame, barSettings, singleIconUpdate)
@@ -110,15 +111,17 @@ function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
             if isTracking then
                 local spellData = spellTable[className][spellName]
 
-                if not spellData then print(spellName, "does not exist") end
-
-                spellName = getCorrectedSpellName(spellName)
-
-                if not trackedSpells[spellName] then
-                    trackedSpells[spellName] = {
-                        duration = spellData.duration,
-                        icon = spellData.icon,
-                    }
+                if spellData then  
+                    spellName = getCorrectedSpellName(spellName)
+    
+                    if not trackedSpells[spellName] then
+                        trackedSpells[spellName] = {
+                            duration = spellData.duration,
+                            icon = spellData.icon,
+                        }
+                    end
+                else
+                    print(spellName, "does not exist in the table: trackedSpells")
                 end
             end
         end
