@@ -1,9 +1,22 @@
 function OmniBar:PLAYER_ENTERING_WORLD()
     local _, zone = IsInInstance()
+
+    if self.zone and self.zone ~= zone then
+        for _, barFrame in pairs(self.barFrames) do
+            self:UpdateBar(barFrame.key, "refreshBarIconsState")
+        end 
+    end
+
     self.zone = zone
-   --[[  for _, barFrame in ipairs(self.barFrames) do
-        self:UpdateBar(barFrame.key)
-    end ]]
+end
+
+function OmniBar:CHAT_MSG_SYSTEM(event, chatMsg)
+    if self.zone == "arena" then return end
+    if not chatMsg:match("Duel starting: 3") then return end
+
+    for _, barFrame in pairs(self.barFrames) do
+        self:UpdateBar(barFrame.key, "refreshBarIconsState")
+    end 
 end
 
 -- Death knights death coil has same name as warlock spell :/ need to use some if statement on that spell

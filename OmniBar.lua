@@ -49,6 +49,7 @@ function OmniBar:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    self:RegisterEvent("CHAT_MSG_SYSTEM")
     self:SetupOptions()
     AddIconsToSpellTable()
 end
@@ -87,11 +88,13 @@ function OmniBar:Delete(barKey, barFrame, keepProfile)
     local targetFrame  = barFrame or self.barFrames[barKey]
 
     targetFrame:Hide()
-    -- dont think i need this override local barKey = targetFrame.key
+    targetFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+
     if not keepProfile then
         self.db.profile.bars[barKey] = nil 
         self.options.args[barKey] = nil
     end
+
     targetFrame.anchor:Hide()
     wipe(targetFrame.icons)
     targetFrame.anchor = nil

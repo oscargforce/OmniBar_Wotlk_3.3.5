@@ -14,7 +14,7 @@ function OmniBar:UpdateBar(barKey, specificUpdate)
         createIcons = function() self:CreateIconsToBar(barFrame, barSettings) end,
         border = function() self:UpdateBorder(barFrame, barSettings) end,
         arrangeIcons = function() self:ArrangeIcons(barFrame, barSettings, true) end,
-        showUnusedIcons = function() self:UpdateShowUnusedIcons(barFrame, barSettings) end,
+        refreshBarIconsState = function() self:UpdateIconVisibilityAndState(barFrame, barSettings) end,
         unusedAlpha = function() self:UpdateUnusedAlpha(barFrame, barSettings) end,
         swipeAlpha = function() self:UpdateSwipeAlpha(barFrame, barSettings) end,
     }
@@ -63,7 +63,7 @@ function OmniBar:UpdateBorder(barFrame, barSettings)
     print("Border: Icons left in pool:", #self.iconPool)
 end
 
-function OmniBar:UpdateShowUnusedIcons(barFrame, barSettings)
+function OmniBar:UpdateIconVisibilityAndState(barFrame, barSettings)
     local showUnusedIcons = barSettings.showUnusedIcons
 
     if showUnusedIcons then

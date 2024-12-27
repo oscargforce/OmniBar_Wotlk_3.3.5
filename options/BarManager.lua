@@ -113,7 +113,7 @@ function OmniBar:AddBarToOptions(barKey)
                 get = function() return self.db.profile.bars[barKey].showUnusedIcons end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].showUnusedIcons = value
-                    self:UpdateBar(barKey, "showUnusedIcons")
+                    self:UpdateBar(barKey, "refreshBarIconsState")
                 end,
                 order = 5,
             },
