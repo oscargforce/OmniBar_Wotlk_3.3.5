@@ -49,7 +49,6 @@ local function MatchesGeneralUnit(unit, trackedUnit)
     return unit == trackedUnit
 end
 
--- Factory function
 local function GetUnitMatchStrategy(zone)
     if zone == "arena" then
         return MatchesArenaUnit
@@ -58,7 +57,6 @@ local function GetUnitMatchStrategy(zone)
     end
 end
 
--- OmniBar integration
 function OmniBar:UnitMatchesTrackedUnit(unit, trackedUnit)
     if not trackedUnit then
         return false
