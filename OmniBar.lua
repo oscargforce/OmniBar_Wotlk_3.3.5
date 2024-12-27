@@ -18,7 +18,7 @@ local DEFAULT_BAR_SETTINGS = {
     showUnusedIcons = true,
     unusedAlpha = 0.45,
     swipeAlpha = 0.65,
-    trackedUnit = "enemy",
+    trackedUnit = "enemies",
     cooldowns = {},
 }
  
@@ -49,6 +49,9 @@ function OmniBar:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    self:RegisterEvent("CHAT_MSG_SYSTEM")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED")
+    self:RegisterEvent("PLAYER_REGEN_DISABLED")
     self:SetupOptions()
     AddIconsToSpellTable()
 end
@@ -87,11 +90,13 @@ function OmniBar:Delete(barKey, barFrame, keepProfile)
     local targetFrame  = barFrame or self.barFrames[barKey]
 
     targetFrame:Hide()
-    -- dont think i need this override local barKey = targetFrame.key
+    targetFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+
     if not keepProfile then
         self.db.profile.bars[barKey] = nil 
         self.options.args[barKey] = nil
     end
+
     targetFrame.anchor:Hide()
     wipe(targetFrame.icons)
     targetFrame.anchor = nil
@@ -277,6 +282,19 @@ function OmniBar:ResetIcons(barFrame)
     -- Clear the icons table (reuse pool instead of removing actual icons)
     wipe(barFrame.icons) 
     wipe(barFrame.activeIcons) 
+end
+
+function OmniBar:RefreshBarsWithActiveIcons()
+    for _, barFrame in pairs(self.barFrames) do
+        local showUnusedIcons = self.db.profile.bars[barFrame.key].showUnusedIcons
+        
+        local shouldRefresh = (showUnusedIcons and next(barFrame.activeIcons)) 
+        or (not showUnusedIcons and #barFrame.icons > 0)
+
+        if shouldRefresh then
+            self:UpdateBar(barFrame.key, "refreshBarIconsState")
+        end 
+    end 
 end
 
 function OmniBar:CreateBar() 
