@@ -282,6 +282,19 @@ function OmniBar:ResetIcons(barFrame)
     wipe(barFrame.activeIcons) 
 end
 
+function OmniBar:RefreshBarsWithActiveIcons()
+    for _, barFrame in pairs(self.barFrames) do
+        local showUnusedIcons = self.db.profile.bars[barFrame.key].showUnusedIcons
+        
+        local shouldRefresh = (showUnusedIcons and next(barFrame.activeIcons)) 
+        or (not showUnusedIcons and #barFrame.icons > 0)
+
+        if shouldRefresh then
+            self:UpdateBar(barFrame.key, "refreshBarIconsState")
+        end 
+    end 
+end
+
 function OmniBar:CreateBar() 
     local barKey = self:GenerateUniqueKey()
     -- Initialize bar settings in the database and UI

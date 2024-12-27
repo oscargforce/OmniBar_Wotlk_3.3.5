@@ -1,23 +1,74 @@
-function OmniBar:PLAYER_ENTERING_WORLD()
-    local _, zone = IsInInstance()
+--[[ 
+    UNIT_CAST_SUCCEEDED can fire multiple times for the same spell if the same player targets multiple units (e.g., target, focus, arena1). 
+    Without optimization, this would create multiple icons for the same spell. 
+    In arenas, to improve performance, we only track arena1, arena2, and arena3 if the bar is set to track all enemies.
+]]
+local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 
-    if self.zone and self.zone ~= zone then
-        for _, barFrame in pairs(self.barFrames) do
-            self:UpdateBar(barFrame.key, "refreshBarIconsState")
-        end 
+local UnitIsEnemy = UnitIsEnemy
+local UnitIsUnit = UnitIsUnit
+
+local arenaUnits = {
+    ["arena1"] = true,
+    ["arena2"] = true,
+    ["arena3"] = true,
+    ["arena4"] = true,
+    ["arena5"] = true,
+}
+
+local nonArenaEnemyUnits = {
+    ["target"] = true,
+    ["focus"] = true,
+}
+
+local function MatchesArenaUnit(unit, trackedUnit)
+    if trackedUnit == "enemy" then
+        return arenaUnits[unit] or false
     end
 
-    self.zone = zone
+    return unit == trackedUnit
 end
 
-function OmniBar:CHAT_MSG_SYSTEM(event, chatMsg)
-    if self.zone == "arena" then return end
-    if not chatMsg:match("Duel starting: 3") then return end
+local function MatchesGeneralUnit(unit, trackedUnit)
+    if trackedUnit == "enemy" then
 
-    for _, barFrame in pairs(self.barFrames) do
-        self:UpdateBar(barFrame.key, "refreshBarIconsState")
-    end 
+        if not nonArenaEnemyUnits[unit] then
+            return false
+        end
+
+        if not UnitIsEnemy("player", unit) then
+            return false
+        end 
+
+        if UnitIsUnit("focus", "target") and unit == "focus" then
+            return false
+        end
+        return nonArenaEnemyUnits[unit] or false 
+    end
+    
+    return unit == trackedUnit
 end
+
+-- Factory function
+local function GetUnitMatchStrategy(zone)
+    if zone == "arena" then
+        return MatchesArenaUnit
+    else
+        return MatchesGeneralUnit
+    end
+end
+
+-- OmniBar integration
+function OmniBar:UnitMatchesTrackedUnit(unit, trackedUnit)
+    if not trackedUnit then
+        return false
+    end
+
+    local strategy = GetUnitMatchStrategy(self.zone)
+
+    return strategy(unit, trackedUnit)
+end
+
 
 -- Death knights death coil has same name as warlock spell :/ need to use some if statement on that spell
 function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spellRank)
@@ -133,49 +184,3 @@ function OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
     self:ArrangeIcons(barFrame, barSettings)
     self:ToggleAnchorVisibility(barFrame)
 end
-
---[[
-
-local units = {
-    target = "",
-    arena1 = "",
-    arena2 = "",
-    arena3 = ""
-}
-
-local function ClearUnitClasses()
-    for arenaUnit in pairs(unitClasses) do
-        unitClasses[arenaUnit] = ""
-    end
-end
-
-local function GetUnitClass(unitId)
-    if unitClasses[unitId] ~= "" then
-        return unitClasses[unitId]
-    end
-    local unitClass = UnitClass(unitId)
-    unitClasses[unitId] = unitClass
-    return unitClass
-end
-
-function OmniBar:UNIT_SPELLCAST_SUCCEEDED(event, unitId, spellName, spellRank)
-    for barKey, barSettings in paris(self.db.profile.bars) do
-        if barSettings.trackUnit == unitId then
-            local unitClass = GetUnitClass(unitId)
-            local spellData = self.db.profile.bars[barKey].cooldowns[unitClass][spellName]
-
-            if not spellData or not spellData.isTracking then 
-                return 
-            end
-
-            local icon = self:GetIconFromPool(barFrame)
-            icon.icon:SetTexture(cooldownData.icon)
-            icon:Show()
-
-            self:ArrangeIcons(self.barFrames[barKey], barSettings)
-        end
-    end
-end
-
-]]
-
