@@ -252,11 +252,22 @@ function OmniBar:ArrangeIcons(barFrame, barSettings, skipSort)
 end
 
 function OmniBar:ReturnIconToPool(icon)
+    self:ResetIconState(icon)
+    icon:StopNewIconAnimation()
     icon:Hide()
     icon:ClearAllPoints()
     icon:SetParent(nil) -- Remove from parent to avoid layout conflicts
     table.insert(self.iconPool, icon)
 end
+
+function OmniBar:ResetIconState(icon)
+    icon.countdownText:SetText("")
+    icon.timerFrame:Hide()
+    icon.timerFrame:SetScript("OnUpdate", nil) -- Delete the timer
+    icon.cooldown:Hide()
+    icon.endTime = nil
+end
+
 
 function OmniBar:ResetIcons(barFrame)
     for _, icon in ipairs(barFrame.icons) do
@@ -265,6 +276,7 @@ function OmniBar:ResetIcons(barFrame)
 
     -- Clear the icons table (reuse pool instead of removing actual icons)
     wipe(barFrame.icons) 
+    wipe(barFrame.activeIcons) 
 end
 
 function OmniBar:CreateBar() 

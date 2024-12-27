@@ -4,11 +4,15 @@
     In arenas, to improve performance, we only track arena1, arena2, and arena3 if the bar is set to track all enemies.
 ]]
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
+local UnitIsEnemy = UnitIsEnemy
+local UnitIsUnit = UnitIsUnit
 
 local arenaUnits = {
     ["arena1"] = true,
     ["arena2"] = true,
     ["arena3"] = true,
+    ["arena4"] = true,
+    ["arena5"] = true,
 }
 
 local nonArenaEnemyUnits = {
@@ -26,9 +30,21 @@ end
 
 local function MatchesGeneralUnit(unit, trackedUnit)
     if trackedUnit == "enemy" then
-        return nonArenaEnemyUnits[unit] or false
-    end
 
+        if not nonArenaEnemyUnits[unit] then
+            return false
+        end
+
+        if not UnitIsEnemy("player", unit) then
+            return false
+        end 
+
+        if UnitIsUnit("focus", "target") and unit == "focus" then
+            return false
+        end
+        return nonArenaEnemyUnits[unit] or false 
+    end
+    
     return unit == trackedUnit
 end
 

@@ -1,11 +1,9 @@
-local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
-
 function OmniBar:PLAYER_ENTERING_WORLD()
     local _, zone = IsInInstance()
     self.zone = zone
-    for _, barFrame in ipairs(self.barFrames) do
+   --[[  for _, barFrame in ipairs(self.barFrames) do
         self:UpdateBar(barFrame.key)
-    end
+    end ]]
 end
 
 -- Death knights death coil has same name as warlock spell :/ need to use some if statement on that spell
@@ -26,11 +24,9 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
     if barSettings.showUnusedIcons then
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName then
-                icon:SetAlpha(1)
+                print("Creating icon for", spellName)
                 barFrame.activeIcons[spellName] = icon
-                self:ToggleAnchorVisibility(barFrame)
-                self:StartCooldownShading(icon, spellData.duration, barSettings, barFrame)
-                self:ArrangeIcons(barFrame, barSettings)
+                self:ActivateIcon(barFrame, barSettings, icon, spellData.duration)
                 return
             end  
         end
@@ -42,10 +38,12 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
     icon.spellName = spellName 
     icon.icon:SetTexture(spellData.icon)
     table.insert(barFrame.icons, icon)
-    self:ToggleAnchorVisibility(barFrame)
+    self:ActivateIcon(barFrame, barSettings, icon, spellData.duration)
+end
 
-    self:StartCooldownShading(icon, spellData.duration, barSettings, barFrame)
-    
+function OmniBar:ActivateIcon(barFrame, barSettings, icon, duration)
+    self:ToggleAnchorVisibility(barFrame)
+    self:StartCooldownShading(icon, duration, barSettings, barFrame)
     self:ArrangeIcons(barFrame, barSettings)
 end
 
@@ -77,6 +75,7 @@ function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame)
 
     icon.endTime = endTime
     icon:Show()
+    icon:SetAlpha(1)
     icon:PlayNewIconAnimation()
 
     icon.cooldown:SetCooldown(startTime, duration)
@@ -102,11 +101,9 @@ function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame)
 end
 
 function OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
-    icon.countdownText:SetText("") 
-    icon.timerFrame:Hide() 
-    icon.timerFrame:SetScript("OnUpdate", nil) -- Delete the timer
+    self:ResetIconState(icon)
+    
     if barSettings.showUnusedIcons then 
-        icon.cooldown:Hide()
         barFrame.activeIcons[icon.spellName] = nil
         self:UpdateUnusedAlpha(barFrame, barSettings, icon) 
     else 
