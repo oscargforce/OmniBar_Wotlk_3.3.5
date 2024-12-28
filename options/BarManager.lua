@@ -346,7 +346,27 @@ function OmniBar:AddBarToOptions(barKey)
             order = i,
             icon = "Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes",
             iconCoords = CLASS_ICON_TCOORDS[tcordKey],
-            args = {}
+            childGroups = "tab",
+            args = {
+                spellsTab = {
+                    type = "group",
+                    name = "Spells",  -- Tab name for spells
+                    order = 1,
+                    args = {}  -- Will populate with spell options
+                },
+                priorityTab = {
+                    type = "group",
+                    name = "Priority",  -- Tab name for priority
+                    order = 2,
+                    args = {
+                        desc = {
+                            type = "description",
+                            order = 0,
+                            name = "Enable 'Show Unused Icons' and track spells for this class to configure their priority order.",
+                        },
+                    }  -- Will populate with priority options
+                },
+            }
         }
 
         if className == "General" then
@@ -356,7 +376,7 @@ function OmniBar:AddBarToOptions(barKey)
         end
 
         for spellName, spellData in pairs(spells) do
-            self.options.args[barKey].args[className].args[spellName]= {
+            self.options.args[barKey].args[className].args.spellsTab.args[spellName] = {
                 type = "toggle",
                 width = "normal",
                 name = function()
@@ -407,7 +427,32 @@ function OmniBar:AddBarToOptions(barKey)
                     self:UpdateBar(barKey)
                 end
             }
+            if self.db.profile.bars[barKey].cooldowns[className] then
+                self.options.args[barKey].args[className].args.priorityTab.args[spellName] = {
+                    name = spellName,
+                    desc = "Set the position for the spell on the bar",
+                    type = "range",
+                    min = 1,
+                    max = 100,
+                    step = 1,
+                    width = "double",
+            --      get = function() return self.db.profile.bars[barKey].maxIconsPerRow end,
+                    set = function(info, value)
+                    end,
+                    disabled = function () return not self.db.profile.bars[barKey].cooldowns[className][spellName] or not self.db.profile.bars[barKey].showUnusedIcons end,
+                    order = i,
+                }
+            else
+                self.options.args[barKey].args[className].args.priorityTab.args = {
+                    desc = {
+                        type = "description",
+                        order = 1,
+                        name = "Enable 'Show Unused Icons' and track spells for this class to configure their priority order.",
+                    },
+                }
+            end
         end
+
         i = i + 1
     end
     -- Refresh the options UI to reflect the changes
