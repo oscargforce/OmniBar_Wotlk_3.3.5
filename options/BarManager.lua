@@ -350,13 +350,13 @@ function OmniBar:AddBarToOptions(barKey)
             args = {
                 spellsTab = {
                     type = "group",
-                    name = "Spells",  -- Tab name for spells
+                    name = "Spells", 
                     order = 1,
-                    args = {}  -- Will populate with spell options
+                    args = {} 
                 },
                 priorityTab = {
                     type = "group",
-                    name = "Priority",  -- Tab name for priority
+                    name = "Priority",
                     order = 2,
                     args = {
                         desc = {
@@ -364,7 +364,7 @@ function OmniBar:AddBarToOptions(barKey)
                             order = 0,
                             name = "Enable 'Show Unused Icons' and track spells for this class to configure their priority order.",
                         },
-                    }  -- Will populate with priority options
+                    } 
                 },
             }
         }
@@ -414,7 +414,7 @@ function OmniBar:AddBarToOptions(barKey)
                     end
                 
                     -- Return the saved value if it exists
-                    return bar.cooldowns[className][spellName]
+                    return bar.cooldowns[className][spellName].isTracking
                 end,
                 set = function(info, value) 
                     local bar = self.db.profile.bars[barKey]
@@ -422,35 +422,37 @@ function OmniBar:AddBarToOptions(barKey)
                         bar.cooldowns[className] = {}
                     end
 
+                    if not bar.cooldowns[className][spellName] then
+                        bar.cooldowns[className][spellName] = {}
+                    end
                     -- Set the value for this spellName
-                    bar.cooldowns[className][spellName] = value
+                    bar.cooldowns[className][spellName].isTracking = value
                     self:UpdateBar(barKey)
+                    LibStub("AceConfigRegistry-3.0"):NotifyChange("OmniBar")
                 end
             }
-            if self.db.profile.bars[barKey].cooldowns[className] then
-                self.options.args[barKey].args[className].args.priorityTab.args[spellName] = {
-                    name = spellName,
-                    desc = "Set the position for the spell on the bar",
-                    type = "range",
-                    min = 1,
-                    max = 100,
-                    step = 1,
-                    width = "double",
-            --      get = function() return self.db.profile.bars[barKey].maxIconsPerRow end,
-                    set = function(info, value)
-                    end,
-                    disabled = function () return not self.db.profile.bars[barKey].cooldowns[className][spellName] or not self.db.profile.bars[barKey].showUnusedIcons end,
-                    order = i,
-                }
-            else
-                self.options.args[barKey].args[className].args.priorityTab.args = {
-                    desc = {
-                        type = "description",
-                        order = 1,
-                        name = "Enable 'Show Unused Icons' and track spells for this class to configure their priority order.",
-                    },
-                }
-            end
+        
+            self.options.args[barKey].args[className].args.priorityTab.args[spellName] = {
+                name = spellName,
+                desc = "Set the position for the spell on the bar",
+                type = "range",
+                min = 1,
+                max = 100,
+                step = 1,
+                width = "double",
+                get = function() return self.db.profile.bars[barKey].maxIconsPerRow end,
+                set = function(info, value)
+                end,
+                disabled = function ()
+                    local bar = self.db.profile.bars[barKey]
+                    if not bar.cooldowns[className] or not bar.cooldowns[className][spellName] then
+                        return true
+                    end
+                    return not bar.cooldowns[className][spellName].isTracking or not bar.showUnusedIcons
+                end,
+                order = i,
+            }
+
         end
 
         i = i + 1
@@ -458,7 +460,3 @@ function OmniBar:AddBarToOptions(barKey)
     -- Refresh the options UI to reflect the changes
     LibStub("AceConfigRegistry-3.0"):NotifyChange("OmniBar")
 end
-
-
-
-

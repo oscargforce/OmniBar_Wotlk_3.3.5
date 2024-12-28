@@ -107,8 +107,8 @@ function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
     local spellTable = addon.spellTable
     
     for className, spells in pairs(barSettings.cooldowns) do
-        for spellName, isTracking in pairs(spells) do
-            if isTracking then
+        for spellName, spellConfig in pairs(spells) do
+            if spellConfig.isTracking then
                 local spellData = spellTable[className][spellName]
 
                 if spellData then  
@@ -118,6 +118,7 @@ function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
                         trackedSpells[spellName] = {
                             duration = spellData.duration,
                             icon = spellData.icon,
+                            priority = spellConfig.priority or 1
                         }
                     end
                 else
