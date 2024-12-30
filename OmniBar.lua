@@ -175,6 +175,7 @@ function OmniBar:CreateIconsToBar(barFrame, barSettings)
         local icon = self:GetIconFromPool(barFrame)
         icon.icon:SetTexture(spellData.icon)
         icon.spellName = spellName
+        icon.priority = spellData.priority 
         icon:Show()
         
         table.insert(barFrame.icons, icon)
@@ -200,13 +201,19 @@ function OmniBar:GetIconFromPool(barFrame)
     return icon
 end
 
-function OmniBar:SortIcons(barFrame)
-       -- Sort icons based on endTime (or default to math.huge)
-       table.sort(barFrame.icons, function(a, b)
-        local aEndTime = a.endTime or math.huge
-        local bEndTime = b.endTime or math.huge 
-        return aEndTime < bEndTime
-    end) 
+function OmniBar:SortIcons(barFrame, showUnusedIcons)
+    if not showUnusedIcons then
+        -- Sort icons based on endTime (or default to math.huge)
+        table.sort(barFrame.icons, function(a, b)
+            local aEndTime = a.endTime or math.huge
+            local bEndTime = b.endTime or math.huge 
+            return aEndTime < bEndTime
+        end) 
+    else
+        table.sort(barFrame.icons, function (a, b) 
+            return a.priority > b.priority  
+        end)
+    end 
 end
 
 local BASE_ICON_SIZE = 36
@@ -219,7 +226,7 @@ function OmniBar:ArrangeIcons(barFrame, barSettings, skipSort)
     local growDirection = barSettings.isRowGrowingUpwards and 1 or -1 
     local numActive = #barFrame.icons
 
-    if not skipSort then self:SortIcons(barFrame) end
+    if not skipSort then self:SortIcons(barFrame, barSettings.showUnusedIcons) end
 
      -- Remove excess icons if necessary
     if numActive > maxIconsTotal then

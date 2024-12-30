@@ -346,7 +346,28 @@ function OmniBar:AddBarToOptions(barKey)
             order = i,
             icon = "Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes",
             iconCoords = CLASS_ICON_TCOORDS[tcordKey],
-            args = {}
+            childGroups = "tab",
+            args = {
+                spellsTab = {
+                    type = "group",
+                    name = "Spells", 
+                    order = 1,
+                    args = {} 
+                },
+                priorityTab = {
+                    type = "group",
+                    name = "Priority",
+                    desc = "Adjust icon positions on the bar.",
+                    order = 2,
+                    args = {
+                        desc = {
+                            type = "description",
+                            order = 0,
+                            name = "Enable 'Show Unused Icons' and track spells for this class to configure their priority order.\n\nHigher priority items are positioned closer to the first icon on the bar.",
+                        },
+                    } 
+                },
+            }
         }
 
         if className == "General" then
@@ -356,7 +377,7 @@ function OmniBar:AddBarToOptions(barKey)
         end
 
         for spellName, spellData in pairs(spells) do
-            self.options.args[barKey].args[className].args[spellName]= {
+            self.options.args[barKey].args[className].args.spellsTab.args[spellName] = {
                 type = "toggle",
                 width = "normal",
                 name = function()
@@ -394,7 +415,7 @@ function OmniBar:AddBarToOptions(barKey)
                     end
                 
                     -- Return the saved value if it exists
-                    return bar.cooldowns[className][spellName]
+                    return bar.cooldowns[className][spellName].isTracking
                 end,
                 set = function(info, value) 
                     local bar = self.db.profile.bars[barKey]
@@ -402,18 +423,53 @@ function OmniBar:AddBarToOptions(barKey)
                         bar.cooldowns[className] = {}
                     end
 
+                    if not bar.cooldowns[className][spellName] then
+                        bar.cooldowns[className][spellName] = {}
+                    end
                     -- Set the value for this spellName
-                    bar.cooldowns[className][spellName] = value
+                    bar.cooldowns[className][spellName].isTracking = value
                     self:UpdateBar(barKey)
                 end
             }
+        
+            self.options.args[barKey].args[className].args.priorityTab.args[spellName] = {
+                name = spellName,
+                desc = "Set the position for the spell on the bar",
+                type = "range",
+                min = 1,
+                max = 100,
+                step = 1,
+                width = "double",
+                get = function() 
+                    local bar = self.db.profile.bars[barKey]
+                    if not bar.cooldowns[className] then
+                        return false
+                    end
+                    if bar.cooldowns[className][spellName] == nil then
+                        return false
+                    end
+                    return bar.cooldowns[className][spellName].priority
+                end,
+                set = function(info, value)
+                    local bar = self.db.profile.bars[barKey]
+                
+                    bar.cooldowns[className][spellName].priority = value
+                    self:UpdateBar(barKey)
+                end,
+                disabled = function ()
+                    local bar = self.db.profile.bars[barKey]
+                    if not bar.cooldowns[className] or not bar.cooldowns[className][spellName] then
+                        return true
+                    end
+                    return not bar.cooldowns[className][spellName].isTracking or not bar.showUnusedIcons
+                end,
+                order = i,
+            }
+
         end
+
         i = i + 1
     end
     -- Refresh the options UI to reflect the changes
     LibStub("AceConfigRegistry-3.0"):NotifyChange("OmniBar")
 end
-
-
-
-
