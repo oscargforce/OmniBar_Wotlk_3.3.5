@@ -98,6 +98,7 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
     -- Get or create icon for this spell
     local icon = self:GetIconFromPool(barFrame)
     icon.spellName = spellName 
+    icon.priority = spellData.priority 
     icon.icon:SetTexture(spellData.icon)
     table.insert(barFrame.icons, icon)
     self:ActivateIcon(barFrame, barSettings, icon, spellData.duration)

@@ -357,12 +357,13 @@ function OmniBar:AddBarToOptions(barKey)
                 priorityTab = {
                     type = "group",
                     name = "Priority",
+                    desc = "Adjust icon positions on the bar.",
                     order = 2,
                     args = {
                         desc = {
                             type = "description",
                             order = 0,
-                            name = "Enable 'Show Unused Icons' and track spells for this class to configure their priority order.",
+                            name = "Enable 'Show Unused Icons' and track spells for this class to configure their priority order.\n\nHigher priority items are positioned closer to the first icon on the bar.",
                         },
                     } 
                 },
@@ -428,7 +429,6 @@ function OmniBar:AddBarToOptions(barKey)
                     -- Set the value for this spellName
                     bar.cooldowns[className][spellName].isTracking = value
                     self:UpdateBar(barKey)
-                    LibStub("AceConfigRegistry-3.0"):NotifyChange("OmniBar")
                 end
             }
         
@@ -440,8 +440,21 @@ function OmniBar:AddBarToOptions(barKey)
                 max = 100,
                 step = 1,
                 width = "double",
-                get = function() return self.db.profile.bars[barKey].maxIconsPerRow end,
+                get = function() 
+                    local bar = self.db.profile.bars[barKey]
+                    if not bar.cooldowns[className] then
+                        return false
+                    end
+                    if bar.cooldowns[className][spellName] == nil then
+                        return false
+                    end
+                    return bar.cooldowns[className][spellName].priority
+                end,
                 set = function(info, value)
+                    local bar = self.db.profile.bars[barKey]
+                
+                    bar.cooldowns[className][spellName].priority = value
+                    self:UpdateBar(barKey)
                 end,
                 disabled = function ()
                     local bar = self.db.profile.bars[barKey]
