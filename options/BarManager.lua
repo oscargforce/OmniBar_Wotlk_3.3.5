@@ -92,7 +92,6 @@ function OmniBar:AddBarToOptions(barKey)
                     ["party2"] = "Party2",
                     ["party3"] = "Party3",
                     ["party4"] = "Party4",
-                    ["party5"] = "Party5",
                 },
                 get = function() return self.db.profile.bars[barKey].trackedUnit end,
                 set = function(info, value)

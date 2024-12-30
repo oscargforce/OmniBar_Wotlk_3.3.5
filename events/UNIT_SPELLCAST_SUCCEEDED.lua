@@ -14,6 +14,11 @@ local arenaUnits = {
     ["arena3"] = true,
     ["arena4"] = true,
     ["arena5"] = true,
+    ["arenapet1"] = true,
+    ["arenapet2"] = true,
+    ["arenapet3"] = true,
+    ["arenapet4"] = true,
+    ["arenapet5"] = true,
 }
 
 local nonArenaEnemyUnits = {
@@ -26,7 +31,15 @@ local function MatchesArenaUnit(unit, trackedUnit)
         return arenaUnits[unit] or false
     end
 
-    return unit == trackedUnit
+    if unit == trackedUnit then
+        return true
+    end
+
+    if unit == trackedUnit:gsub("arena", "arenapet") then
+        return true
+    end
+
+    return false
 end
 
 local function MatchesGeneralUnit(unit, trackedUnit)
@@ -71,7 +84,7 @@ end
 -- Death knights death coil has same name as warlock spell :/ need to use some if statement on that spell
 function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spellRank)
     local barSettings = self.db.profile.bars[barFrame.key]
-
+    print(spellName, unit)
     if not self:UnitMatchesTrackedUnit(unit, barSettings.trackedUnit) then return end
 
     local spellData = barFrame.trackedSpells[spellName]
@@ -92,7 +105,6 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
                 return
             end  
         end
-        -- If icon not found then we need to add it manually to the bar since we exceeded the totalMaxIconsToDisplay, and remove a unused bar.
     end
 
     -- Get or create icon for this spell
