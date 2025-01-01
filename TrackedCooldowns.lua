@@ -2,19 +2,19 @@ local addonName, addon = ...
 
 addon.spellTable = { 
     ["General"] = {
-        ["Berserking"] = { isTracking = false, duration = 180, spellId = 26297 },
-        ["Blood Fury"] = { isTracking = false, duration = 120, spellId = 20572 },
-        ["Escape Artist"] = { isTracking = false, duration = 60, spellId = 20589 },
-        ["Gift of the Naaru"] = { isTracking = false, duration = 180, spellId = 28880 },
-        ["Arcane Torrent"] = { isTracking = false, duration = 120, spellId = 28730 },
-        ["Shadowmeld"] = { isTracking = false, duration = 120, spellId = 58984 },
-        ["Stoneform"] = { isTracking = false, duration = 120, spellId = 20594 },
-        ["War Stomp"] = { isTracking = false, duration = 120, spellId = 20549 },
+        ["Berserking"] = { isTracking = false, duration = 180, spellId = 26297, race = "Troll" },
+        ["Blood Fury"] = { isTracking = false, duration = 120, spellId = 20572, race = "Orc" },
+        ["Escape Artist"] = { isTracking = false, duration = 60, spellId = 20589, race = "Gnome" },
+        ["Gift of the Naaru"] = { isTracking = false, duration = 180, spellId = 28880, race = "Draenei" },
+        ["Arcane Torrent"] = { isTracking = false, duration = 120, spellId = 28730, race = "Blood Elf" },
+        ["Shadowmeld"] = { isTracking = false, duration = 120, spellId = 58984, race = "Night Elf" },
+        ["Stoneform"] = { isTracking = false, duration = 120, spellId = 20594, race = "Dwarf" },
+        ["War Stomp"] = { isTracking = false, duration = 120, spellId = 20549, race = "Tauren" },
         ["Bauble of True Blood"] = { isTracking = false, duration = 120, spellId = 50726, item = true },
         ["Sindragosa's Flawless Fang"] = { isTracking = false, duration = 60, spellId = 50364, item = true },
         ["Corroded Skeleton Key"] = { isTracking = false, duration = 120, spellId = 50356, item = true },
         ["PvP Trinket"] = { isTracking = false, duration = 120, spellId = 51377, item = true },
-        ["Every Man for Himself"] = { isTracking = false, duration = 120, spellId = 59752 },
+        ["Every Man for Himself"] = { isTracking = false, duration = 120, spellId = 59752, race = "Human" },
     },
 
     ["Death Knight"] = {

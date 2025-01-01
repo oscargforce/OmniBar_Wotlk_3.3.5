@@ -96,6 +96,7 @@ function OmniBar:AddBarToOptions(barKey)
                 get = function() return self.db.profile.bars[barKey].trackedUnit end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].trackedUnit = value
+                    self:UpdateBar(barKey)
                 end,
                 order = 2,
             },
@@ -198,8 +199,8 @@ function OmniBar:AddBarToOptions(barKey)
                     LEFT = "Left",
                     RIGHT = "Right",
                 },
-                set = function(info, state)
-                    print(info)
+                set = function(info, value)
+                    print(value)
                 end,
                 order = 14,
             },

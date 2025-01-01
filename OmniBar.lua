@@ -59,7 +59,6 @@ end
 -- runs after OmniBar:OnInitialize()
 function OmniBar:OnEnable()
     -- Step 1: Clean up existing bars, 
-    -- NOTE: When does this loop ever run? Is frames not removed on reload
     for barKey, barFrame in pairs(self.barFrames) do
         print("Cleaning up bar:", barKey)
         self:Delete(barKey, barFrame, true)
@@ -136,23 +135,69 @@ function OmniBar:InitializeBar(barKey, settings)
     barFrame.icons = {}
     barFrame.activeIcons = {} -- only used if show unused icons is enabled.
     barFrame.trackedSpells = {}
-    barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-    barFrame:SetScript("OnEvent", function (...) 
-        self:OnUnitSpellCastSucceeded(...)
-    end)
     self.barFrames[barKey] = barFrame
 
     -- Populate barFrame.trackedSpells table with tracked cds
     self:UpdateSpellTrackingForBar(barFrame, barSettings)
+    self:InitializeEventsTracking(barFrame, barSettings)
 
+    -- Maybe change, only createIconsToBar if trackedUnit == all enemies and showUnusedIcons
      -- Hide/show icons
     if barSettings.showUnusedIcons then
-        self:CreateIconsToBar(barFrame, barSettings)
-        self:UpdateUnusedAlpha(barFrame, barSettings)
+        self:SetupBarIcons(barFrame, barSettings)
     else
         self:CreateIconsToPool(barFrame)
     end  
    
+end
+
+function OmniBar:InitializeEventsTracking(barFrame, barSettings)
+    local trackedUnit = barSettings.trackedUnit
+    barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+
+    if trackedUnit:match("^arena[1-5]$") then
+        barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
+    elseif trackedUnit:match("^party[1-4]$") then
+        barFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
+    elseif trackedUnit == "target" then
+     -- barFrame:RegisterEvent("")
+    elseif trackedUnit == "focus" then
+     -- barFrame:RegisterEvent("") 
+    else
+     -- self:InitializeEnemyTracking(bar)
+    end
+
+    barFrame:SetScript("OnEvent", function (barFrame, event, ...) 
+        OmniBar:OnEventHandler(barFrame, event, ...)
+    end)
+end
+
+function OmniBar:OnEventHandler(barFrame, event, ...)
+    if event == "UNIT_SPELLCAST_SUCCEEDED" then
+        self:OnUnitSpellCastSucceeded(barFrame, event, ...)
+    elseif event == "PARTY_MEMBERS_CHANGED" then
+        self:OnPartyMembersChanged(barFrame, event, ...)
+    elseif event == "ARENA_OPPONENT_UPDATE" then
+        --self:OnPartyMembersChanged(barFrame, event, ...)
+    end
+end
+
+function OmniBar:SetupBarIcons(barFrame, barSettings)
+    local trackedUnit = barSettings.trackedUnit
+    
+     if trackedUnit:match("^arena[1-5]$") then
+        -- something
+    elseif trackedUnit:match("^party[1-4]$") then
+        self:OnEventHandler(barFrame, "PARTY_MEMBERS_CHANGED")
+    elseif trackedUnit == "target" then
+        -- something
+    elseif trackedUnit == "focus" then
+        -- something
+    else
+        -- tracked unit is all enemies hence just populate the bar directly.
+        self:CreateIconsToBar(barFrame, barSettings)
+        self:UpdateUnusedAlpha(barFrame, barSettings)
+    end
 end
 
 function OmniBar:CreateIconsToPool(barFrame)
@@ -164,24 +209,33 @@ function OmniBar:CreateIconsToPool(barFrame)
         self:ReturnIconToPool(icon)
     end
 end
+
+function OmniBar:CreateIconToBar(barFrame, spellName, spellData)
+    local icon = self:GetIconFromPool(barFrame)
+    icon.icon:SetTexture(spellData.icon)
+    icon.spellName = spellName
+    icon.priority = spellData.priority 
+    icon.className = spellData.className
+    if spellData.race then 
+        icon.race = spellData.race 
+    end
+    icon:Show()
+    
+    table.insert(barFrame.icons, icon)
+end
  
+-- Maybe change this function to CreateIconToBar, so its single. Or rename to populate enemies bar.
 function OmniBar:CreateIconsToBar(barFrame, barSettings)
-    if not barSettings.showUnusedIcons then return end
+    if not barSettings.showUnusedIcons or barSettings.trackedUnit ~= "enemies" then
+        return
+    end
     
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         -- change this later to if spellData then... and remove the print
         if not spellData then print(spellName,"Does not exist in spellTable") end
-
-        local icon = self:GetIconFromPool(barFrame)
-        icon.icon:SetTexture(spellData.icon)
-        icon.spellName = spellName
-        icon.priority = spellData.priority 
-        icon:Show()
-        
-        table.insert(barFrame.icons, icon)
+        self:CreateIconToBar(barFrame, spellName, spellData)
     end
     
-
     self:ArrangeIcons(barFrame, barSettings)
 end
 
@@ -272,6 +326,7 @@ function OmniBar:ReturnIconToPool(icon)
     table.insert(self.iconPool, icon)
 end
 
+-- Don't reset spellName, priority, class, or race to avoid affecting showUnusedIcons when the CD countdown ends.
 function OmniBar:ResetIconState(icon)
     icon.countdownText:SetText("")
     icon.timerFrame:Hide()

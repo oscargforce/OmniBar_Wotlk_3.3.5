@@ -39,6 +39,10 @@ local function MatchesArenaUnit(unit, trackedUnit)
         return true
     end
 
+    if unit == trackedUnit:gsub("party", "partypet") then
+        return true
+    end
+
     return false
 end
 
@@ -59,7 +63,13 @@ local function MatchesGeneralUnit(unit, trackedUnit)
         return nonArenaEnemyUnits[unit] or false 
     end
     
-    return unit == trackedUnit
+    if unit == trackedUnit then
+        return true
+    end
+
+    if unit == trackedUnit:gsub("party", "partypet") then
+        return true
+    end
 end
 
 local function GetUnitMatchStrategy(zone)
@@ -84,7 +94,7 @@ end
 -- Death knights death coil has same name as warlock spell :/ need to use some if statement on that spell
 function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spellRank)
     local barSettings = self.db.profile.bars[barFrame.key]
-    print(spellName, unit)
+    print(unit, spellName)
     if not self:UnitMatchesTrackedUnit(unit, barSettings.trackedUnit) then return end
 
     local spellData = barFrame.trackedSpells[spellName]
