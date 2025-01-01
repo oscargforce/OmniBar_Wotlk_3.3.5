@@ -216,12 +216,13 @@ function OmniBar:CreateIconToBar(barFrame, spellName, spellData)
     icon.spellName = spellName
     icon.priority = spellData.priority 
     icon.className = spellData.className
+    icon.spellId = spellData.spellId
     if spellData.race then 
         icon.race = spellData.race 
     end
-    icon:Show()
-    
+
     table.insert(barFrame.icons, icon)
+    return icon
 end
  
 -- Maybe change this function to CreateIconToBar, so its single. Or rename to populate enemies bar.
@@ -251,6 +252,7 @@ function OmniBar:GetIconFromPool(barFrame)
     print("creating new icon")
     -- Otherwise, create a new icon
     local icon = barFrame.CreateOmniBarIcon()
+    icon:Show()
     self:MakeFrameDraggable(icon, barFrame)
     return icon
 end
@@ -265,6 +267,10 @@ function OmniBar:SortIcons(barFrame, showUnusedIcons)
         end) 
     else
         table.sort(barFrame.icons, function (a, b) 
+            if a.priority == b.priority then
+                return a.spellId < b.spellId
+            end
+
             return a.priority > b.priority  
         end)
     end 

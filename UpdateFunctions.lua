@@ -119,7 +119,8 @@ function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
                             duration = spellData.duration,
                             icon = spellData.icon,
                             priority = spellConfig.priority or 1,
-                            className = className
+                            className = className,
+                            spellId = spellData.spellId
                         }
 
                         if spellData.race then

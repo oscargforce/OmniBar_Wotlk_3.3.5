@@ -118,11 +118,7 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
     end
 
     -- Get or create icon for this spell
-    local icon = self:GetIconFromPool(barFrame)
-    icon.spellName = spellName 
-    icon.priority = spellData.priority 
-    icon.icon:SetTexture(spellData.icon)
-    table.insert(barFrame.icons, icon)
+    local icon = self:CreateIconToBar(barFrame, spellName, spellData)
     self:ActivateIcon(barFrame, barSettings, icon, spellData.duration)
 end
 
@@ -159,7 +155,6 @@ function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame)
     local endTime = startTime + duration
 
     icon.endTime = endTime
-    icon:Show()
     icon:SetAlpha(1)
     icon:PlayNewIconAnimation()
 

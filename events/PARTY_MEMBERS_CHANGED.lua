@@ -9,6 +9,7 @@ local UnitRace = UnitRace
       2) Fix the create icons function, so it works with updating, or maybe just remove it completley. 
       3) Maybe reset the priority and spellName, className, race when returning to pool?  
       4) If we set UpdateUnusedAlpha here we need to remove that operation from the operationOrder in the updateBar function
+      5) Fix bug, when the cooldown is used it changes places and changes places again once the cd is over
 ]]
 
 function OmniBar:OnPartyMembersChanged(barFrame)
