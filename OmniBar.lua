@@ -22,7 +22,6 @@ local DEFAULT_BAR_SETTINGS = {
     cooldowns = {},
 }
  
-
 local function AddIconsToSpellTable()
     for className, spells in pairs(spellTable) do
         for _, spellData in pairs(spells) do
@@ -159,6 +158,7 @@ function OmniBar:InitializeEventsTracking(barFrame, barSettings)
         barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
     elseif trackedUnit:match("^party[1-4]$") then
         barFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
+        barFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
     elseif trackedUnit == "target" then
      -- barFrame:RegisterEvent("")
     elseif trackedUnit == "focus" then
@@ -177,6 +177,8 @@ function OmniBar:OnEventHandler(barFrame, event, ...)
         self:OnUnitSpellCastSucceeded(barFrame, event, ...)
     elseif event == "PARTY_MEMBERS_CHANGED" then
         self:OnPartyMembersChanged(barFrame, event, ...)
+    elseif event == "UNIT_INVENTORY_CHANGED" then
+        self:OnUnitInventoryChanged(barFrame, event, ...)
     elseif event == "ARENA_OPPONENT_UPDATE" then
         --self:OnPartyMembersChanged(barFrame, event, ...)
     end
@@ -188,7 +190,7 @@ function OmniBar:SetupBarIcons(barFrame, barSettings)
      if trackedUnit:match("^arena[1-5]$") then
         -- something
     elseif trackedUnit:match("^party[1-4]$") then
-        self:OnEventHandler(barFrame, "PARTY_MEMBERS_CHANGED")
+        self:OnEventHandler(barFrame, "PARTY_MEMBERS_CHANGED", "editMode")
     elseif trackedUnit == "target" then
         -- something
     elseif trackedUnit == "focus" then
@@ -219,6 +221,9 @@ function OmniBar:CreateIconToBar(barFrame, spellName, spellData)
     icon.spellId = spellData.spellId
     if spellData.race then 
         icon.race = spellData.race 
+    end
+    if spellData.item then 
+        icon.item = spellData.item 
     end
 
     table.insert(barFrame.icons, icon)
@@ -339,6 +344,8 @@ function OmniBar:ResetIconState(icon)
     icon.timerFrame:SetScript("OnUpdate", nil) -- Delete the timer
     icon.cooldown:Hide()
     icon.endTime = nil
+    icon.item = nil
+    icon.race = nil
 end
 
 

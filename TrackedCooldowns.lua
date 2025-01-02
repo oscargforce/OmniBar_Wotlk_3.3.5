@@ -91,13 +91,13 @@ addon.spellTable = {
         ["Divine Plea"] = { isTracking = false, duration = 60, spellId = 54428 },
         ["Hammer of Justice"] = { isTracking = false, duration = 40, spellId = 10308 },
         ["Divine Shield"] = { isTracking = false, duration = 300, spellId = 642 },
-        ["Repentance"] = { isTracking = false, duration = 60, spellId = 20066 },
-        ["Divine Sacrifice"] = { isTracking = false, duration = 120, spellId = 64205 },
+        ["Repentance"] = { isTracking = false, duration = 60, spellId = 20066, spec = true },
+        ["Divine Sacrifice"] = { isTracking = false, duration = 120, spellId = 64205, spec = true },
         ["Hand of Sacrifice"] = { isTracking = false, duration = 120, spellId = 6940 },
         ["Hand of Freedom"] = { isTracking = false, duration = 25, spellId = 1044 },
         ["Hand of Protection"] = { isTracking = false, duration = 180, spellId = 10278 },
         ["Avenging Wrath"] = { isTracking = false, duration = 120, spellId = 31884 },
-        ["Holy Shock"] = { isTracking = false, duration = 5, spellId = 48825 },
+        ["Holy Shock"] = { isTracking = false, duration = 5, spellId = 48825, spec = true },
     },
 
     ["Priest"] = {
@@ -142,12 +142,12 @@ addon.spellTable = {
     
     ["Warlock"] = {
         ["Spell Lock"] = { isTracking = true, duration = 24, spellId = 19647 },
-        ["Fel Domination"] = { isTracking = false, duration = 180, spellId = 18708 },
+        ["Fel Domination"] = { isTracking = false, duration = 180, spellId = 18708, spec = true },
         ["Devour Magic"] = { isTracking = false, duration = 8, spellId = 48011 },
         ["Death Coil"] = { isTracking = false, duration = 120, spellId = 47860 },
         ["Howl of Terror"] = { isTracking = false, duration = 32, spellId = 17928 },
         ["Demonic Circle: Teleport"] = { isTracking = false, duration = 26, spellId = 48020 },
-        ["Shadowfury"] = { isTracking = false, duration = 20, spellId = 47847 },
+        ["Shadowfury"] = { isTracking = false, duration = 20, spellId = 47847, spec = true },
     },
 
     ["Warrior"] = {
@@ -192,3 +192,63 @@ function addon.DeepCopyTable(tbl)
     end
     return copy
 end
+
+function addon.GetTrinketNameFromBuff(buffName)
+    local nameMapping = {
+        ["Release of Light"] = "Bauble of True Blood",
+        ["Hardened Skin"] = "Corroded Skeleton Key",
+    }
+    
+    return nameMapping[buffName] or buffName
+end
+
+function addon.GetBuffNameFromTrinket(trinketName)
+    local nameMapping = {
+        ["Bauble of True Blood"] = "Release of Light",
+        ["Corroded Skeleton Key"] = "Hardened Skin",
+    }
+    
+    return nameMapping[trinketName] or trinketName
+end
+
+-- Copy the specAbilities from PAB addon
+addon.specSpellTable = {
+	["Rogue"] = {
+		["Preparation"] = {
+			talentGroup = 3,
+			index = 14,
+		},
+    },
+    ["Warlock"] = {
+		["Shadowfury"] = {
+			talentGroup = 3,
+			index = 23,
+		},
+		["Fel Domination"] = { 
+			talentGroup = 2,
+			index = 10,
+		},
+	},
+    ["Paladin"] = {
+		["Aura Mastery"] = { -- Aura Mastery
+			talentGroup = 1,
+			index = 6,
+		},
+		["Holy Shock"] = { -- Holy Shock
+			talentGroup = 1,
+			index = 18,
+		},
+		["Divine Sacrifice"] = { -- Divine Sacrifice
+			talentGroup = 2,
+			index = 6,
+		},
+		["Avenger's Shield"] = { -- Avenger's Shield
+			talentGroup = 2,
+			index = 22,
+		},
+		["Repentance"] = { -- Repentance
+			talentGroup = 3,
+			index = 18,
+		},
+	},
+}

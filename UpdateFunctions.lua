@@ -1,5 +1,6 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local addonName, addon = ...
+local GetBuffNameFromTrinket = addon.GetBuffNameFromTrinket
 
 function OmniBar:UpdateBar(barKey, specificUpdate)
     local barFrame = self.barFrames[barKey]
@@ -91,15 +92,24 @@ function OmniBar:UpdateUnusedAlpha(barFrame, barSettings, singleIconUpdate)
     singleIconUpdate:SetAlpha(unusedAlpha)
 end
 
-local function getCorrectedSpellName(spellName)
-    local nameMapping = {
-        ["Bauble of True Blood"] = "Release of Light",
-        ["Corroded Skeleton Key"] = "Hardened Skin",
+--[[ Updates the spell tracking for a specific bar
+    @param barFrame - The UI frame for the bar
+    @param barSettings - Saved variable for the bar eg self.profile.bars[barKey]
+    
+    Structure of trackedSpells:
+    {
+        [spellName] = {
+            duration = number,
+            icon = string,
+            priority = number,
+            className = string,
+            spellId = number,
+            race = string (optional),
+            spec = boolean (optional),
+            item = boolean (optional)
+        }
     }
-
-    return nameMapping[spellName] or spellName
-end
-
+]]
 function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
     local trackedSpells = barFrame.trackedSpells
     wipe(trackedSpells)
@@ -111,24 +121,31 @@ function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
             if spellConfig.isTracking then
                 local spellData = spellTable[className][spellName]
 
-                if spellData then  
-                    spellName = getCorrectedSpellName(spellName)
-    
-                    if not trackedSpells[spellName] then
-                        trackedSpells[spellName] = {
-                            duration = spellData.duration,
-                            icon = spellData.icon,
-                            priority = spellConfig.priority or 1,
-                            className = className,
-                            spellId = spellData.spellId
-                        }
+                if not spellData then  
+                    print(spellName, "does not exist in the table: trackedSpells. Add it to the table then preform /relod")
+                    return
+                end
 
-                        if spellData.race then
-                            trackedSpells[spellName].race = spellData.race
-                        end
+                spellName = GetBuffNameFromTrinket(spellName) -- if not trinket the func returns the orignal spellName
+
+                if not trackedSpells[spellName] then
+                    trackedSpells[spellName] = {
+                        duration = spellData.duration,
+                        icon = spellData.icon,
+                        priority = spellConfig.priority or 1,
+                        className = className,
+                        spellId = spellData.spellId
+                    }
+
+                    if spellData.race then
+                        trackedSpells[spellName].race = spellData.race
                     end
-                else
-                    print(spellName, "does not exist in the table: trackedSpells")
+                    if spellData.spec then
+                        trackedSpells[spellName].spec = spellData.spec
+                    end
+                    if spellData.item then
+                        trackedSpells[spellName].item = spellData.item
+                    end
                 end
             end
         end
