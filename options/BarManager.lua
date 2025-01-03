@@ -96,6 +96,7 @@ function OmniBar:AddBarToOptions(barKey)
                 get = function() return self.db.profile.bars[barKey].trackedUnit end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].trackedUnit = value
+                    self:UpdateBar(barKey, "updateEvents")
                     self:UpdateBar(barKey)
                 end,
                 order = 2,

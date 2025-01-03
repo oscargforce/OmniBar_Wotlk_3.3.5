@@ -89,6 +89,9 @@ function OmniBar:Delete(barKey, barFrame, keepProfile)
 
     targetFrame:Hide()
     targetFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    targetFrame:UnregisterEvent("ARENA_OPPONENT_UPDATE")
+    targetFrame:UnregisterEvent("PARTY_MEMBERS_CHANGED")
+    targetFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
 
     if not keepProfile then
         self.db.profile.bars[barKey] = nil 
@@ -151,22 +154,8 @@ function OmniBar:InitializeBar(barKey, settings)
 end
 
 function OmniBar:InitializeEventsTracking(barFrame, barSettings)
-    local trackedUnit = barSettings.trackedUnit
-    barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-
-    if trackedUnit:match("^arena[1-5]$") then
-        barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
-    elseif trackedUnit:match("^party[1-4]$") then
-        barFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
-        barFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
-    elseif trackedUnit == "target" then
-     -- barFrame:RegisterEvent("")
-    elseif trackedUnit == "focus" then
-     -- barFrame:RegisterEvent("") 
-    else
-     -- self:InitializeEnemyTracking(bar)
-    end
-
+    self:UpdateUnitEventTracking(barFrame, barSettings)
+    
     barFrame:SetScript("OnEvent", function (barFrame, event, ...) 
         OmniBar:OnEventHandler(barFrame, event, ...)
     end)
@@ -226,6 +215,7 @@ function OmniBar:CreateIconToBar(barFrame, spellName, spellData)
         icon.item = spellData.item 
     end
 
+    icon:Show()
     table.insert(barFrame.icons, icon)
     return icon
 end
@@ -250,14 +240,12 @@ function OmniBar:GetIconFromPool(barFrame)
     if #self.iconPool > 0 then
         local icon = table.remove(self.iconPool)
         icon:SetParent(barFrame.iconsContainer)
-        icon:Show()
         self:MakeFrameDraggable(icon, barFrame)
         return icon
     end
     print("creating new icon")
     -- Otherwise, create a new icon
     local icon = barFrame.CreateOmniBarIcon()
-    icon:Show()
     self:MakeFrameDraggable(icon, barFrame)
     return icon
 end

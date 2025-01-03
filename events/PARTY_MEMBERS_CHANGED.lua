@@ -17,65 +17,79 @@ local GetItemInfo = GetItemInfo
 --[[ 
 
     TODO:
-      1) Need to add in equipment check for trinkets if tracked.
-      2) Fix the create icons function, so it works with updating, or maybe just remove it completley. 
-      3) Maybe reset the priority and spellName, className, race when returning to pool?  
-      4) Bug: We create dublicate icons if OnPartyMembersChanged event is fired multiple times .. maybe always reset icons when the event triggers?
-      5) Feat: Add filtering of tracked spells based on units spec and talents.
-      6) Feat: Add a clean up to unregister for all events related to this party member bar if tracked unit changes
       7) Feat: update party1 depending if party member change spec, can be done by UnitSpellCastSucceeded and then creating some onUpdate function to check if we need to inspect unit
-      8) Feat: Add a reset so when teleported to a new instance such as arena, we clean the state, so that we filter the players spells/race
-
-
-    TODOS
+      8) Feat: Add a reset so when teleported to a new instance such as arena, we clean the state, so that we filter the players spells/race (I think this is done by in PLAYER_ENTERING_WORLD NEED TO TEST TOMORROW)
+    
     If new party 1 -> reset icons DONE
     if same party 1 -> Dont reset icons DONE
     if players logs out -> dont add more icons, but we dont want to reset icons. DONE
     If out of range when invited, we are not filter icons
 ]]
 
- partyGUIDCache = {
-    ["party1"] = "",
-    ["party2"] = "",
-    ["party3"] = "",
-    ["party4"] = "",
-    ["party5"] = ""
-}
+--[[
+   Without using `barFrame.key` as the cache key, creating multiple bars would cause icon creation issues. 
+    The check `if not isInEditMode and previousPartyGUID ~= "" and currentPartyGUID == previousPartyGUID` 
+    would prevent new icons from being created across bars tracking the same party unit.
+
+    By nesting the GUID cache under `barFrame.key`, each bar maintains its own unique party unit tracking, 
+    ensuring icons are correctly created for every bar.
+
+local partyGUIDCache = {
+        ["OmniBar1"] =  {
+            ["party1"] = "",
+      },
+        ["OmniBar2"] =  {
+            ["party1"] = "",
+      },
+}        
+]]
+
+local partyGUIDCache = {}
 
 function OmniBar:OnPartyMembersChanged(barFrame, event, isInEditMode)
-    local barSettings = self.db.profile.bars[barFrame.key]
-    
+    local barKey = barFrame.key
+    local barSettings = self.db.profile.bars[barKey]
+    print("OnPartyMembersChanged:", barKey )
     if not barSettings.showUnusedIcons then return end
 	if IsActiveBattlefieldArena() then return end
     
     local trackedUnit = barSettings.trackedUnit
     local currentPartyGUID = UnitGUID(trackedUnit)
-    local previousPartyGUID = partyGUIDCache[trackedUnit]
+
+    if not partyGUIDCache[barKey] then
+        partyGUIDCache[barKey] = {}
+    end
+
+    if not partyGUIDCache[barKey][trackedUnit] then
+        partyGUIDCache[barKey][trackedUnit] = ""
+    end
+
+    local previousPartyGUID = partyGUIDCache[barKey][trackedUnit]
  
-    -- check if still in party or partyUnit exist in the group
+    -- If the tracked unit is no longer in the party, reset icons
     if not currentPartyGUID then
         print("check if still in party or partyUnit exist in the group")
         self:ResetIcons(barFrame)
-        partyGUIDCache[trackedUnit] = ""
+        partyGUIDCache[barKey][trackedUnit] = ""
         self:ToggleAnchorVisibility(barFrame)
         return
     end
 
-    -- If same player then return, no changes for this unit during this event
+    -- If the same player is still in the same party slot and we're not in edit mode then no changes required as the unit hasn't changed
     if not isInEditMode and previousPartyGUID ~= "" and currentPartyGUID == previousPartyGUID then
         print(trackedUnit, "If same player then return, no changes for this unit during this event")
         return
     end
 
-    -- new partyUnit player update the bar
-    if currentPartyGUID ~= previousPartyGUID then
+    -- If a new player is now occupying this party slot (the party unit has changed),
+    -- we need to update the bar to reflect the abilities and cooldowns of the new player.
+ --   if currentPartyGUID ~= previousPartyGUID then
         print("new partyUnit player update the bar")
         self:ResetIcons(barFrame)
-        partyGUIDCache[trackedUnit] = currentPartyGUID
-    end
+        partyGUIDCache[barKey][trackedUnit] = currentPartyGUID
+--    end
 
     local className = UnitClass(trackedUnit)
-
     local race = UnitRace(trackedUnit)
 
     local unitTrinkets = {}
@@ -91,7 +105,6 @@ function OmniBar:OnPartyMembersChanged(barFrame, event, isInEditMode)
     -- filter the tracked cooldowns based on class, race, talents and items equipped
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         local shouldTrack = false
-
         if className == spellData.className then
             shouldTrack = true
 
@@ -110,7 +123,7 @@ function OmniBar:OnPartyMembersChanged(barFrame, event, isInEditMode)
             shouldTrack = true
         end
 
-        if spellData.item then
+        if spellData.item and didInspect then
             local trinketName = GetTrinketNameFromBuff(spellName)
             shouldTrack = unitTrinkets[trinketName] or false
         end

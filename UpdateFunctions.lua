@@ -18,6 +18,7 @@ function OmniBar:UpdateBar(barKey, specificUpdate)
         refreshBarIconsState = function() self:UpdateIconVisibilityAndState(barFrame, barSettings) end,
         unusedAlpha = function() self:UpdateUnusedAlpha(barFrame, barSettings) end,
         swipeAlpha = function() self:UpdateSwipeAlpha(barFrame, barSettings) end,
+        updateEvents = function() self:UpdateUnitEventTracking(barFrame, barSettings) end,
     }
 
     if specificUpdate then
@@ -163,4 +164,29 @@ function OmniBar:UpdateSwipeAlpha(barFrame, barSettings, singleIconUpdate)
     end
 
     singleIconUpdate:SetAlpha(swipeAlpha)
+end
+
+function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
+    local trackedUnit = barSettings.trackedUnit
+    -- Unregister previous events
+    barFrame:UnregisterEvent("ARENA_OPPONENT_UPDATE")
+    barFrame:UnregisterEvent("PARTY_MEMBERS_CHANGED")
+    barFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
+    barFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    
+    if trackedUnit:match("^arena[1-5]$") then
+        barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
+    elseif trackedUnit:match("^party[1-4]$") then
+        barFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
+        barFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
+    elseif trackedUnit == "target" then
+        -- barFrame:RegisterEvent("")
+    elseif trackedUnit == "focus" then
+        -- barFrame:RegisterEvent("") 
+    else
+        -- all enemies, maybe not need anything?
+    end
+
+    -- Always register UNIT_SPELLCAST_SUCCEEDED
+    barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 end
