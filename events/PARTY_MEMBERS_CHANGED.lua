@@ -16,23 +16,18 @@ local GetItemInfo = GetItemInfo
 --[[ 
 
     TODO:
-      7) Feat: update party1 depending if party member change spec, can be done by UnitSpellCastSucceeded and then creating some onUpdate function to check if we need to inspect unit
-      8) Feat: Add a reset so when teleported to a new instance such as arena, we clean the state, so that we filter the players spells/race (I think this is done by in PLAYER_ENTERING_WORLD NEED TO TEST TOMORROW)
+        3) Chore: Add all the talents to the specSpellTable
     
-    If new party 1 -> reset icons DONE
-    if same party 1 -> Dont reset icons DONE
-    if players logs out -> dont add more icons, but we dont want to reset icons. DONE
-    If out of range when invited, we are not filter icons
+    Core Features This File Handle:
+      - Only handle bars with party tracking and show unused icons enabled.
+      - Reset icons when a new Party 1 is detected. 
+      - Maintain icons when the same Party 1 is detected. 
+      - Prevent adding more icons if a player logs out but avoid resetting existing icons to keep cooldown track. 
+      - Does not filter icons when a player is out of range upon being invited. A message is sent to the user. Note: This only affects spec spells and items.
 ]]
 
 --[[
-   Without using `barFrame.key` as the cache key, creating multiple bars would cause icon creation issues. 
-    The check `if not isInEditMode and previousPartyGUID ~= "" and currentPartyGUID == previousPartyGUID` 
-    would prevent new icons from being created across bars tracking the same party unit.
-
-    By nesting the GUID cache under `barFrame.key`, each bar maintains its own unique party unit tracking, 
-    ensuring icons are correctly created for every bar.
-
+Each bar maintains its own independent state, enabling users to track the same unit across multiple bars simultaneously.
 local partyGUIDCache = {
         ["OmniBar1"] =  {
             ["party1"] = "",
@@ -96,7 +91,9 @@ function OmniBar:OnPartyMembersChanged(barFrame, event, isInEditMode)
         unitTrinkets = self:GetPartyUnitsTrinkets(trackedUnit) 
         didInspect = true
     else
-       print("|cFFFF0000[OmniBar]|r: |cFFFFFF00" .. trackedUnit .. "|r was not in range for inspection. |cFF00FF00The spells may not match the unit's current talents.|r Please |cFF00FFFF/reload|r when closer to the unit.")
+        if self.db.profile.showOutOfRangeMessages then
+            print("|cFFFF0000[OmniBar]|r: |cFFFFFF00" .. trackedUnit .. "|r was not in range for inspection. |cFF00FF00The spells may not match the unit's current talents.|r Please |cFF00FFFF/reload|r when closer to the unit. This message can be disabled in the options menu 'Show Out of Range Messages'.")
+        end
     end
 
     -- filter the tracked cooldowns based on class, race, talents and items equipped

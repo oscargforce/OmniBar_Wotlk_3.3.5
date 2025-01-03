@@ -10,7 +10,7 @@ Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
 embeds.xml
 
 ViewTable.lua
-TrackedCooldowns.lua
+AddonData.lua
 OmniBar.lua
 widgets\OminbarWidget.lua
 options\Panel.lua

@@ -40,7 +40,7 @@ end
 
 -- Register options and initialize the addon
 function OmniBar:OnInitialize()
-    self.db = LibStub("AceDB-3.0"):New("OMNIBAR_TEST", { profile = { bars = {} } })
+    self.db = LibStub("AceDB-3.0"):New("OMNIBAR_TEST", { profile = { bars = {}, showOutOfRangeMessages = true } })
     self.barFrames = {}
     self.barIndex = 1
     self.iconPool = {}
