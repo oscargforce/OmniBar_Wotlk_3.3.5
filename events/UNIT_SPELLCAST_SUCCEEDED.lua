@@ -90,11 +90,12 @@ function OmniBar:UnitMatchesTrackedUnit(unit, trackedUnit)
     return strategy(unit, trackedUnit)
 end
 
+-- Maybe a bug, for example spirit wolves uses bash same ability as druid, we might display the icon if its tracked on druid but not on shaman. 
+-- Need to test this, and if so add another condition icon.className == unit class, maybe want to add a cache for this to reduce the api calls.
 
 -- Death knights death coil has same name as warlock spell :/ need to use some if statement on that spell
 function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spellRank)
     local barSettings = self.db.profile.bars[barFrame.key]
-    print(unit, spellName)
     if not self:UnitMatchesTrackedUnit(unit, barSettings.trackedUnit) then return end
 
     local spellData = barFrame.trackedSpells[spellName]
@@ -109,12 +110,14 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
     if barSettings.showUnusedIcons then
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName then
-                print("Creating icon for", spellName)
+                print("Activating icon:", spellName)
                 barFrame.activeIcons[spellName] = icon
                 self:ActivateIcon(barFrame, barSettings, icon, spellData.duration)
                 return
             end  
         end
+        -- icon not found on bar, simply exit the function
+        return
     end
 
     -- Get or create icon for this spell

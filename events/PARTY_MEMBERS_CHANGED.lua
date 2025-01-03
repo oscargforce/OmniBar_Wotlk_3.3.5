@@ -1,8 +1,7 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local _, addon = ...
 local specSpellTable = addon.specSpellTable
-local GetTrinketNameFromBuff = addon.GetTrinketNameFromBuff
-local IsActiveBattlefieldArena = IsActiveBattlefieldArena
+local GetBuffNameFromTrinket = addon.GetBuffNameFromTrinket
 local UnitGUID = UnitGUID
 local UnitClass = UnitClass
 local UnitRace = UnitRace
@@ -44,14 +43,13 @@ local partyGUIDCache = {
 }        
 ]]
 
-local partyGUIDCache = {}
+ local partyGUIDCache = {}
 
 function OmniBar:OnPartyMembersChanged(barFrame, event, isInEditMode)
     local barKey = barFrame.key
     local barSettings = self.db.profile.bars[barKey]
     print("OnPartyMembersChanged:", barKey )
     if not barSettings.showUnusedIcons then return end
-	if IsActiveBattlefieldArena() then return end
     
     local trackedUnit = barSettings.trackedUnit
     local currentPartyGUID = UnitGUID(trackedUnit)
@@ -83,11 +81,10 @@ function OmniBar:OnPartyMembersChanged(barFrame, event, isInEditMode)
 
     -- If a new player is now occupying this party slot (the party unit has changed),
     -- we need to update the bar to reflect the abilities and cooldowns of the new player.
- --   if currentPartyGUID ~= previousPartyGUID then
-        print("new partyUnit player update the bar")
-        self:ResetIcons(barFrame)
-        partyGUIDCache[barKey][trackedUnit] = currentPartyGUID
---    end
+    print("new partyUnit player update the bar")
+    self:ResetIcons(barFrame)
+    partyGUIDCache[barKey][trackedUnit] = currentPartyGUID
+
 
     local className = UnitClass(trackedUnit)
     local race = UnitRace(trackedUnit)
@@ -124,8 +121,7 @@ function OmniBar:OnPartyMembersChanged(barFrame, event, isInEditMode)
         end
 
         if spellData.item and didInspect then
-            local trinketName = GetTrinketNameFromBuff(spellName)
-            shouldTrack = unitTrinkets[trinketName] or false
+            shouldTrack = unitTrinkets[spellName] or false
         end
 
         if shouldTrack then
@@ -150,8 +146,8 @@ function OmniBar:GetPartyUnitsTrinkets(trackedUnit)
         if itemLink then
             local itemName = GetItemInfo(itemLink)
             if itemName then
-                print(itemName)
-                trinkets[itemName] = true
+                local trinketBuffName = GetBuffNameFromTrinket(itemName)
+                trinkets[trinketBuffName] = true
             end
         end
     end

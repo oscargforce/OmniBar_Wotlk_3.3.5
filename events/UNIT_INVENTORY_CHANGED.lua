@@ -1,21 +1,15 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local _, addon = ...
-local GetTrinketNameFromBuff = addon.GetTrinketNameFromBuff
-local IsActiveBattlefieldArena = IsActiveBattlefieldArena
+local UnitAffectingCombat = UnitAffectingCombat
 local CheckInteractDistance = CheckInteractDistance
 local NotifyInspect = NotifyInspect
 local ClearInspectPlayer = ClearInspectPlayer
 
 --[[
-So pros for keeping it all in party members changed:
- if unit changes gear, we update talent incase they switched [not reliable though] however one does often change gear when switching talents.
-
- cons:
-  Might risk resetting cds earlier then expected.
-  
-
- general:
- the event sucks, it gives wrong talents sometimes... Might have to delay a second before making a request.
+      NOTE: WoW's 3.3.5 Inventory API can be unreliable, especially when trinkets are swapped quickly. 
+        It may not keep up with rapid changes and could return outdated trinket data. 
+        In some cases, it may provide information about the trinkets that were equipped a moment ago,
+        rather than the current state.
 ]]
 
 function OmniBar:OnUnitInventoryChanged(barFrame, event, unit)
@@ -28,7 +22,7 @@ function OmniBar:OnUnitInventoryChanged(barFrame, event, unit)
 
     if trackedUnit ~= unit then return end
 
-    if select(1, IsActiveBattlefieldArena()) then return end
+    if UnitAffectingCombat(trackedUnit) then return end
 
     local unitTrinkets = {}
     local didInspect = false
@@ -36,31 +30,34 @@ function OmniBar:OnUnitInventoryChanged(barFrame, event, unit)
 
     if CheckInteractDistance(trackedUnit, 1) then 
         NotifyInspect(trackedUnit)
-        print("tracking", trackedUnit)
+        print("NotifyInspect", trackedUnit)
         unitTrinkets = self:GetPartyUnitsTrinkets(trackedUnit) 
         didInspect = true
     end
 
     if not didInspect then return end
 
+    -- existing icon trinkets on the omnibar.
+    local iconTrinketsOnBar = {}
+
     for i = #barFrame.icons, 1, -1 do
         local icon = barFrame.icons[i]
-        if icon.item then  
-            local trinketName = GetTrinketNameFromBuff(icon.spellName)
-            if not unitTrinkets[trinketName] then
+        if icon.item then          
+            if not unitTrinkets[icon.spellName] then -- Remove trinket icon form bar since it no longer is equipped.
                 table.remove(barFrame.icons, i)
                 self:ReturnIconToPool(icon) 
                 needsRearranging = true
+
+            else 
+                iconTrinketsOnBar[icon.spellName] = true -- cache equipped trinket
             end
         end
     end
 
     for trinketName, _ in pairs(unitTrinkets) do
-        local isTrinketOnBar = false
-        local buffName = addon.GetBuffNameFromTrinket(trinketName)
-        local spellData = barFrame.trackedSpells[buffName] 
-        if spellData then
-            self:CreateIconToBar(barFrame, buffName, spellData)
+        local spellData = barFrame.trackedSpells[trinketName] 
+        if spellData and not iconTrinketsOnBar[trinketName] then
+            self:CreateIconToBar(barFrame, trinketName, spellData)
             needsRearranging = true
         end
     end
@@ -71,4 +68,5 @@ function OmniBar:OnUnitInventoryChanged(barFrame, event, unit)
         self:ArrangeIcons(barFrame, barSettings)
         self:UpdateUnusedAlpha(barFrame, barSettings)
     end
+    print("OnUnitInventoryChanged DONE")
 end

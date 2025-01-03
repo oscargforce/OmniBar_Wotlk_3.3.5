@@ -193,19 +193,12 @@ function addon.DeepCopyTable(tbl)
     return copy
 end
 
-function addon.GetTrinketNameFromBuff(buffName)
-    local nameMapping = {
-        ["Release of Light"] = "Bauble of True Blood",
-        ["Hardened Skin"] = "Corroded Skeleton Key",
-    }
-    
-    return nameMapping[buffName] or buffName
-end
-
 function addon.GetBuffNameFromTrinket(trinketName)
     local nameMapping = {
         ["Bauble of True Blood"] = "Release of Light",
         ["Corroded Skeleton Key"] = "Hardened Skin",
+        ["Medallion of the Alliance"] = "PvP Trinket",
+        ["Medallion of the Horde"] = "PvP Trinket",
     }
     
     return nameMapping[trinketName] or trinketName
