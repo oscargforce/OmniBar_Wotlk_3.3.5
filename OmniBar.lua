@@ -168,6 +168,8 @@ function OmniBar:OnEventHandler(barFrame, event, ...)
         self:OnPartyMembersChanged(barFrame, event, ...)
     elseif event == "UNIT_INVENTORY_CHANGED" then
         self:OnUnitInventoryChanged(barFrame, event, ...)
+    elseif event == "INSPECT_TALENT_READY" then
+        self:OnInspectTalentReady(barFrame, event, ...)
     elseif event == "ARENA_OPPONENT_UPDATE" then
         --self:OnPartyMembersChanged(barFrame, event, ...)
     end
@@ -243,7 +245,7 @@ function OmniBar:GetIconFromPool(barFrame)
         self:MakeFrameDraggable(icon, barFrame)
         return icon
     end
-    print("creating new icon")
+ --   print("creating new icon")
     -- Otherwise, create a new icon
     local icon = barFrame.CreateOmniBarIcon()
     self:MakeFrameDraggable(icon, barFrame)
