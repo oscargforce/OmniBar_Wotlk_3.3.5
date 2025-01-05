@@ -10,27 +10,19 @@ local GetActiveTalentGroup = GetActiveTalentGroup
 local GetInventoryItemLink = GetInventoryItemLink
 local GetItemInfo = GetItemInfo
 
---[[ 
-
-    TODO:
-        3) Chore: Add all the talents to the specSpellTable
-    
+--[[
     Core Features This File Handle:
-      - Only handle bars with party tracking and show unused icons enabled.
-      - Reset icons when a new Party 1 is detected. 
-      - Maintain icons when the same Party 1 is detected. 
-      - Prevent adding more icons if a player logs out but avoid resetting existing icons to keep cooldown track. 
-      - Does not filter icons when a player is out of range upon being invited. A message is sent to the user. Note: This only affects spec spells and items.
+      - Only handle party members changed event for bars that have showUnusedIcons enabled.
+      - Reset icons when a NEW party unit is detected. 
+      - Maintain icons when the SAME party unit is detected. 
+      - Prevent adding more icons if a party unit logs out but avoid resetting existing icons to keep cooldown track. 
+      - Does not filter icons when a party unit is out of range upon being invited. A message is sent to the user. Note: This only affects spec spells and items.
+      - Each bar maintains its own independent state, enabling users to track the same unit across multiple bars simultaneously.
 
-      Each bar maintains its own independent state, enabling users to track the same unit across multiple bars simultaneously.
-      local partyGUIDCache = {
-        ["OmniBar1"] =  {
-            ["party1"] = "",
-       },
-        ["OmniBar2"] =  {
-            ["party1"] = "",
-      },
-}  
+    How it works:
+        - When a party member changes, the OnPartyMembersChanged() handler is triggered. The bar is reset, and the new party unit is added to the inspect queue.
+        - InspectQueueOmniBar will dynamically check if the unit is in range before calling NotifyInspect(). If the unit is out of range, a message is sent to the user.
+        - If the unit is in range, NotifyInspect() is called, and the OnInspectTalentReady() handler is triggered. The bar is updated with the new party unit's abilities and cooldowns.
 ]]
 
 
