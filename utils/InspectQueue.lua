@@ -3,6 +3,7 @@ local GetTime = GetTime
 local NotifyInspect = NotifyInspect
 local CheckInteractDistance = CheckInteractDistance
 local ClearInspectPlayer = ClearInspectPlayer
+local wipe = wipe
 
 InspectQueueOmniBar =  {
     queue = {},
