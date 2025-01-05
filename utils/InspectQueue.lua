@@ -4,7 +4,7 @@ local NotifyInspect = NotifyInspect
 local CheckInteractDistance = CheckInteractDistance
 local ClearInspectPlayer = ClearInspectPlayer
 
-InspectQueue =  {
+InspectQueueOmniBar =  {
     queue = {},
     isProcessing = false,
     retryInterval = 1, -- seconds between retry attempts
@@ -14,7 +14,7 @@ InspectQueue =  {
     frame = nil
 }
 
-function InspectQueue:New()
+function InspectQueueOmniBar:New()
     local obj = setmetatable({}, { __index = self })
      -- Create frame for OnUpdate
      obj.frame = CreateFrame("Frame")
@@ -26,7 +26,7 @@ function InspectQueue:New()
     return obj
 end
 
-function InspectQueue:AddToQueue(unit, bar)
+function InspectQueueOmniBar:AddToQueue(unit, bar)
     for _, item in ipairs(self.queue) do
         if item.unit == unit and item.bar == bar then
             return
@@ -45,13 +45,13 @@ function InspectQueue:AddToQueue(unit, bar)
     end
 end
 
-function InspectQueue:IsUnitInRange(unit)
+function InspectQueueOmniBar:IsUnitInRange(unit)
     local distance = CheckInteractDistance(unit, 1)
     print("IsUnitInRange", unit, distance == 1)
     return distance == 1
 end
 
-function InspectQueue:FindNextInRangeUnit()
+function InspectQueueOmniBar:FindNextInRangeUnit()
     for i, item in ipairs(self.queue) do
         if self:IsUnitInRange(item.unit) then
             return i
@@ -59,7 +59,7 @@ function InspectQueue:FindNextInRangeUnit()
     end
 end
 
-function InspectQueue:ProcessQueue()
+function InspectQueueOmniBar:ProcessQueue()
     print(self.isProcessing, #self.queue)
     if self.isProcessing or #self.queue == 0 then 
         print("ProcessQueue HIDING FRAME")
@@ -86,7 +86,7 @@ function InspectQueue:ProcessQueue()
     self.frame:Show()
 end
 
-function InspectQueue:OnUpdate(elapsed)
+function InspectQueueOmniBar:OnUpdate(elapsed)
     self.timeElapsed = self.timeElapsed + elapsed
     
     if self.timeElapsed >= self.retryInterval then
@@ -114,7 +114,7 @@ function InspectQueue:OnUpdate(elapsed)
 
 end
 
-function InspectQueue:InspectComplete()
+function InspectQueueOmniBar:InspectComplete()
     ClearInspectPlayer()
     self.currentInspect.bar:UnregisterEvent("INSPECT_TALENT_READY")
     self.currentInspect = nil
@@ -125,7 +125,7 @@ function InspectQueue:InspectComplete()
     self:ProcessQueue()
 end 
 
-function InspectQueue:ClearQueue()
+function InspectQueueOmniBar:ClearQueue()
     wipe(self.queue)
     self.isProcessing = false
     self.currentInspect = nil
@@ -134,7 +134,7 @@ function InspectQueue:ClearQueue()
     end
 end
 
-function InspectQueue:RemoveBarFromQueue(bar)
+function InspectQueueOmniBar:RemoveBarFromQueue(bar)
     for i = #self.queue, 1, -1 do
         local item = self.queue[i]
         if item.bar == bar then
@@ -143,7 +143,7 @@ function InspectQueue:RemoveBarFromQueue(bar)
     end
 end
 
-function InspectQueue:PrintOutOfRangeMessage()
+function InspectQueueOmniBar:PrintOutOfRangeMessage()
     if not OmniBar.db.profile.showOutOfRangeMessages then
         return
     end

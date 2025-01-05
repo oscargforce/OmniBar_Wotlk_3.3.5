@@ -35,7 +35,7 @@ local GetItemInfo = GetItemInfo
 
 
 local partyGUIDCache = {}
-local inspectQueue = InspectQueue:New()
+local inspectQueue = InspectQueueOmniBar:New()
 
 
 function OmniBar:OnPartyMembersChanged(barFrame, event, isInEditMode)
