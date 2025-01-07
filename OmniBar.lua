@@ -171,7 +171,7 @@ function OmniBar:OnEventHandler(barFrame, event, ...)
     elseif event == "INSPECT_TALENT_READY" then
         self:OnInspectTalentReady(barFrame, event, ...)
     elseif event == "ARENA_OPPONENT_UPDATE" then
-        --self:OnPartyMembersChanged(barFrame, event, ...)
+        self:OnArenaOpponentUpdate(barFrame, event, ...)
     end
 end
 

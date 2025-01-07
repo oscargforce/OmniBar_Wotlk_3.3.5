@@ -23,5 +23,6 @@ events\CHAT_MSG_SYSTEM.lua
 events\PLAYER_REGEN.lua
 events\PARTY_MEMBERS_CHANGED.lua
 events\UNIT_INVENTORY_CHANGED.lua
+events\ARENA_OPPONENT_UPDATE.lua
 
 
