@@ -2,8 +2,10 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local UnitClass = UnitClass
 local UnitRace = UnitRace
 
-local arenaOpponents = {}
+
+local arenaOpponents = OmniBar.arenaOpponents = {}
 local processedBars = {}
+
 
 -- Caches and returns the arena units class and race.
  local function GetUnitData(unit)
@@ -12,7 +14,8 @@ local processedBars = {}
         local unitRace = UnitRace(unit) 
         arenaOpponents[unit] = {
             className = unitClass,
-            race = unitRace
+            race = unitRace,
+            spec = nil
         }
 
         return unitClass, unitRace
