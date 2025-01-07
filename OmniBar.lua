@@ -18,7 +18,7 @@ local DEFAULT_BAR_SETTINGS = {
     showUnusedIcons = true,
     unusedAlpha = 0.45,
     swipeAlpha = 0.65,
-    trackedUnit = "enemies",
+    trackedUnit = "allEnemies",
     cooldowns = {},
 }
  
@@ -92,6 +92,7 @@ function OmniBar:Delete(barKey, barFrame, keepProfile)
     targetFrame:UnregisterEvent("ARENA_OPPONENT_UPDATE")
     targetFrame:UnregisterEvent("PARTY_MEMBERS_CHANGED")
     targetFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
+    targetFrame:UnregisterEvent("INSPECT_TALENT_READY")
 
     if not keepProfile then
         self.db.profile.bars[barKey] = nil 
@@ -224,7 +225,7 @@ end
  
 -- Maybe change this function to CreateIconToBar, so its single. Or rename to populate enemies bar.
 function OmniBar:CreateIconsToBar(barFrame, barSettings)
-    if not barSettings.showUnusedIcons or barSettings.trackedUnit ~= "enemies" then
+    if not barSettings.showUnusedIcons or barSettings.trackedUnit ~= "allEnemies" then
         return
     end
     
@@ -262,11 +263,16 @@ function OmniBar:SortIcons(barFrame, showUnusedIcons)
         end) 
     else
         table.sort(barFrame.icons, function (a, b) 
+            -- Sort alphabetically by className
+            if a.className ~= b.className then
+                return a.className < b.className 
+            end
+
+            -- Sort by priority within the same class
             if a.priority == b.priority then
                 return a.spellId < b.spellId
             end
-
-            return a.priority > b.priority  
+            return a.priority > b.priority    
         end)
     end 
 end

@@ -173,6 +173,7 @@ function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
     barFrame:UnregisterEvent("PARTY_MEMBERS_CHANGED")
     barFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
     barFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    barFrame:UnregisterEvent("INSPECT_TALENT_READY")
     
     if trackedUnit:match("^arena[1-5]$") then
         barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
@@ -183,8 +184,8 @@ function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
         -- barFrame:RegisterEvent("")
     elseif trackedUnit == "focus" then
         -- barFrame:RegisterEvent("") 
-    else
-        -- all enemies, maybe not need anything?
+    else -- All enemies
+        barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
     end
 
     -- Always register UNIT_SPELLCAST_SUCCEEDED

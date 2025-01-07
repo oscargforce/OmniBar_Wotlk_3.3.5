@@ -2,30 +2,10 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local UnitClass = UnitClass
 local UnitRace = UnitRace
 
---[[
-    local arenaOpponents = {
-        ["arena1"] = {
-            ["class"] = "Warrior",
-            ["race"] = "Human"
-        }
-    }
+local arenaOpponents = {}
+local processedBars = {}
 
-    local processedBars = {
-        ["OmniBar1"] = {
-            ["arena1"] = true
-        }
-        ["OmniBar2"] = {
-            ["arena1"] = true
-        }
-    }
-
-/dump arenaOpponents
-/dump processedBars
-]]
-
- local arenaOpponents = {}
- local processedBars = {}
-
+-- Caches and returns the arena units class and race.
  local function GetUnitData(unit)
     if not arenaOpponents[unit] then
         local unitClass = UnitClass(unit) 
@@ -41,6 +21,7 @@ local UnitRace = UnitRace
     return arenaOpponents[unit].className, arenaOpponents[unit].race
 end
 
+-- Reset state of the unit data and processed bars.
 local function ClearUnitData(unit)
     arenaOpponents[unit] = nil
     for barKey, units in pairs(processedBars) do
@@ -48,6 +29,7 @@ local function ClearUnitData(unit)
     end
 end
 
+-- Mark the bar as processed for the unit. To prevent duplicate requests and icons.
 local function MarkBarAsProcessed(barKey, unit)
     if not processedBars[barKey] then
         processedBars[barKey] = {}
@@ -60,14 +42,68 @@ local function HasBarProcessedUnit(barKey, unit)
 end
 
 local function AlreadyFilteredByClassAndRace(unit)
-    return arenaOpponents[unit] and arenaOpponents[unit].class and arenaOpponents[unit].race
+    return arenaOpponents[unit] and arenaOpponents[unit].className and arenaOpponents[unit].race
 end
 
+local function ShouldTrackSpell(spellName, spellData, unitClass, unitRace)
+    if unitClass == spellData.className then
+        return true
+    end
+
+    if spellData.race and spellData.race == unitRace then
+        return true
+    end
+
+    if spellName == "PvP Trinket" and unitRace ~= "Human" then
+        return true
+    end
+
+    return false
+end
+
+local function HandleAllArenaUnits(barFrame, barSettings, barKey, unit, updateReason)
+    if not unit:match("^arena[1-5]$") then return end
+
+    if updateReason == "cleared" then
+        ClearUnitData(unit)
+        if OmniBar.zone == "arena" then 
+            OmniBar:ResetIcons(barFrame) 
+        end
+        return
+    end
+
+    if updateReason ~= "seen" then return end
+
+    if AlreadyFilteredByClassAndRace(unit) and HasBarProcessedUnit(barKey, unit) then
+        return
+    end
+
+    local unitClass, unitRace = GetUnitData(unit)
+    MarkBarAsProcessed(barKey, unit)
+
+    for spellName, spellData in pairs(barFrame.trackedSpells) do
+        if ShouldTrackSpell(spellName, spellData, unitClass, unitRace) then
+            OmniBar:CreateIconToBar(barFrame, spellName, spellData)
+        end
+    end
+
+    OmniBar:ArrangeIcons(barFrame, barSettings)
+    OmniBar:UpdateUnusedAlpha(barFrame, barSettings)
+end
 
 function OmniBar:OnArenaOpponentUpdate(barFrame, event, unit, updateReason)
     local barKey = barFrame.key
     local barSettings = self.db.profile.bars[barKey]
+
     if not barSettings.showUnusedIcons then return end
+
+    local trackedUnit = barSettings.trackedUnit
+
+    if trackedUnit == "allEnemies" then
+        HandleAllArenaUnits(barFrame, barSettings, barKey, unit, updateReason)
+        return
+    end
+
     if unit ~= barSettings.trackedUnit then return end
     
     if updateReason == "cleared" then 
@@ -85,24 +121,8 @@ function OmniBar:OnArenaOpponentUpdate(barFrame, event, unit, updateReason)
     local unitClass, unitRace = GetUnitData(unit)
     MarkBarAsProcessed(barKey, unit)
 
-    print("unitClass", unitClass, "unitRace", unitRace)
-
     for spellName, spellData in pairs(barFrame.trackedSpells) do
-        local shouldTrack = false
-
-        if unitClass == spellData.className then
-            shouldTrack = true
-        end
-
-        if spellData.race and spellData.race == unitRace then
-            shouldTrack = true
-        end
-
-        if spellName == "PvP Trinket" and unitRace ~= "Human" then
-            shouldTrack = true
-        end
-
-        if shouldTrack then
+        if ShouldTrackSpell(spellName, spellData, unitClass, unitRace) then
             self:CreateIconToBar(barFrame, spellName, spellData)
         end
     end

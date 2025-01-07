@@ -27,7 +27,7 @@ local nonArenaEnemyUnits = {
 }
 
 local function MatchesArenaUnit(unit, trackedUnit)
-    if trackedUnit == "enemies" then
+    if trackedUnit == "allEnemies" then
         return arenaUnits[unit] or false
     end
 
@@ -47,7 +47,7 @@ local function MatchesArenaUnit(unit, trackedUnit)
 end
 
 local function MatchesGeneralUnit(unit, trackedUnit)
-    if trackedUnit == "enemies" then
+    if trackedUnit == "allEnemies" then
 
         if not nonArenaEnemyUnits[unit] then
             return false
