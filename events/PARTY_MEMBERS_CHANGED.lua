@@ -1,6 +1,6 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local _, addon = ...
-local specSpellTable = addon.specSpellTable
+local talentTreeCoordinates = addon.talentTreeCoordinates
 local GetBuffNameFromTrinket = addon.GetBuffNameFromTrinket
 local UnitGUID = UnitGUID
 local UnitClass = UnitClass
@@ -137,11 +137,11 @@ function OmniBar:GetPartyUnitsTrinkets(trackedUnit)
 end
 
 function OmniBar:CheckSpecAbilitiesForUnit(className, spellName)
-    if not specSpellTable[className] or not specSpellTable[className][spellName] then return false end
-    local spell = specSpellTable[className][spellName]
+    if not talentTreeCoordinates[className] or not talentTreeCoordinates[className][spellName] then return false end
+    local talentInfo = talentTreeCoordinates[className][spellName]
     local hasTalent = select(5, GetTalentInfo(
-            spell.talentGroup,
-            spell.index,
+            talentInfo.talentGroup,
+            talentInfo.index,
             true, -- Inspecting the unit
             false, -- Not for a pet
             GetActiveTalentGroup(true) -- Inspect unit's active spec [eg primary or secondary spec]

@@ -119,11 +119,23 @@ function OmniBar:GenerateUniqueKey()
     return key
 end
 
+local function DeepCopyTable(tbl)
+    local copy = {}
+    for k, v in pairs(tbl) do
+        if type(v) == "table" then
+            copy[k] = addon.DeepCopyTable(v)  -- Recursively copy tables
+        else
+            copy[k] = v
+        end
+    end
+    return copy
+end
+
 function OmniBar:InitializeBar(barKey, settings)
     if (not self.db.profile.bars[barKey]) then
         self.db.profile.bars[barKey] = {}
 
-        local defaultBarSettings = addon.DeepCopyTable(DEFAULT_BAR_SETTINGS)
+        local defaultBarSettings = DeepCopyTable(DEFAULT_BAR_SETTINGS)
 
 		for a,b in pairs(defaultBarSettings) do
 			self.db.profile.bars[barKey][a] = b
@@ -144,7 +156,6 @@ function OmniBar:InitializeBar(barKey, settings)
     self:UpdateSpellTrackingForBar(barFrame, barSettings)
     self:InitializeEventsTracking(barFrame, barSettings)
 
-    -- Maybe change, only createIconsToBar if trackedUnit == all enemies and showUnusedIcons
      -- Hide/show icons
     if barSettings.showUnusedIcons then
         self:SetupBarIcons(barFrame, barSettings)
