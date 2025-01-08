@@ -53,8 +53,13 @@ addon.specAuras = {
     }
 }
 
+addon.crossSpecSpells = {
+    ["Aimed Shot"] = { mm = true, survival = true, bm = true },
+    ["Readiness"] = { mm = true, bm = true },
+    ["Scatter Shot"] =  { mm = true, survival = true },
+}
 
-addon.specSpells = {
+addon.specDefiningSpells = {
     -- Death Knight
     ["Anti-Magic Zone"] = "Unholy",
     ["Bone Shield"] = "Unholy",
@@ -81,15 +86,13 @@ addon.specSpells = {
     ["Typhoon"] = "Balance",
 
     -- Hunter
-    ["Aimed Shot"] = "mm",
     ["Bestial Wrath"] = "bm",
     ["Black Arrow"] = "survival",
     ["Chimera Shot"] = "mm",
     ["Intimidation"] = "bm",
-    ["Readiness"] = "mm",
-    ["Scatter Shot"] = "survival",
     ["Silencing Shot"] = "mm",
     ["Wyvern Sting"] = "survival",
+    ["Explosive Shot"] = "survival",
 
     -- Mage
     ["Arcane Power"] = "Arcane",

@@ -94,6 +94,7 @@ function OmniBar:Delete(barKey, barFrame, keepProfile)
     targetFrame:UnregisterEvent("PARTY_MEMBERS_CHANGED")
     targetFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
     targetFrame:UnregisterEvent("INSPECT_TALENT_READY")
+    targetFrame:UnregisterEvent("UNIT_AURA")
 
     if not keepProfile then
         self.db.profile.bars[barKey] = nil 
@@ -185,6 +186,8 @@ function OmniBar:OnEventHandler(barFrame, event, ...)
         self:OnInspectTalentReady(barFrame, event, ...)
     elseif event == "ARENA_OPPONENT_UPDATE" then
         self:OnArenaOpponentUpdate(barFrame, event, ...)
+    elseif event == "UNIT_AURA" then
+        self:OnUnitAura(barFrame, event, ...)
     end
 end
 

@@ -26,5 +26,6 @@ events\PLAYER_REGEN.lua
 events\PARTY_MEMBERS_CHANGED.lua
 events\UNIT_INVENTORY_CHANGED.lua
 events\ARENA_OPPONENT_UPDATE.lua
+events\UNIT_AURA.lua
 
 

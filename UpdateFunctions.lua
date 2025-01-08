@@ -174,9 +174,11 @@ function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
     barFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
     barFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
     barFrame:UnregisterEvent("INSPECT_TALENT_READY")
+    barFrame:UnregisterEvent("UNIT_AURA")
     
     if trackedUnit:match("^arena[1-5]$") then
         barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
+        barFrame:RegisterEvent("UNIT_AURA")
     elseif trackedUnit:match("^party[1-4]$") then
         barFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
         barFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
@@ -186,6 +188,7 @@ function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
         -- barFrame:RegisterEvent("") 
     else -- All enemies
         barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
+        barFrame:RegisterEvent("UNIT_AURA")
     end
 
     -- Always register UNIT_SPELLCAST_SUCCEEDED
