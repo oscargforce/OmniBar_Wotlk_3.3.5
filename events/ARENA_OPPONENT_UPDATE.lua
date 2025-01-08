@@ -2,13 +2,12 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local UnitClass = UnitClass
 local UnitRace = UnitRace
 
-
-local arenaOpponents = OmniBar.arenaOpponents = {}
 local processedBars = {}
 
 
 -- Caches and returns the arena units class and race.
  local function GetUnitData(unit)
+    local arenaOpponents = OmniBar.arenaOpponents
     if not arenaOpponents[unit] then
         local unitClass = UnitClass(unit) 
         local unitRace = UnitRace(unit) 
@@ -26,6 +25,7 @@ end
 
 -- Reset state of the unit data and processed bars.
 local function ClearUnitData(unit)
+    local arenaOpponents = OmniBar.arenaOpponents
     arenaOpponents[unit] = nil
     for barKey, units in pairs(processedBars) do
         units[unit] = nil
@@ -45,6 +45,7 @@ local function HasBarProcessedUnit(barKey, unit)
 end
 
 local function AlreadyFilteredByClassAndRace(unit)
+    local arenaOpponents = OmniBar.arenaOpponents
     return arenaOpponents[unit] and arenaOpponents[unit].className and arenaOpponents[unit].race
 end
 

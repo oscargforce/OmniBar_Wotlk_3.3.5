@@ -108,6 +108,8 @@ end
 
 function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
     if barSettings.showUnusedIcons then
+        self:DetectSpecByAbility(spellName, barSettings.trackedUnit, barFrame)
+
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName then
                 print("Activating icon:", spellName)
@@ -123,12 +125,13 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
     -- Get or create icon for this spell
     local icon = self:CreateIconToBar(barFrame, spellName, spellData)
     self:ActivateIcon(barFrame, barSettings, icon, spellData.duration)
+    self:ArrangeIcons(barFrame, barSettings)
 end
 
 function OmniBar:ActivateIcon(barFrame, barSettings, icon, duration)
     self:ToggleAnchorVisibility(barFrame)
     self:StartCooldownShading(icon, duration, barSettings, barFrame)
-    self:ArrangeIcons(barFrame, barSettings)
+    -- self:ArrangeIcons(barFrame, barSettings) -- maybe we dont need this anymore?
 end
 
 local COLORS = {
@@ -198,8 +201,10 @@ function OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
                 break
             end
         end
+
+        print("ARRANGE ICONS")
+        self:ArrangeIcons(barFrame, barSettings)
     end
-    print("ARRANGE ICONS")
-    self:ArrangeIcons(barFrame, barSettings)
+    
     self:ToggleAnchorVisibility(barFrame)
 end

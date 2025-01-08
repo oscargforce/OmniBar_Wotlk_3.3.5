@@ -81,15 +81,15 @@ addon.specSpells = {
     ["Typhoon"] = "Balance",
 
     -- Hunter
-    ["Aimed Shot"] = "Marksmanship",
-    ["Bestial Wrath"] = "Beast Mastery",
-    ["Black Arrow"] = "Survival",
-    ["Chimera Shot"] = "Marksmanship",
-    ["Intimidation"] = "Beast Mastery",
-    ["Readiness"] = "Marksmanship",
-    ["Scatter Shot"] = "Survival",
-    ["Silencing Shot"] = "Marksmanship",
-    ["Wyvern Sting"] = "Survival",
+    ["Aimed Shot"] = "mm",
+    ["Bestial Wrath"] = "bm",
+    ["Black Arrow"] = "survival",
+    ["Chimera Shot"] = "mm",
+    ["Intimidation"] = "bm",
+    ["Readiness"] = "mm",
+    ["Scatter Shot"] = "survival",
+    ["Silencing Shot"] = "mm",
+    ["Wyvern Sting"] = "survival",
 
     -- Mage
     ["Arcane Power"] = "Arcane",

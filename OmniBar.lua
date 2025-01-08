@@ -44,6 +44,7 @@ function OmniBar:OnInitialize()
     self.barFrames = {}
     self.barIndex = 1
     self.iconPool = {}
+    self.arenaOpponents = {}
     self.db.RegisterCallback(self, "OnProfileChanged", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
@@ -228,6 +229,9 @@ function OmniBar:CreateIconToBar(barFrame, spellName, spellData)
     if spellData.item then 
         icon.item = spellData.item 
     end
+    if spellData.spec then 
+        icon.spec = spellData.spec 
+    end
 
     icon:Show()
     table.insert(barFrame.icons, icon)
@@ -344,7 +348,7 @@ function OmniBar:ReturnIconToPool(icon)
     table.insert(self.iconPool, icon)
 end
 
--- Don't reset spellName, priority, class, or race to avoid affecting showUnusedIcons when the CD countdown ends.
+-- Don't reset spellName, priority, class, to avoid affecting showUnusedIcons when the CD countdown ends.
 function OmniBar:ResetIconState(icon)
     icon.countdownText:SetText("")
     icon.timerFrame:Hide()
@@ -353,6 +357,7 @@ function OmniBar:ResetIconState(icon)
     icon.endTime = nil
     icon.item = nil
     icon.race = nil
+    icon.spec = nil
 end
 
 
