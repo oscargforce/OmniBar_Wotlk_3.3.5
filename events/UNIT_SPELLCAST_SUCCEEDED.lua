@@ -103,12 +103,12 @@ function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spel
     if spellName == "Death Coil" and spellRank ~="Rank 6" then return end
 
     print("PASSED:", spellName)
-    self:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
+    self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
 end
 
-function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
+function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
     if barSettings.showUnusedIcons then
-        self:DetectSpecByAbility(spellName, barSettings.trackedUnit, barFrame)
+        self:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
 
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName then

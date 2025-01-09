@@ -151,8 +151,13 @@ function OmniBar:CheckSpecAbilitiesForUnit(className, spellName)
     return hasTalent
 end
 
-
-
+function OmniBar:ClearPartyGUIDCache()
+    for barKey, partyGUIDs in pairs(partyGUIDCache) do
+        for partyGUID, _ in pairs(partyGUIDs) do
+            partyGUIDs[partyGUID] = ""
+        end
+    end
+end
 
 
 

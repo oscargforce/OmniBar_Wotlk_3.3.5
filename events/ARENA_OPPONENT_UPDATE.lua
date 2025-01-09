@@ -30,6 +30,8 @@ local function ClearUnitData(unit)
     for barKey, units in pairs(processedBars) do
         units[unit] = nil
     end
+
+    OmniBar:ClearSpecProcessedData(unit)
 end
 
 -- Mark the bar as processed for the unit. To prevent duplicate requests and icons.
