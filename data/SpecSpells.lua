@@ -57,18 +57,18 @@ addon.crossSpecSpells = {
     ["Aimed Shot"] = { mm = true, survival = true, bm = true },
     ["Readiness"] = { mm = true, bm = true },
     ["Scatter Shot"] =  { mm = true, survival = true },
+    ["Lichborne"] =  { frostDk = true, blood = true, unholy = true },
+    ["Bone Shield"] =  { frostDk = true, blood = true, unholy = true },
 }
 
 addon.specDefiningSpells = {
     -- Death Knight
     ["Anti-Magic Zone"] = "unholy",
-    ["Bone Shield"] = "unholy",
     ["Dancing Rune Weapon"] = "blood",
     ["Deathchill"] = "frostDk",
     ["Howling Blast"] = "frostDk",
     ["Hungering Cold"] = "frostDk",
     ["Hysteria"] = "blood",
-    ["Lichborne"] = "frostDk",
     ["Mark of Blood"] = "blood",
     ["Rune Tap"] = "blood",
     ["Summon Gargoyle"] = "Unholy",

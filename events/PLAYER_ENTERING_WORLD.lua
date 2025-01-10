@@ -8,7 +8,12 @@ function OmniBar:PLAYER_ENTERING_WORLD()
         self:RefreshBarsWithActiveIcons()
         self:ClearPartyGUIDCache()
         print("PLAYER_ENTERING_WORLD: RefreshBarsWithActiveIcons")
-    end
 
+    end
+    
     self.zone = zone
+
+    if self.zone == "arena" then
+        self:HandleMidGameReloadsForArenaUpdate()
+    end
 end

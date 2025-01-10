@@ -1,9 +1,9 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local UnitClass = UnitClass
 local UnitRace = UnitRace
+local UnitExists = UnitExists
 
 local processedBars = {}
-
 
 -- Caches and returns the arena units class and race.
  local function GetUnitData(unit)
@@ -135,4 +135,40 @@ function OmniBar:OnArenaOpponentUpdate(barFrame, event, unit, updateReason)
 
     self:ArrangeIcons(barFrame, barSettings)
     self:UpdateUnusedAlpha(barFrame, barSettings)
+end
+
+-- Util function called in OmniBar:PLAYER_ENTERING_WORLD()
+function OmniBar:HandleMidGameReloadsForArenaUpdate()
+    if not UnitExists("arena1") then return end
+
+    for barKey, barSettings in pairs(self.db.profile.bars) do
+        local barFrame = self.barFrames[barKey]
+
+        if barSettings.showUnusedIcons then
+            -- Handle bars tracking all arena enemies
+            if barSettings.trackedUnit == "allEnemies" then
+                local existingUnits = {}
+
+                -- Collect all active arena units
+                for i = 1, 5 do
+                    local unit = "arena" .. i
+                    if UnitExists(unit) then
+                        table.insert(existingUnits, unit)
+                    end
+                end
+
+                -- Clear previous arena data and process current units
+                self:OnArenaOpponentUpdate(barFrame, "", "arena1", "cleared")
+                for _, unit in ipairs(existingUnits) do
+                    self:OnArenaOpponentUpdate(barFrame, "", unit, "seen")
+                end
+
+            -- Handle bars tracking specific arena units
+            elseif barSettings.trackedUnit:match("^arena[1-5]$") then
+                if UnitExists(barSettings.trackedUnit) then
+                    self:OnArenaOpponentUpdate(barFrame, "", barSettings.trackedUnit, "seen")
+                end
+            end
+        end
+    end
 end
