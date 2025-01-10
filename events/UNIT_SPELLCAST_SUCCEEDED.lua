@@ -27,7 +27,7 @@ local nonArenaEnemyUnits = {
 }
 
 local function MatchesArenaUnit(unit, trackedUnit)
-    if trackedUnit == "enemies" then
+    if trackedUnit == "allEnemies" then
         return arenaUnits[unit] or false
     end
 
@@ -39,11 +39,15 @@ local function MatchesArenaUnit(unit, trackedUnit)
         return true
     end
 
+    if unit == trackedUnit:gsub("party", "partypet") then
+        return true
+    end
+
     return false
 end
 
 local function MatchesGeneralUnit(unit, trackedUnit)
-    if trackedUnit == "enemies" then
+    if trackedUnit == "allEnemies" then
 
         if not nonArenaEnemyUnits[unit] then
             return false
@@ -59,7 +63,13 @@ local function MatchesGeneralUnit(unit, trackedUnit)
         return nonArenaEnemyUnits[unit] or false 
     end
     
-    return unit == trackedUnit
+    if unit == trackedUnit then
+        return true
+    end
+
+    if unit == trackedUnit:gsub("party", "partypet") then
+        return true
+    end
 end
 
 local function GetUnitMatchStrategy(zone)
@@ -80,11 +90,12 @@ function OmniBar:UnitMatchesTrackedUnit(unit, trackedUnit)
     return strategy(unit, trackedUnit)
 end
 
+-- Maybe a bug, for example spirit wolves uses bash same ability as druid, we might display the icon if its tracked on druid but not on shaman. 
+-- Need to test this, and if so add another condition icon.className == unit class, maybe want to add a cache for this to reduce the api calls.
 
 -- Death knights death coil has same name as warlock spell :/ need to use some if statement on that spell
 function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spellRank)
     local barSettings = self.db.profile.bars[barFrame.key]
-    print(spellName, unit)
     if not self:UnitMatchesTrackedUnit(unit, barSettings.trackedUnit) then return end
 
     local spellData = barFrame.trackedSpells[spellName]
@@ -92,34 +103,35 @@ function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spel
     if spellName == "Death Coil" and spellRank ~="Rank 6" then return end
 
     print("PASSED:", spellName)
-    self:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
+    self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
 end
 
-function OmniBar:OnCooldownUsed(barFrame, barSettings, spellName, spellData)
+function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
     if barSettings.showUnusedIcons then
+        self:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
+
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName then
-                print("Creating icon for", spellName)
+                print("Activating icon:", spellName)
                 barFrame.activeIcons[spellName] = icon
                 self:ActivateIcon(barFrame, barSettings, icon, spellData.duration)
                 return
             end  
         end
+        -- icon not found on bar, simply exit the function
+        return
     end
 
     -- Get or create icon for this spell
-    local icon = self:GetIconFromPool(barFrame)
-    icon.spellName = spellName 
-    icon.priority = spellData.priority 
-    icon.icon:SetTexture(spellData.icon)
-    table.insert(barFrame.icons, icon)
+    local icon = self:CreateIconToBar(barFrame, spellName, spellData)
     self:ActivateIcon(barFrame, barSettings, icon, spellData.duration)
+    self:ArrangeIcons(barFrame, barSettings)
 end
 
 function OmniBar:ActivateIcon(barFrame, barSettings, icon, duration)
     self:ToggleAnchorVisibility(barFrame)
     self:StartCooldownShading(icon, duration, barSettings, barFrame)
-    self:ArrangeIcons(barFrame, barSettings)
+    -- self:ArrangeIcons(barFrame, barSettings) -- maybe we dont need this anymore?
 end
 
 local COLORS = {
@@ -149,7 +161,6 @@ function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame)
     local endTime = startTime + duration
 
     icon.endTime = endTime
-    icon:Show()
     icon:SetAlpha(1)
     icon:PlayNewIconAnimation()
 
@@ -190,8 +201,10 @@ function OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
                 break
             end
         end
+
+        print("ARRANGE ICONS")
+        self:ArrangeIcons(barFrame, barSettings)
     end
-    print("ARRANGE ICONS")
-    self:ArrangeIcons(barFrame, barSettings)
+    
     self:ToggleAnchorVisibility(barFrame)
 end

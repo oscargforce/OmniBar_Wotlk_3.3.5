@@ -1,5 +1,6 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local addonName, addon = ...
+local GetBuffNameFromTrinket = addon.GetBuffNameFromTrinket
 
 function OmniBar:UpdateBar(barKey, specificUpdate)
     local barFrame = self.barFrames[barKey]
@@ -11,12 +12,13 @@ function OmniBar:UpdateBar(barKey, specificUpdate)
         scale = function() self:UpdateScale(barFrame, barSettings) end,
         resetIcons = function() self:ResetIcons(barFrame) end,
         updateSpellTracking = function() self:UpdateSpellTrackingForBar(barFrame, barSettings) end,
-        createIcons = function() self:CreateIconsToBar(barFrame, barSettings) end,
+        setUpIcons = function() self:SetupBarIcons(barFrame, barSettings) end,
         border = function() self:UpdateBorder(barFrame, barSettings) end,
         arrangeIcons = function() self:ArrangeIcons(barFrame, barSettings, true) end,
         refreshBarIconsState = function() self:UpdateIconVisibilityAndState(barFrame, barSettings) end,
         unusedAlpha = function() self:UpdateUnusedAlpha(barFrame, barSettings) end,
         swipeAlpha = function() self:UpdateSwipeAlpha(barFrame, barSettings) end,
+        updateEvents = function() self:UpdateUnitEventTracking(barFrame, barSettings) end,
     }
 
     if specificUpdate then
@@ -32,7 +34,7 @@ function OmniBar:UpdateBar(barKey, specificUpdate)
     end
     
     -- Perform all required updates if no specific update is provided
-    local operationOrder = {"name", "scale", "resetIcons", "updateSpellTracking", "createIcons", "unusedAlpha","border"}
+    local operationOrder = {"name", "scale", "resetIcons", "updateSpellTracking", "setUpIcons","border"}
     for _, key in ipairs(operationOrder) do
         local operation = updateOperations[key]
         operation()
@@ -68,7 +70,7 @@ function OmniBar:UpdateIconVisibilityAndState(barFrame, barSettings)
 
     if showUnusedIcons then
         self:ResetIcons(barFrame)
-        self:CreateIconsToBar(barFrame, barSettings)
+        self:SetupBarIcons(barFrame, barSettings)
         self:UpdateUnusedAlpha(barFrame, barSettings)
     else
         self:ResetIcons(barFrame)
@@ -91,15 +93,24 @@ function OmniBar:UpdateUnusedAlpha(barFrame, barSettings, singleIconUpdate)
     singleIconUpdate:SetAlpha(unusedAlpha)
 end
 
-local function getCorrectedSpellName(spellName)
-    local nameMapping = {
-        ["Bauble of True Blood"] = "Release of Light",
-        ["Corroded Skeleton Key"] = "Hardened Skin",
+--[[ Updates the spell tracking for a specific bar
+    @param barFrame - The UI frame for the bar
+    @param barSettings - Saved variable for the bar eg self.profile.bars[barKey]
+    
+    Structure of trackedSpells:
+    {
+        [spellName] = {
+            duration = number,
+            icon = string,
+            priority = number,
+            className = string,
+            spellId = number,
+            race = string (optional),
+            spec = boolean (optional),
+            item = boolean (optional)
+        }
     }
-
-    return nameMapping[spellName] or spellName
-end
-
+]]
 function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
     local trackedSpells = barFrame.trackedSpells
     wipe(trackedSpells)
@@ -111,18 +122,31 @@ function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
             if spellConfig.isTracking then
                 local spellData = spellTable[className][spellName]
 
-                if spellData then  
-                    spellName = getCorrectedSpellName(spellName)
-    
-                    if not trackedSpells[spellName] then
-                        trackedSpells[spellName] = {
-                            duration = spellData.duration,
-                            icon = spellData.icon,
-                            priority = spellConfig.priority or 1
-                        }
+                if not spellData then  
+                    print(spellName, "does not exist in the table: trackedSpells. Add it to the table then preform /relod")
+                    return
+                end
+
+                spellName = GetBuffNameFromTrinket(spellName) -- if not trinket the func returns the orignal spellName
+
+                if not trackedSpells[spellName] then
+                    trackedSpells[spellName] = {
+                        duration = spellData.duration,
+                        icon = spellData.icon,
+                        priority = spellConfig.priority or 1,
+                        className = className,
+                        spellId = spellData.spellId
+                    }
+
+                    if spellData.race then
+                        trackedSpells[spellName].race = spellData.race
                     end
-                else
-                    print(spellName, "does not exist in the table: trackedSpells")
+                    if spellData.spec then
+                        trackedSpells[spellName].spec = spellData.spec
+                    end
+                    if spellData.item then
+                        trackedSpells[spellName].item = spellData.item
+                    end
                 end
             end
         end
@@ -140,4 +164,33 @@ function OmniBar:UpdateSwipeAlpha(barFrame, barSettings, singleIconUpdate)
     end
 
     singleIconUpdate:SetAlpha(swipeAlpha)
+end
+
+function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
+    local trackedUnit = barSettings.trackedUnit
+    -- Unregister previous events
+    barFrame:UnregisterEvent("ARENA_OPPONENT_UPDATE")
+    barFrame:UnregisterEvent("PARTY_MEMBERS_CHANGED")
+    barFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
+    barFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    barFrame:UnregisterEvent("INSPECT_TALENT_READY")
+    barFrame:UnregisterEvent("UNIT_AURA")
+    
+    if trackedUnit:match("^arena[1-5]$") then
+        barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
+        barFrame:RegisterEvent("UNIT_AURA")
+    elseif trackedUnit:match("^party[1-4]$") then
+        barFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
+        barFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
+    elseif trackedUnit == "target" then
+        -- barFrame:RegisterEvent("")
+    elseif trackedUnit == "focus" then
+        -- barFrame:RegisterEvent("") 
+    else -- All enemies
+        barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
+        barFrame:RegisterEvent("UNIT_AURA")
+    end
+
+    -- Always register UNIT_SPELLCAST_SUCCEEDED
+    barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 end

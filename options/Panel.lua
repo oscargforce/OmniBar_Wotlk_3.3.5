@@ -41,13 +41,21 @@ function OmniBar:SetupOptions()
                 name = "General Settings",
                 order = 0,
                 args = {
+                    showOutOfRangeMessages = {
+                        type = "toggle",
+                        name = "Show Out of Range Messages",
+                        desc = "When enabled, a message will be displayed when OmniBar is out of range to inspect a unit.",
+                        get = function(info) return self.db.profile.showOutOfRangeMessages end,
+                        set = function(info, value) self.db.profile.showOutOfRangeMessages = value end,
+                        order = 1,
+                    },
                     lockBars = {
                         type = "toggle",
                         name = "Lock Bar Positions",
                         desc = "When enabled, prevents bars from being moved around.",
                         set = function(info, value) self.db.profile.lockBars = value end,
                         get = function(info) return self.db.profile.lockBars end,
-                        order = 1,
+                        order = 2,
                     },
                     showInArena = {
                         type = "toggle",
@@ -55,7 +63,7 @@ function OmniBar:SetupOptions()
                         desc = "Enable this option to show the cooldown bars in arena matches.",
                         set = function(info, value) self.db.profile.showInArena = value end,
                         get = function(info) return self.db.profile.showInArena end,
-                        order = 2,
+                        order = 3,
                     },
                     showInWorld = {
                         type = "toggle",
@@ -63,16 +71,6 @@ function OmniBar:SetupOptions()
                         desc = "Enable this option to show the cooldown bars in the world and battlegrounds.",
                         set = function(info, value) self.db.profile.showInWorld = value end,
                         get = function(info) return self.db.profile.showInWorld end,
-                        order = 3,
-                    },
-                    sliderOption = {
-                        type = "range",
-                        name = "Slider Option",
-                        min = 0,
-                        max = 100,
-                        step = 1,
-                        set = function(info, value) self.db.profile.sliderOption = value end,
-                        get = function(info) return self.db.profile.sliderOption end,
                         order = 4,
                     },
                 },
