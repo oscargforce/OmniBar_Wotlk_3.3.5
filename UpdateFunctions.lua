@@ -166,15 +166,25 @@ function OmniBar:UpdateSwipeAlpha(barFrame, barSettings, singleIconUpdate)
     singleIconUpdate:SetAlpha(swipeAlpha)
 end
 
+local function IsValidWorldUnit(trackedUnit)
+    return trackedUnit == "allEnemies" or trackedUnit == "target" or trackedUnit == "focus"
+end
+
+local function SetSpellTrackingEventForBar(barFrame, trackedUnit, zone)
+    if IsValidWorldUnit(trackedUnit) and zone == "arena" then
+        barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+        print("Registered UNIT_SPELLCAST_SUCCEEDED")
+    else
+        barFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+        print("Unregistered UNIT_SPELLCAST_SUCCEEDED")
+    end
+end
+
 function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
     local trackedUnit = barSettings.trackedUnit
+
     -- Unregister previous events
-    barFrame:UnregisterEvent("ARENA_OPPONENT_UPDATE")
-    barFrame:UnregisterEvent("PARTY_MEMBERS_CHANGED")
-    barFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
-    barFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-    barFrame:UnregisterEvent("INSPECT_TALENT_READY")
-    barFrame:UnregisterEvent("UNIT_AURA")
+    self:UnregisterAllEvents(barFrame)
     
     if trackedUnit:match("^arena[1-5]$") then
         barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
@@ -191,6 +201,13 @@ function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
         barFrame:RegisterEvent("UNIT_AURA")
     end
 
-    -- Always register UNIT_SPELLCAST_SUCCEEDED
-    barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    SetSpellTrackingEventForBar(barFrame, trackedUnit, self.zone)
+end
+
+
+function OmniBar:UpdateSpellTrackingEventForAllBars(zone)
+    for barKey, barFrame in pairs(self.barFrames) do
+        local trackedUnit = self.db.profile.bars[barFrame.key].trackedUnit
+        SetSpellTrackingEventForBar(barFrame, trackedUnit, zone)
+    end
 end

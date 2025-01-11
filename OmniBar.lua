@@ -24,7 +24,7 @@ local DEFAULT_BAR_SETTINGS = {
  
 local function AddIconsToSpellTable()
     for className, spells in pairs(spellTable) do
-        for _, spellData in pairs(spells) do
+        for spellName, spellData in pairs(spells) do
             local icon
             if not spellData.item then 
                 local _, _, spellIcon = GetSpellInfo(spellData.spellId)  
@@ -45,6 +45,7 @@ function OmniBar:OnInitialize()
     self.barIndex = 1
     self.iconPool = {}
     self.arenaOpponents = {}
+    self.spellCastsCache = {} -- Only used if bars registered to combat log events
     self.db.RegisterCallback(self, "OnProfileChanged", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
@@ -52,6 +53,7 @@ function OmniBar:OnInitialize()
     self:RegisterEvent("CHAT_MSG_SYSTEM")
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
+   -- self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:SetupOptions()
     AddIconsToSpellTable()
 end
@@ -89,12 +91,7 @@ function OmniBar:Delete(barKey, barFrame, keepProfile)
     local targetFrame  = barFrame or self.barFrames[barKey]
 
     targetFrame:Hide()
-    targetFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-    targetFrame:UnregisterEvent("ARENA_OPPONENT_UPDATE")
-    targetFrame:UnregisterEvent("PARTY_MEMBERS_CHANGED")
-    targetFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
-    targetFrame:UnregisterEvent("INSPECT_TALENT_READY")
-    targetFrame:UnregisterEvent("UNIT_AURA")
+    self:UnregisterAllBarEvents(targetFrame)
 
     if not keepProfile then
         self.db.profile.bars[barKey] = nil 
@@ -111,6 +108,16 @@ function OmniBar:Delete(barKey, barFrame, keepProfile)
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("OmniBar")
 end
 
+function OmniBar:UnregisterAllBarEvents(barFrame)
+    barFrame:UnregisterEvent("ARENA_OPPONENT_UPDATE")
+    barFrame:UnregisterEvent("INSPECT_TALENT_READY")
+    barFrame:UnregisterEvent("PARTY_MEMBERS_CHANGED")
+    barFrame:UnregisterEvent("PLAYER_TARGET_CHANGED")
+    barFrame:UnregisterEvent("UNIT_AURA")
+    barFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
+    barFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+end
+
 function OmniBar:GenerateUniqueKey()
     local key
     repeat
@@ -125,7 +132,7 @@ local function DeepCopyTable(tbl)
     local copy = {}
     for k, v in pairs(tbl) do
         if type(v) == "table" then
-            copy[k] = addon.DeepCopyTable(v)  -- Recursively copy tables
+            copy[k] = DeepCopyTable(v)  -- Recursively copy tables
         else
             copy[k] = v
         end
@@ -139,8 +146,8 @@ function OmniBar:InitializeBar(barKey, settings)
 
         local defaultBarSettings = DeepCopyTable(DEFAULT_BAR_SETTINGS)
 
-		for a,b in pairs(defaultBarSettings) do
-			self.db.profile.bars[barKey][a] = b
+		for k, v in pairs(defaultBarSettings) do
+			self.db.profile.bars[barKey][k] = v
 		end
 
         self.db.profile.bars[barKey].name = barKey 
@@ -188,6 +195,8 @@ function OmniBar:OnEventHandler(barFrame, event, ...)
         self:OnArenaOpponentUpdate(barFrame, event, ...)
     elseif event == "UNIT_AURA" then
         self:OnUnitAura(barFrame, event, ...)
+    elseif event == "PLAYER_TARGET_CHANGED" then
+        self:OnPlayerTargetChange(barFrame, event, ...)
     end
 end
 

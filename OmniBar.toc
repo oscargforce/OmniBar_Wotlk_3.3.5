@@ -27,5 +27,7 @@ events\OnPartyMembersChanged.lua
 events\OnUnitInventoryChanged.lua
 events\OnArenaOpponentUpdate.lua
 events\OnUnitAura.lua
+events\OnCombatLogUnfiltered.lua
+events\OnPlayerTargetChanged.lua
 
 
