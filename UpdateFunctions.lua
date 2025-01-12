@@ -166,17 +166,22 @@ function OmniBar:UpdateSwipeAlpha(barFrame, barSettings, singleIconUpdate)
     singleIconUpdate:SetAlpha(swipeAlpha)
 end
 
-local function IsValidWorldUnit(trackedUnit)
-    return trackedUnit == "allEnemies" or trackedUnit == "target" or trackedUnit == "focus"
-end
+local VALID_WORLD_UNITS = {
+    allEnemies = true,
+    target = true,
+    focus = true,
+}
 
 local function SetSpellTrackingEventForBar(barFrame, trackedUnit, zone)
-    if IsValidWorldUnit(trackedUnit) and zone == "arena" then
-        barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-        print("Registered UNIT_SPELLCAST_SUCCEEDED")
+    if not VALID_WORLD_UNITS[trackedUnit] then 
+        return 
+    end
+    
+    if zone == "arena" then
+        barFrame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED") -- Event: UnitSpellCastSucceeded can handle all scenarios in arenas
     else
-        barFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-        print("Unregistered UNIT_SPELLCAST_SUCCEEDED")
+        print("Registered COMBAT_LOG_EVENT_UNFILTERED") 
+        barFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     end
 end
 
@@ -184,7 +189,7 @@ function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
     local trackedUnit = barSettings.trackedUnit
 
     -- Unregister previous events
-    self:UnregisterAllEvents(barFrame)
+    self:UnregisterAllBarEvents(barFrame)
     
     if trackedUnit:match("^arena[1-5]$") then
         barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
@@ -201,13 +206,14 @@ function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
         barFrame:RegisterEvent("UNIT_AURA")
     end
 
+    barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
     SetSpellTrackingEventForBar(barFrame, trackedUnit, self.zone)
 end
 
 
-function OmniBar:UpdateSpellTrackingEventForAllBars(zone)
+function OmniBar:UpdateSpellTrackingEventForBars(zone)
     for barKey, barFrame in pairs(self.barFrames) do
-        local trackedUnit = self.db.profile.bars[barFrame.key].trackedUnit
+        local trackedUnit = self.db.profile.bars[barKey].trackedUnit
         SetSpellTrackingEventForBar(barFrame, trackedUnit, zone)
     end
 end

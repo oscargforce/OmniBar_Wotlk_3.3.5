@@ -45,7 +45,7 @@ function OmniBar:OnInitialize()
     self.barIndex = 1
     self.iconPool = {}
     self.arenaOpponents = {}
-    self.spellCastsCache = {} -- Only used if bars registered to combat log events
+    self.combatLogCache = {}
     self.db.RegisterCallback(self, "OnProfileChanged", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
@@ -53,7 +53,6 @@ function OmniBar:OnInitialize()
     self:RegisterEvent("CHAT_MSG_SYSTEM")
     self:RegisterEvent("PLAYER_REGEN_ENABLED")
     self:RegisterEvent("PLAYER_REGEN_DISABLED")
-   -- self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:SetupOptions()
     AddIconsToSpellTable()
 end
@@ -116,6 +115,7 @@ function OmniBar:UnregisterAllBarEvents(barFrame)
     barFrame:UnregisterEvent("UNIT_AURA")
     barFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
     barFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    barFrame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 end
 
 function OmniBar:GenerateUniqueKey()
@@ -185,6 +185,8 @@ end
 function OmniBar:OnEventHandler(barFrame, event, ...)
     if event == "UNIT_SPELLCAST_SUCCEEDED" then
         self:OnUnitSpellCastSucceeded(barFrame, event, ...)
+    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+        self:OnCombatLogEventUnfiltered(barFrame, event, ...)
     elseif event == "PARTY_MEMBERS_CHANGED" then
         self:OnPartyMembersChanged(barFrame, event, ...)
     elseif event == "UNIT_INVENTORY_CHANGED" then
@@ -198,7 +200,7 @@ function OmniBar:OnEventHandler(barFrame, event, ...)
     elseif event == "PLAYER_TARGET_CHANGED" then
         self:OnPlayerTargetChange(barFrame, event, ...)
     end
-end
+end 
 
 function OmniBar:SetupBarIcons(barFrame, barSettings)
     local trackedUnit = barSettings.trackedUnit
