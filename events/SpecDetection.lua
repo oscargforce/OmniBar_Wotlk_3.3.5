@@ -4,7 +4,22 @@ local specDefiningSpells = addon.specDefiningSpells
 local crossSpecSpells = addon.crossSpecSpells
 local specDefiningAuras = addon.specDefiningAuras
 local UnitAura = UnitAura
+local UnitClass = UnitClass
+
 local processedBars = {}
+
+local validArenaUnits = {
+    ["arena1"] = true,
+    ["arena2"] = true,
+    ["arena3"] = true,
+    ["arena4"] = true,
+    ["arena5"] = true,
+}
+
+local validWorldUnits = {
+    ["target"] = true,
+    ["focus"] = true,
+}
 
 local function MarkBarAsProcessed(barKey, unit)
     if not processedBars[barKey] then
@@ -23,8 +38,17 @@ function OmniBar:ClearSpecProcessedData(unit)
     end
 end
 
+function OmniBar:DetectSpecByCombatLogCache(spellName)
+    return specDefiningSpells[spellName]
+end
+
 function OmniBar:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
-    if not unit:match("^arena[1-5]$") then return end
+    if self.zone ~= "arena" then 
+        self:DetectSpecInWorldZones(spellName, unit, barFrame, barSettings)
+        return 
+    end
+
+    if self.zone == "arena" and not validArenaUnits[unit] then return end
 
     local barKey = barFrame.key
     if HasBarProcessedUnit(barKey, unit) then
@@ -44,6 +68,26 @@ function OmniBar:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
     end
 
     if opponent.spec then
+        self:OnSpecDetected(unit, opponent, barFrame, barSettings)
+        MarkBarAsProcessed(barKey, unit)
+    end
+end
+
+function OmniBar:DetectSpecInWorldZones(spellName, unit, barFrame, barSettings)
+    if not validWorldUnits[unit] then return end
+
+    local barKey = barFrame.key
+    if HasBarProcessedUnit(barKey, unit) then
+        print(barSettings.name, "returns because HasBarProcessedUnit")
+        return
+    end
+
+    local definedSpec = specDefiningSpells[spellName]
+    
+    if definedSpec then
+        print("WHOHOOOO", definedSpec)
+        local className = UnitClass(unit)
+        local opponent = { className = className, spec = definedSpec }
         self:OnSpecDetected(unit, opponent, barFrame, barSettings)
         MarkBarAsProcessed(barKey, unit)
     end

@@ -198,9 +198,9 @@ function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
         barFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
         barFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
     elseif trackedUnit == "target" then
-        -- barFrame:RegisterEvent("")
+        barFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
     elseif trackedUnit == "focus" then
-        -- barFrame:RegisterEvent("") 
+        barFrame:RegisterEvent("PLAYER_FOCUS_CHANGED") 
     else -- All enemies
         barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
         barFrame:RegisterEvent("UNIT_AURA")

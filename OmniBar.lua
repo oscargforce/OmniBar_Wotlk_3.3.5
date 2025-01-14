@@ -46,6 +46,7 @@ function OmniBar:OnInitialize()
     self.iconPool = {}
     self.arenaOpponents = {}
     self.combatLogCache = {}
+    self.currentRealm = GetRealmName()
     self.db.RegisterCallback(self, "OnProfileChanged", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
@@ -111,6 +112,7 @@ function OmniBar:UnregisterAllBarEvents(barFrame)
     barFrame:UnregisterEvent("ARENA_OPPONENT_UPDATE")
     barFrame:UnregisterEvent("INSPECT_TALENT_READY")
     barFrame:UnregisterEvent("PARTY_MEMBERS_CHANGED")
+    barFrame:UnregisterEvent("PLAYER_FOCUS_CHANGED")
     barFrame:UnregisterEvent("PLAYER_TARGET_CHANGED")
     barFrame:UnregisterEvent("UNIT_AURA")
     barFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
@@ -197,8 +199,8 @@ function OmniBar:OnEventHandler(barFrame, event, ...)
         self:OnArenaOpponentUpdate(barFrame, event, ...)
     elseif event == "UNIT_AURA" then
         self:OnUnitAura(barFrame, event, ...)
-    elseif event == "PLAYER_TARGET_CHANGED" then
-        self:OnPlayerTargetChange(barFrame, event, ...)
+    elseif event == "PLAYER_TARGET_CHANGED" or event == "PLAYER_FOCUS_CHANGED" then
+        self:OnPlayerTargetChanged(barFrame, event, ...)
     end
 end 
 
@@ -447,6 +449,20 @@ function OmniBar:ToggleAnchorVisibility(barFrame)
         barFrame.anchor:Hide()
     else
         barFrame.anchor:Show()
+    end
+end
+
+function OmniBar:RemoveExpiredSpellsFromCombatLogCache()
+    local currentTime = GetTime()
+
+    for playerName, spells in pairs(self.combatLogCache) do
+        for spellName, spellData in pairs(spells) do
+            if spellData.expires then
+                if currentTime >= spellData.expires then
+                    self.combatLogCache[playerName][spellName] = nil
+                end
+            end
+        end
     end
 end
 

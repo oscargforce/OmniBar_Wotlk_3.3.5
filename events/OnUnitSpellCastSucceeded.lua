@@ -7,6 +7,7 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 
 local UnitIsEnemy = UnitIsEnemy
 local UnitIsUnit = UnitIsUnit
+local GetTime = GetTime
 
 local arenaUnits = {
     ["arena1"] = true,
@@ -106,15 +107,15 @@ function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spel
     self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
 end
 
-function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
+function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpell)
     if barSettings.showUnusedIcons then
         self:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
 
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName then
-                print("Activating icon:", spellName)
+                --print("Activating icon:", spellName)
                 barFrame.activeIcons[spellName] = icon
-                self:ActivateIcon(barFrame, barSettings, icon, spellData.duration)
+                self:ActivateIcon(barFrame, barSettings, icon, spellData.duration, cachedSpell)
                 return
             end  
         end
@@ -124,13 +125,13 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellDat
 
     -- Get or create icon for this spell
     local icon = self:CreateIconToBar(barFrame, spellName, spellData)
-    self:ActivateIcon(barFrame, barSettings, icon, spellData.duration)
+    self:ActivateIcon(barFrame, barSettings, icon, spellData.duration, cachedSpell)
     self:ArrangeIcons(barFrame, barSettings)
 end
 
-function OmniBar:ActivateIcon(barFrame, barSettings, icon, duration)
+function OmniBar:ActivateIcon(barFrame, barSettings, icon, duration, cachedSpell)
     self:ToggleAnchorVisibility(barFrame)
-    self:StartCooldownShading(icon, duration, barSettings, barFrame)
+    self:StartCooldownShading(icon, duration, barSettings, barFrame, cachedSpell)
     -- self:ArrangeIcons(barFrame, barSettings) -- maybe we dont need this anymore?
 end
 
@@ -156,13 +157,23 @@ local function formatTimeText(timeLeft)
     return string.format("%s%.0f%s", color, timeLeft, COLORS.END_TAG)
 end
 
-function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame)
-    local startTime = GetTime()
-    local endTime = startTime + duration
+function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame, cachedSpell)
+    local now = GetTime()
+    local startTime = now
+    local remainingDuration = duration
 
+    if cachedSpell then
+        remainingDuration = cachedSpell.expires - now
+        startTime = cachedSpell.timestamp
+        duration = cachedSpell.duration 
+    end
+
+    local endTime = now + remainingDuration
     icon.endTime = endTime
     icon:SetAlpha(1)
-    icon:PlayNewIconAnimation()
+    if not cachedSpell then
+        icon:PlayNewIconAnimation()
+    end
 
     icon.cooldown:SetCooldown(startTime, duration)
     icon.cooldown:SetAlpha(barSettings.swipeAlpha)
@@ -175,7 +186,7 @@ function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame)
         if lastUpdate >= 0.2 then
             local timeLeft = endTime - GetTime()
             if timeLeft > 0 then
-                -- need to add condition here, if barSettings.noCountdown, return early
+                -- need to add condition here, if barSettings.noCountdownText, return early
                 icon.countdownText:SetText(formatTimeText(timeLeft))
             else
                 OmniBar:OnCooldownEnd(icon, barFrame, barSettings)

@@ -1,5 +1,52 @@
 --[[ 
 
+
+ function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame, cachedSpell)
+    local now = GetTime()
+    local remainingDuration = duration
+
+    if cachedSpell then
+        remainingDuration = cachedSpell.expires - now
+        duration = remainingDuration 
+    end
+
+    local endTime = now + remainingDuration
+    print("End time:", endTime, "Duration:", duration, "Remaining duration:", remainingDuration)
+    icon:SetAlpha(1)
+    if not cachedSpell then
+        icon:PlayNewIconAnimation()
+    end
+
+    icon.cooldown:SetCooldown(now, remainingDuration)
+    icon.cooldown:SetAlpha(barSettings.swipeAlpha)
+
+    print("Icons pool OnUpdate", #self.iconPool)
+    local lastUpdate = 0
+    icon.timerFrame:Show() 
+    icon.timerFrame:SetScript("OnUpdate", function(self, elapsed)
+        lastUpdate = lastUpdate + elapsed
+        if lastUpdate >= 0.2 then
+            local timeLeft = endTime - GetTime()
+            print("Time left:", timeLeft)
+            if timeLeft > 0 then
+                -- need to add condition here, if barSettings.noCountdownText, return early
+                icon.countdownText:SetText(formatTimeText(timeLeft))
+            else
+                print("Cooldown ended")
+                OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
+               -- print("BarFrame icons num:", #barFrame.icons)
+            end
+            lastUpdate = 0
+        end
+    end) 
+end 
+
+
+
+
+
+
+
 local spellCasts = {}
 
 -- original omnibar also tracks SPELL_AURA_APPLIED 
