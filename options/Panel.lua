@@ -1,5 +1,5 @@
-
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
+local wipe = wipe
 
 function OmniBar:SetupOptions()
     self.options = {
@@ -83,9 +83,18 @@ function OmniBar:SetupOptions()
     -- Add the options table to Blizzard's options UI
     self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("OmniBar", "OmniBar")
  
-    -- Register a chat command to open the options UI
-    self:RegisterChatCommand("ob", function()
-        InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
+    -- Register slash commands
+    self:RegisterChatCommand("ob", function(input)
+        local command = input and input:trim():lower() or ""
+        if command == "reset" then
+            wipe(self.combatLogCache)
+            self:RefreshBarsWithActiveIcons()
+        else
+            -- Default behavior - open options
+            InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
+        end
+
     end)
  
 end
+

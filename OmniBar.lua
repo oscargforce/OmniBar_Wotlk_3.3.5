@@ -212,13 +212,16 @@ function OmniBar:SetupBarIcons(barFrame, barSettings)
     elseif trackedUnit:match("^party[1-4]$") then
         self:OnEventHandler(barFrame, "PARTY_MEMBERS_CHANGED", "editMode")
     elseif trackedUnit == "target" then
-        -- something
+        self:OnEventHandler(barFrame, "PLAYER_TARGET_CHANGED")
     elseif trackedUnit == "focus" then
-        -- something
+        self:OnEventHandler(barFrame, "PLAYER_FOCUS_CHANGED")
+    elseif trackedUnit == "allEnemies" and self.zone ~= "arena" then
+        self:OnEventHandler(barFrame, "PLAYER_TARGET_CHANGED")
+        self:OnEventHandler(barFrame, "PLAYER_FOCUS_CHANGED")
     else
         -- tracked unit is all enemies hence just populate the bar directly.
-        self:CreateIconsToBar(barFrame, barSettings)
-        self:UpdateUnusedAlpha(barFrame, barSettings)
+      --  self:CreateIconsToBar(barFrame, barSettings)
+      --  self:UpdateUnusedAlpha(barFrame, barSettings)
     end
 end
 
@@ -244,9 +247,6 @@ function OmniBar:CreateIconToBar(barFrame, spellName, spellData)
     end
     if spellData.item then 
         icon.item = spellData.item 
-    end
-    if spellData.spec then 
-        icon.spec = spellData.spec 
     end
 
     icon:Show()
@@ -277,7 +277,6 @@ function OmniBar:GetIconFromPool(barFrame)
         self:MakeFrameDraggable(icon, barFrame)
         return icon
     end
- --   print("creating new icon")
     -- Otherwise, create a new icon
     local icon = barFrame.CreateOmniBarIcon()
     self:MakeFrameDraggable(icon, barFrame)
@@ -373,7 +372,8 @@ function OmniBar:ResetIconState(icon)
     icon.endTime = nil
     icon.item = nil
     icon.race = nil
-    icon.spec = nil
+    --icon.unitType = nil
+    --icon.unitName = nil
 end
 
 

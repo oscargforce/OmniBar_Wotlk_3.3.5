@@ -89,6 +89,7 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
         spellId = spellId,
         spellName = spellName,
         timestamp = now, -- actually using this property
+        playerName = playerName -- using ths property
     }
 
     -- 4.1) Detect the spec of the player if it's not already cached.
@@ -110,8 +111,3 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
     end
  
 end
-
-
-
-
-

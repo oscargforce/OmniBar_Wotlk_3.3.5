@@ -1,5 +1,6 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local IsInInstance = IsInInstance
+local wipe = wipe
 
 function OmniBar:PLAYER_ENTERING_WORLD()
     print("OnPlayerEnteringWorld")
@@ -9,6 +10,7 @@ function OmniBar:PLAYER_ENTERING_WORLD()
     if self.zone and self.zone ~= zone then
         self:RefreshBarsWithActiveIcons()
         self:ClearPartyGUIDCache()
+        wipe(self.combatLogCache)
         print("PLAYER_ENTERING_WORLD: RefreshBarsWithActiveIcons")  
     end
     

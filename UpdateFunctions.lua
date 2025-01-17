@@ -166,22 +166,30 @@ function OmniBar:UpdateSwipeAlpha(barFrame, barSettings, singleIconUpdate)
     singleIconUpdate:SetAlpha(swipeAlpha)
 end
 
-local VALID_WORLD_UNITS = {
+local validWorldUnits = {
     allEnemies = true,
     target = true,
     focus = true,
 }
 
 local function SetSpellTrackingEventForBar(barFrame, trackedUnit, zone)
-    if not VALID_WORLD_UNITS[trackedUnit] then 
+    if not validWorldUnits[trackedUnit] then 
         return 
     end
     
     if zone == "arena" then
         barFrame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED") -- Event: UnitSpellCastSucceeded can handle all scenarios in arenas
+        if trackedUnit == "allEnemies" then
+            barFrame:UnregisterEvent("PLAYER_TARGET_CHANGED") 
+            barFrame:UnregisterEvent("PLAYER_FOCUS_CHANGED") 
+        end
     else
         print("Registered COMBAT_LOG_EVENT_UNFILTERED") 
         barFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        if trackedUnit == "allEnemies" then
+            barFrame:RegisterEvent("PLAYER_TARGET_CHANGED") 
+            barFrame:RegisterEvent("PLAYER_FOCUS_CHANGED") 
+        end
     end
 end
 
