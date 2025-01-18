@@ -4,9 +4,11 @@
     In arenas, to improve performance, we only track arena1-5 if the bar is set to track all enemies.
 ]]
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
-
+local addonName, addon = ...
+local sharedCds = addon.sharedCds
 local UnitIsEnemy = UnitIsEnemy
 local UnitIsUnit = UnitIsUnit
+local GetTime = GetTime
 
 local arenaUnits = {
     ["arena1"] = true,
@@ -101,20 +103,34 @@ function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spel
     local spellData = barFrame.trackedSpells[spellName]
     if not spellData then return end
     if spellName == "Death Coil" and spellRank ~="Rank 6" then return end
-
     print("PASSED:", spellName)
     self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
 end
 
-function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
+function OmniBar:SharedCooldownsForSpell(spellName, barFrame, barSettings)
+    local sharedCd = sharedCds[spellName]
+    if not sharedCd then return end
+
+    for i, icon in ipairs(barFrame.icons) do
+        if sharedCd[icon.spellName] then
+            print("Shared cd cooldown for", icon.spellName)
+           
+            barFrame.activeIcons[icon] = true
+            local sharedCdDuration = sharedCd[icon.spellName]
+            self:ActivateIcon(barFrame, barSettings, icon, sharedCdDuration)
+        end
+    end
+end
+
+function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpell)
     if barSettings.showUnusedIcons then
         self:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
+        self:SharedCooldownsForSpell(spellName, barFrame, barSettings)
 
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName then
-                print("Activating icon:", spellName)
-                barFrame.activeIcons[spellName] = icon
-                self:ActivateIcon(barFrame, barSettings, icon, spellData.duration)
+                barFrame.activeIcons[icon] = true
+                self:ActivateIcon(barFrame, barSettings, icon, spellData.duration, cachedSpell)
                 return
             end  
         end
@@ -124,13 +140,17 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellDat
 
     -- Get or create icon for this spell
     local icon = self:CreateIconToBar(barFrame, spellName, spellData)
-    self:ActivateIcon(barFrame, barSettings, icon, spellData.duration)
+    if cachedSpell then 
+        icon.unitName = cachedSpell.playerName 
+        icon.unitType = unit
+    end
+    self:ActivateIcon(barFrame, barSettings, icon, spellData.duration, cachedSpell)
     self:ArrangeIcons(barFrame, barSettings)
 end
 
-function OmniBar:ActivateIcon(barFrame, barSettings, icon, duration)
+function OmniBar:ActivateIcon(barFrame, barSettings, icon, duration, cachedSpell)
     self:ToggleAnchorVisibility(barFrame)
-    self:StartCooldownShading(icon, duration, barSettings, barFrame)
+    self:StartCooldownShading(icon, duration, barSettings, barFrame, cachedSpell)
     -- self:ArrangeIcons(barFrame, barSettings) -- maybe we dont need this anymore?
 end
 
@@ -156,18 +176,28 @@ local function formatTimeText(timeLeft)
     return string.format("%s%.0f%s", color, timeLeft, COLORS.END_TAG)
 end
 
-function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame)
-    local startTime = GetTime()
-    local endTime = startTime + duration
+function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame, cachedSpell)
+    local now = GetTime()
+    local startTime = now
+    local remainingDuration = duration
 
+    if cachedSpell then
+        remainingDuration = cachedSpell.expires - now
+        startTime = cachedSpell.timestamp
+        duration = cachedSpell.duration 
+    end
+
+    local endTime = now + remainingDuration
     icon.endTime = endTime
     icon:SetAlpha(1)
-    icon:PlayNewIconAnimation()
+    if not cachedSpell then
+        icon:PlayNewIconAnimation()
+    end
 
     icon.cooldown:SetCooldown(startTime, duration)
     icon.cooldown:SetAlpha(barSettings.swipeAlpha)
 
-    print("Icons pool OnUpdate", #self.iconPool)
+    print("StartCooldownShading Icons pool before:", #self.iconPool)
     local lastUpdate = 0
     icon.timerFrame:Show() 
     icon.timerFrame:SetScript("OnUpdate", function(self, elapsed)
@@ -175,11 +205,11 @@ function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame)
         if lastUpdate >= 0.2 then
             local timeLeft = endTime - GetTime()
             if timeLeft > 0 then
-                -- need to add condition here, if barSettings.noCountdown, return early
+                -- need to add condition here, if barSettings.noCountdownText, return early
                 icon.countdownText:SetText(formatTimeText(timeLeft))
             else
                 OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
-                print("BarFrame icons num:", #barFrame.icons)
+                print("StartCooldownShading expired barFrame.icons:", #barFrame.icons)
             end
             lastUpdate = 0
         end
@@ -187,10 +217,11 @@ function OmniBar:StartCooldownShading(icon, duration, barSettings, barFrame)
 end
 
 function OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
-    self:ResetIconState(icon)
-    
     if barSettings.showUnusedIcons then 
-        barFrame.activeIcons[icon.spellName] = nil
+        barFrame.activeIcons[icon] = nil
+
+        self:ResetIconState(icon)
+        self:CleanupWorldZoneInactiveIcons(icon, barFrame, barSettings)
         self:UpdateUnusedAlpha(barFrame, barSettings, icon) 
     else 
         self:ReturnIconToPool(icon) 
@@ -202,9 +233,37 @@ function OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
             end
         end
 
-        print("ARRANGE ICONS")
         self:ArrangeIcons(barFrame, barSettings)
     end
     
     self:ToggleAnchorVisibility(barFrame)
+end
+
+local validWorldUnitsForCleanUp = {
+    ["target"] = true,
+    ["focus"] = true,
+    ["allEnemies"] = true,
+}
+function OmniBar:CleanupWorldZoneInactiveIcons(icon, barFrame, barSettings)
+    if self.zone == "arena" then return end
+    if not validWorldUnitsForCleanUp[barSettings.trackedUnit] then return end
+
+    local currentUnitName = GetUnitName(icon.unitType)
+    print("Checking icon removal for", icon.spellName, "unit type:", icon.unitType)
+    print("Current unit:", icon.unitType, "Current name:", currentUnitName, "Icon unit name:", icon.unitName)
+
+    if icon.unitName ~= currentUnitName or
+        (icon.unitType == "target" and not UnitExists("target")) or
+        (icon.unitType == "focus" and not UnitExists("focus")) then
+        
+        print("Removing icon", icon.spellName, "from", icon.unitType)
+        self:ReturnIconToPool(icon)
+        for i = #barFrame.icons, 1, -1 do
+            if barFrame.icons[i] == icon then
+                table.remove(barFrame.icons, i)
+                break
+            end
+        end
+        self:ArrangeIcons(barFrame, barSettings)
+    end 
 end

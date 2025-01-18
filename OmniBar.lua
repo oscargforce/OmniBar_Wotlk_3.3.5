@@ -24,7 +24,7 @@ local DEFAULT_BAR_SETTINGS = {
  
 local function AddIconsToSpellTable()
     for className, spells in pairs(spellTable) do
-        for _, spellData in pairs(spells) do
+        for spellName, spellData in pairs(spells) do
             local icon
             if not spellData.item then 
                 local _, _, spellIcon = GetSpellInfo(spellData.spellId)  
@@ -45,6 +45,8 @@ function OmniBar:OnInitialize()
     self.barIndex = 1
     self.iconPool = {}
     self.arenaOpponents = {}
+    self.combatLogCache = {}
+    self.currentRealm = GetRealmName()
     self.db.RegisterCallback(self, "OnProfileChanged", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
@@ -89,12 +91,7 @@ function OmniBar:Delete(barKey, barFrame, keepProfile)
     local targetFrame  = barFrame or self.barFrames[barKey]
 
     targetFrame:Hide()
-    targetFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-    targetFrame:UnregisterEvent("ARENA_OPPONENT_UPDATE")
-    targetFrame:UnregisterEvent("PARTY_MEMBERS_CHANGED")
-    targetFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
-    targetFrame:UnregisterEvent("INSPECT_TALENT_READY")
-    targetFrame:UnregisterEvent("UNIT_AURA")
+    self:UnregisterAllBarEvents(targetFrame)
 
     if not keepProfile then
         self.db.profile.bars[barKey] = nil 
@@ -103,12 +100,25 @@ function OmniBar:Delete(barKey, barFrame, keepProfile)
 
     targetFrame.anchor:Hide()
     wipe(targetFrame.icons)
+    wipe(targetFrame.activeIcons)
     targetFrame.anchor = nil
     targetFrame.background = nil
     targetFrame.text = nil
     self.barFrames[barKey] = nil
 
 	LibStub("AceConfigRegistry-3.0"):NotifyChange("OmniBar")
+end
+
+function OmniBar:UnregisterAllBarEvents(barFrame)
+    barFrame:UnregisterEvent("ARENA_OPPONENT_UPDATE")
+    barFrame:UnregisterEvent("INSPECT_TALENT_READY")
+    barFrame:UnregisterEvent("PARTY_MEMBERS_CHANGED")
+    barFrame:UnregisterEvent("PLAYER_FOCUS_CHANGED")
+    barFrame:UnregisterEvent("PLAYER_TARGET_CHANGED")
+    barFrame:UnregisterEvent("UNIT_AURA")
+    barFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
+    barFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    barFrame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 end
 
 function OmniBar:GenerateUniqueKey()
@@ -125,7 +135,7 @@ local function DeepCopyTable(tbl)
     local copy = {}
     for k, v in pairs(tbl) do
         if type(v) == "table" then
-            copy[k] = addon.DeepCopyTable(v)  -- Recursively copy tables
+            copy[k] = DeepCopyTable(v)  -- Recursively copy tables
         else
             copy[k] = v
         end
@@ -139,8 +149,8 @@ function OmniBar:InitializeBar(barKey, settings)
 
         local defaultBarSettings = DeepCopyTable(DEFAULT_BAR_SETTINGS)
 
-		for a,b in pairs(defaultBarSettings) do
-			self.db.profile.bars[barKey][a] = b
+		for k, v in pairs(defaultBarSettings) do
+			self.db.profile.bars[barKey][k] = v
 		end
 
         self.db.profile.bars[barKey].name = barKey 
@@ -178,6 +188,8 @@ end
 function OmniBar:OnEventHandler(barFrame, event, ...)
     if event == "UNIT_SPELLCAST_SUCCEEDED" then
         self:OnUnitSpellCastSucceeded(barFrame, event, ...)
+    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+        self:OnCombatLogEventUnfiltered(barFrame, event, ...)
     elseif event == "PARTY_MEMBERS_CHANGED" then
         self:OnPartyMembersChanged(barFrame, event, ...)
     elseif event == "UNIT_INVENTORY_CHANGED" then
@@ -188,8 +200,10 @@ function OmniBar:OnEventHandler(barFrame, event, ...)
         self:OnArenaOpponentUpdate(barFrame, event, ...)
     elseif event == "UNIT_AURA" then
         self:OnUnitAura(barFrame, event, ...)
+    elseif event == "PLAYER_TARGET_CHANGED" or event == "PLAYER_FOCUS_CHANGED" then
+        self:OnPlayerTargetChanged(barFrame, event, ...)
     end
-end
+end 
 
 function OmniBar:SetupBarIcons(barFrame, barSettings)
     local trackedUnit = barSettings.trackedUnit
@@ -199,13 +213,16 @@ function OmniBar:SetupBarIcons(barFrame, barSettings)
     elseif trackedUnit:match("^party[1-4]$") then
         self:OnEventHandler(barFrame, "PARTY_MEMBERS_CHANGED", "editMode")
     elseif trackedUnit == "target" then
-        -- something
+        self:OnEventHandler(barFrame, "PLAYER_TARGET_CHANGED")
     elseif trackedUnit == "focus" then
-        -- something
+        self:OnEventHandler(barFrame, "PLAYER_FOCUS_CHANGED")
+    elseif trackedUnit == "allEnemies" and self.zone ~= "arena" then
+        self:OnEventHandler(barFrame, "PLAYER_TARGET_CHANGED")
+        self:OnEventHandler(barFrame, "PLAYER_FOCUS_CHANGED")
     else
         -- tracked unit is all enemies hence just populate the bar directly.
-        self:CreateIconsToBar(barFrame, barSettings)
-        self:UpdateUnusedAlpha(barFrame, barSettings)
+      --  self:CreateIconsToBar(barFrame, barSettings)
+      --  self:UpdateUnusedAlpha(barFrame, barSettings)
     end
 end
 
@@ -231,9 +248,6 @@ function OmniBar:CreateIconToBar(barFrame, spellName, spellData)
     end
     if spellData.item then 
         icon.item = spellData.item 
-    end
-    if spellData.spec then 
-        icon.spec = spellData.spec 
     end
 
     icon:Show()
@@ -264,7 +278,6 @@ function OmniBar:GetIconFromPool(barFrame)
         self:MakeFrameDraggable(icon, barFrame)
         return icon
     end
- --   print("creating new icon")
     -- Otherwise, create a new icon
     local icon = barFrame.CreateOmniBarIcon()
     self:MakeFrameDraggable(icon, barFrame)
@@ -360,7 +373,8 @@ function OmniBar:ResetIconState(icon)
     icon.endTime = nil
     icon.item = nil
     icon.race = nil
-    icon.spec = nil
+    --icon.unitType = nil
+    --icon.unitName = nil
 end
 
 
@@ -436,6 +450,20 @@ function OmniBar:ToggleAnchorVisibility(barFrame)
         barFrame.anchor:Hide()
     else
         barFrame.anchor:Show()
+    end
+end
+
+function OmniBar:RemoveExpiredSpellsFromCombatLogCache()
+    local currentTime = GetTime()
+
+    for playerName, spells in pairs(self.combatLogCache) do
+        for spellName, spellData in pairs(spells) do
+            if spellData.expires then
+                if currentTime >= spellData.expires then
+                    self.combatLogCache[playerName][spellName] = nil
+                end
+            end
+        end
     end
 end
 

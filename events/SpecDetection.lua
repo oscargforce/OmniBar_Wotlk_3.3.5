@@ -4,7 +4,23 @@ local specDefiningSpells = addon.specDefiningSpells
 local crossSpecSpells = addon.crossSpecSpells
 local specDefiningAuras = addon.specDefiningAuras
 local UnitAura = UnitAura
+local GetUnitName = GetUnitName
+local UnitClass = UnitClass
+
 local processedBars = {}
+
+local validArenaUnits = {
+    ["arena1"] = true,
+    ["arena2"] = true,
+    ["arena3"] = true,
+    ["arena4"] = true,
+    ["arena5"] = true,
+}
+
+local validWorldUnits = {
+    ["target"] = true,
+    ["focus"] = true,
+}
 
 local function MarkBarAsProcessed(barKey, unit)
     if not processedBars[barKey] then
@@ -23,8 +39,17 @@ function OmniBar:ClearSpecProcessedData(unit)
     end
 end
 
+function OmniBar:DetectSpecByCombatLogCache(spellName)
+    return specDefiningSpells[spellName]
+end
+
 function OmniBar:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
-    if not unit:match("^arena[1-5]$") then return end
+    if self.zone ~= "arena" then 
+        self:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barSettings)
+        return 
+    end
+
+    if not validArenaUnits[unit] then return end
 
     local barKey = barFrame.key
     if HasBarProcessedUnit(barKey, unit) then
@@ -42,8 +67,36 @@ function OmniBar:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
             print(barSettings.name, "Detected spec for " .. unit .. ": " .. definedSpec .. " via " .. spellName)
         end
     end
-
+    
     if opponent.spec then
+        self:OnSpecDetected(unit, opponent, barFrame, barSettings)
+        MarkBarAsProcessed(barKey, unit)
+    end
+end
+
+function OmniBar:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barSettings)
+    if not validWorldUnits[unit] then return end
+    if barSettings.trackedUnit == "allEnemies" then return end
+
+    local barKey = barFrame.key
+    if HasBarProcessedUnit(barKey, unit) then
+        print(barSettings.name, "returns because HasBarProcessedUnit")
+        return
+    end
+
+    local unitName = GetUnitName(unit)
+    local cachedData = self.combatLogCache[unitName]
+
+    if cachedData and cachedData.spec then 
+        print(barSettings.name, "Detected spec for " .. unit .. ": " .. cachedData.spec .. " via combat log cache")
+        return 
+    end
+
+    local definedSpec = specDefiningSpells[spellName]
+    
+    if definedSpec then
+        local className = UnitClass(unit)
+        local opponent = { className = className, spec = definedSpec }
         self:OnSpecDetected(unit, opponent, barFrame, barSettings)
         MarkBarAsProcessed(barKey, unit)
     end
@@ -80,37 +133,33 @@ function OmniBar:DetectSpecByAura(unit, barFrame, barSettings)
     end
 end
 
-local function SpellBelongsToSpec(icon, opponent)
-    if not icon.spec then 
-        return true 
+local function SpellBelongsToSpec(spellData, opponent, spellName)
+    if not spellData.spec then 
+        return false 
     end
 
-    -- Dont remove icons for other classes.
-    if icon.className ~= opponent.className then
-        return true
+    if spellData.className ~= opponent.className then
+        return false
     end
 
-    local crossSpecInfo = crossSpecSpells[icon.spellName]
+    local crossSpecInfo = crossSpecSpells[spellName]
     if crossSpecInfo and crossSpecInfo[opponent.spec] then
-        print("Allowing cross-spec spell: " .. icon.spellName)
+        print("Allowing cross-spec spell: " .. spellName)
         return true
     end
 
-    return icon.spec == opponent.spec
+    return spellData.spec == opponent.spec
 end
 
 function OmniBar:OnSpecDetected(unit, opponent, barFrame, barSettings)
-    -- check if there are icons on the bar, maybe add them we will see when testing.
-    if #barFrame.icons == 0 then return end
+    if #barFrame.icons == 0 then return end -- unsure why I have this check hehehe :P
 
     local needsRearranging = false
 
-    for i = #barFrame.icons, 1, -1 do
-        local icon = barFrame.icons[i]
-        if not SpellBelongsToSpec(icon, opponent) then
-            print(barSettings.name,"removing icon", icon.spellName)          
-            table.remove(barFrame.icons, i)
-            self:ReturnIconToPool(icon) 
+    for spellName, spellData in pairs(barFrame.trackedSpells) do
+        if SpellBelongsToSpec(spellData, opponent, spellName) then
+            print("OnSpecDetected:", spellName)
+            self:CreateIconToBar(barFrame, spellName, spellData)
             needsRearranging = true
         end
     end
@@ -120,5 +169,3 @@ function OmniBar:OnSpecDetected(unit, opponent, barFrame, barSettings)
         self:UpdateUnusedAlpha(barFrame, barSettings)
     end
 end
-
-

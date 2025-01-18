@@ -166,15 +166,38 @@ function OmniBar:UpdateSwipeAlpha(barFrame, barSettings, singleIconUpdate)
     singleIconUpdate:SetAlpha(swipeAlpha)
 end
 
+local validWorldUnits = {
+    allEnemies = true,
+    target = true,
+    focus = true,
+}
+
+local function SetSpellTrackingEventForBar(barFrame, trackedUnit, zone)
+    if not validWorldUnits[trackedUnit] then 
+        return 
+    end
+    
+    if zone == "arena" then
+        barFrame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED") -- Event: UnitSpellCastSucceeded can handle all scenarios in arenas
+        if trackedUnit == "allEnemies" then
+            barFrame:UnregisterEvent("PLAYER_TARGET_CHANGED") 
+            barFrame:UnregisterEvent("PLAYER_FOCUS_CHANGED") 
+        end
+    else
+        print("Registered COMBAT_LOG_EVENT_UNFILTERED") 
+        barFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        if trackedUnit == "allEnemies" then
+            barFrame:RegisterEvent("PLAYER_TARGET_CHANGED") 
+            barFrame:RegisterEvent("PLAYER_FOCUS_CHANGED") 
+        end
+    end
+end
+
 function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
     local trackedUnit = barSettings.trackedUnit
+
     -- Unregister previous events
-    barFrame:UnregisterEvent("ARENA_OPPONENT_UPDATE")
-    barFrame:UnregisterEvent("PARTY_MEMBERS_CHANGED")
-    barFrame:UnregisterEvent("UNIT_INVENTORY_CHANGED")
-    barFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-    barFrame:UnregisterEvent("INSPECT_TALENT_READY")
-    barFrame:UnregisterEvent("UNIT_AURA")
+    self:UnregisterAllBarEvents(barFrame)
     
     if trackedUnit:match("^arena[1-5]$") then
         barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
@@ -183,14 +206,22 @@ function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
         barFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
         barFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
     elseif trackedUnit == "target" then
-        -- barFrame:RegisterEvent("")
+        barFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
     elseif trackedUnit == "focus" then
-        -- barFrame:RegisterEvent("") 
+        barFrame:RegisterEvent("PLAYER_FOCUS_CHANGED") 
     else -- All enemies
         barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
         barFrame:RegisterEvent("UNIT_AURA")
     end
 
-    -- Always register UNIT_SPELLCAST_SUCCEEDED
     barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+    SetSpellTrackingEventForBar(barFrame, trackedUnit, self.zone)
+end
+
+
+function OmniBar:UpdateSpellTrackingEventForBars(zone)
+    for barKey, barFrame in pairs(self.barFrames) do
+        local trackedUnit = self.db.profile.bars[barKey].trackedUnit
+        SetSpellTrackingEventForBar(barFrame, trackedUnit, zone)
+    end
 end

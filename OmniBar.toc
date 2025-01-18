@@ -12,6 +12,7 @@ data\SpellTable.lua
 data\ClassNameToTCoordsKey.lua
 data\TalentTreeCoordinates.lua
 data\SpecSpells.lua
+data\CooldownInteractions.lua
 OmniBar.lua
 widgets\OminbarWidget.lua
 options\Panel.lua
@@ -19,13 +20,15 @@ options\BarManager.lua
 UpdateFunctions.lua
 events\InspectQueue.lua
 events\SpecDetection.lua
-events\PLAYER_ENTERING_WORLD.lua
-events\UNIT_SPELLCAST_SUCCEEDED.lua
-events\CHAT_MSG_SYSTEM.lua
-events\PLAYER_REGEN.lua
-events\PARTY_MEMBERS_CHANGED.lua
-events\UNIT_INVENTORY_CHANGED.lua
-events\ARENA_OPPONENT_UPDATE.lua
-events\UNIT_AURA.lua
+events\OnPlayerEnteringWorld.lua
+events\OnUnitSpellCastSucceeded.lua
+events\OnChatMsgSystem.lua
+events\OnPlayerRegen.lua
+events\OnPartyMembersChanged.lua
+events\OnUnitInventoryChanged.lua
+events\OnArenaOpponentUpdate.lua
+events\OnUnitAura.lua
+events\OnCombatLogEventUnfiltered.lua
+events\OnPlayerTargetChanged.lua
 
 
