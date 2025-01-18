@@ -4,7 +4,8 @@
     In arenas, to improve performance, we only track arena1-5 if the bar is set to track all enemies.
 ]]
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
-
+local addonName, addon = ...
+local sharedCds = addon.sharedCds
 local UnitIsEnemy = UnitIsEnemy
 local UnitIsUnit = UnitIsUnit
 local GetTime = GetTime
@@ -106,9 +107,25 @@ function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spel
     self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
 end
 
+function OmniBar:SharedCooldownsForSpell(spellName, barFrame, barSettings)
+    local sharedCd = sharedCds[spellName]
+    if not sharedCd then return end
+
+    for i, icon in ipairs(barFrame.icons) do
+        if sharedCd[icon.spellName] then
+            print("Shared cd cooldown for", icon.spellName)
+           
+            barFrame.activeIcons[icon] = true
+            local sharedCdDuration = sharedCd[icon.spellName]
+            self:ActivateIcon(barFrame, barSettings, icon, sharedCdDuration)
+        end
+    end
+end
+
 function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpell)
     if barSettings.showUnusedIcons then
         self:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
+        self:SharedCooldownsForSpell(spellName, barFrame, barSettings)
 
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName then
@@ -222,8 +239,15 @@ function OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
     self:ToggleAnchorVisibility(barFrame)
 end
 
+local validWorldUnitsForCleanUp = {
+    ["target"] = true,
+    ["focus"] = true,
+    ["allEnemies"] = true,
+}
 function OmniBar:CleanupWorldZoneInactiveIcons(icon, barFrame, barSettings)
     if self.zone == "arena" then return end
+    if not validWorldUnitsForCleanUp[barSettings.trackedUnit] then return end
+
     local currentUnitName = GetUnitName(icon.unitType)
     print("Checking icon removal for", icon.spellName, "unit type:", icon.unitType)
     print("Current unit:", icon.unitType, "Current name:", currentUnitName, "Icon unit name:", icon.unitName)

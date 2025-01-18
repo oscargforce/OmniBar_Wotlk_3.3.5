@@ -100,6 +100,7 @@ function OmniBar:Delete(barKey, barFrame, keepProfile)
 
     targetFrame.anchor:Hide()
     wipe(targetFrame.icons)
+    wipe(targetFrame.activeIcons)
     targetFrame.anchor = nil
     targetFrame.background = nil
     targetFrame.text = nil

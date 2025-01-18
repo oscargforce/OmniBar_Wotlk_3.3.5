@@ -12,6 +12,7 @@ data\SpellTable.lua
 data\ClassNameToTCoordsKey.lua
 data\TalentTreeCoordinates.lua
 data\SpecSpells.lua
+data\CooldownInteractions.lua
 OmniBar.lua
 widgets\OminbarWidget.lua
 options\Panel.lua
