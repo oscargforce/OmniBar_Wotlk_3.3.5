@@ -90,7 +90,7 @@ end
 local function RemoveInactiveIconsInWorldZone(icon, barFrame, barSettings)
     if OmniBar.zone == "arena" then return end
     if barSettings.trackedUnit ~= "allEnemies" then return end
-    viewTable(icon)
+    
     local currentUnitName = GetUnitName(icon.unitType)
     print("Checking icon removal for", icon.spellName, "unit type:", icon.unitType)
     print("Current unit:", icon.unitType, "Current name:", currentUnitName, "Icon unit name:", icon.unitName)
