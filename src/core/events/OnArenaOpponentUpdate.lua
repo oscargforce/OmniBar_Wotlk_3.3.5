@@ -1,4 +1,5 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
+local GetUnitName = GetUnitName
 local UnitClass = UnitClass
 local UnitRace = UnitRace
 local UnitExists = UnitExists
@@ -10,9 +11,11 @@ local processedBars = {}
     local arenaOpponents = OmniBar.arenaOpponents
 
     if not arenaOpponents[unit] then
+        local unitName = GetUnitName(unit) 
         local unitClass = UnitClass(unit) 
         local unitRace = UnitRace(unit) 
         arenaOpponents[unit] = {
+            unitName = unitName,
             className = unitClass,
             race = unitRace,
             spec = nil

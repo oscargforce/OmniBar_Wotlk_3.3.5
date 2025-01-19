@@ -1,0 +1,39 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+    <!-- Data -->
+    <Script file="src\data\SpellTable.lua"/>
+    <Script file="src\data\ClassNameToTCoordsKey.lua"/>
+    <Script file="src\data\TalentTreeCoordinates.lua"/>
+    <Script file="src\data\SpecSpells.lua"/>
+    <Script file="src\data\CooldownInteractions.lua"/>
+
+    <!-- Core -->
+    <Script file="src\Main.lua"/>
+    <Script file="src\core\Bars.lua"/>
+    <Script file="src\core\Cache.lua"/>
+    <Script file="src\core\Cooldown.lua"/>
+    <Script file="src\core\Icons.lua"/>
+    <Script file="src\core\InspectQueue.lua"/>
+    <Script file="src\core\Layout.lua"/>
+    <Script file="src\core\SpecDetection.lua"/>
+
+    <!-- Events -->
+    <Script file="src\core\EventController.lua"/>
+    <Script file="src\core\events\OnArenaOpponentUpdate.lua"/>
+    <Script file="src\core\events\OnChatMsgSystem.lua"/>
+    <Script file="src\core\events\OnCombatLogEventUnfiltered.lua"/>
+    <Script file="src\core\events\OnPartyMembersChanged.lua"/>
+    <Script file="src\core\events\OnPlayerEnteringWorld.lua"/>
+    <Script file="src\core\events\OnPlayerRegen.lua"/>
+    <Script file="src\core\events\OnPlayerTargetChanged.lua"/>
+    <Script file="src\core\events\OnUnitAura.lua"/>
+    <Script file="src\core\events\OnUnitInventoryChanged.lua"/>
+    <Script file="src\core\events\OnUnitSpellCastSucceeded.lua"/>
+    
+    <!-- Widgets -->
+    <Script file="src\widgets\OminBarWidget.lua"/>
+
+    <!-- Options -->
+    <Script file="src\options\Panel.lua"/>
+    <Script file="src\options\BarManager.lua"/>
+
+</Ui>

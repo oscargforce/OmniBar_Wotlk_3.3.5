@@ -92,9 +92,8 @@ end
 
 
 function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
-    -- When done with developing add a if UnitIsEnemy("player", unit) then return end
     if UnitIsPlayer(unit) and not UnitIsEnemy("player", unit) then
-        return
+       return
     end 
     
     local existingIcons = {}
@@ -148,21 +147,19 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
         if not existingIcon then
             if showUnusedIcons then
                 if ShouldTrackSpell(spellName, spellData, unitClass, unitRace, cachedSpec) then
-                    local icon = self:CreateIconToBar(barFrame, spellName, spellData)
-                    icon.unitName = unitName 
-                    icon.unitType = unit
+                    local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
                     icon:SetAlpha(unusedAlpha)
                 end
             end
 
             if hasCachedCooldown then
-                self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpells[spellName])
+                self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, hasCachedCooldown)
             end
         end
     end
 
     if showUnusedIcons then
         self:ArrangeIcons(barFrame, barSettings)
+        if spellName == "Penance" then viewTable(barFrame.icons) end
     end
-    
 end
