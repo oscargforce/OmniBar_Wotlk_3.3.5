@@ -5,30 +5,8 @@
 ## Author: Oscargforce
 ## SavedVariables: OMNIBAR_TEST
 
-embeds.xml
-
 ViewTable.lua
-data\SpellTable.lua
-data\ClassNameToTCoordsKey.lua
-data\TalentTreeCoordinates.lua
-data\SpecSpells.lua
-data\CooldownInteractions.lua
-OmniBar.lua
-widgets\OminbarWidget.lua
-options\Panel.lua
-options\BarManager.lua
-UpdateFunctions.lua
-events\InspectQueue.lua
-events\SpecDetection.lua
-events\OnPlayerEnteringWorld.lua
-events\OnUnitSpellCastSucceeded.lua
-events\OnChatMsgSystem.lua
-events\OnPlayerRegen.lua
-events\OnPartyMembersChanged.lua
-events\OnUnitInventoryChanged.lua
-events\OnArenaOpponentUpdate.lua
-events\OnUnitAura.lua
-events\OnCombatLogEventUnfiltered.lua
-events\OnPlayerTargetChanged.lua
+embeds.xml
+load.xml
 
 

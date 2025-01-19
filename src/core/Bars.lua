@@ -2,6 +2,37 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local addonName, addon = ...
 local GetBuffNameFromTrinket = addon.GetBuffNameFromTrinket
 
+function OmniBar:CreateBar() 
+    local barKey = self:GenerateUniqueKey()
+    -- Initialize bar settings in the database and UI
+    self:InitializeBar(barKey)
+    -- Add the bar to options
+    self:AddBarToOptions(barKey)
+
+    print("Bar created with key:", barKey)
+end
+
+function OmniBar:SetPosition(barFrame, newPosition)
+    if not barFrame then return end
+    local barKey = barFrame.key
+    local position = self.db.profile.bars[barKey].position
+
+    -- Update position in database
+    position.point = newPosition.point
+    position.relativePoint = newPosition.relativePoint
+    position.x = newPosition.x
+    position.y = newPosition.y
+end
+
+function OmniBar:ToggleAnchorVisibility(barFrame)
+    if #barFrame.icons > 0 or next(barFrame.activeIcons) then
+        barFrame.anchor:Hide()
+    else
+        barFrame.anchor:Show()
+    end
+end
+
+
 function OmniBar:UpdateBar(barKey, specificUpdate)
     local barFrame = self.barFrames[barKey]
     local barSettings = self.db.profile.bars[barKey]
@@ -11,7 +42,7 @@ function OmniBar:UpdateBar(barKey, specificUpdate)
         name = function() self:UpdateBarName(barFrame, barSettings) end,
         scale = function() self:UpdateScale(barFrame, barSettings) end,
         resetIcons = function() self:ResetIcons(barFrame) end,
-        updateSpellTracking = function() self:UpdateSpellTrackingForBar(barFrame, barSettings) end,
+        buildSpellTracking = function() self:BuildTrackedSpells(barFrame, barSettings) end,
         setUpIcons = function() self:SetupBarIcons(barFrame, barSettings) end,
         border = function() self:UpdateBorder(barFrame, barSettings) end,
         arrangeIcons = function() self:ArrangeIcons(barFrame, barSettings, true) end,
@@ -34,7 +65,7 @@ function OmniBar:UpdateBar(barKey, specificUpdate)
     end
     
     -- Perform all required updates if no specific update is provided
-    local operationOrder = {"name", "scale", "resetIcons", "updateSpellTracking", "setUpIcons","border"}
+    local operationOrder = {"name", "scale", "resetIcons", "buildSpellTracking", "setUpIcons","border"}
     for _, key in ipairs(operationOrder) do
         local operation = updateOperations[key]
         operation()
@@ -54,45 +85,6 @@ function OmniBar:UpdateScale(barFrame, barSettings)
     barFrame.iconsContainer:SetScale(barSettings.scale)
 end
 
-function OmniBar:UpdateBorder(barFrame, barSettings)
-    for i, button in ipairs(barFrame.icons) do
-        if barSettings.showBorder then
-            button.icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
-        else
-            button.icon:SetTexCoord(0.07, 0.9, 0.07, 0.9) 
-        end
-    end
-    print("Border: Icons left in pool:", #self.iconPool)
-end
-
-function OmniBar:UpdateIconVisibilityAndState(barFrame, barSettings)
-    local showUnusedIcons = barSettings.showUnusedIcons
-
-    if showUnusedIcons then
-        self:ResetIcons(barFrame)
-        self:SetupBarIcons(barFrame, barSettings)
-        self:UpdateUnusedAlpha(barFrame, barSettings)
-    else
-        self:ResetIcons(barFrame)
-    end
- 
-    self:ToggleAnchorVisibility(barFrame)
-end
-
-function OmniBar:UpdateUnusedAlpha(barFrame, barSettings, singleIconUpdate)
-    if not barSettings.showUnusedIcons then return end
-
-    local unusedAlpha = barSettings.unusedAlpha
-
-    if not singleIconUpdate then
-        for _, icon in ipairs(barFrame.icons) do
-            icon:SetAlpha(unusedAlpha)
-        end
-        return
-    end
-    singleIconUpdate:SetAlpha(unusedAlpha)
-end
-
 --[[ Updates the spell tracking for a specific bar
     @param barFrame - The UI frame for the bar
     @param barSettings - Saved variable for the bar eg self.profile.bars[barKey]
@@ -106,12 +98,12 @@ end
             className = string,
             spellId = number,
             race = string (optional),
-            spec = boolean (optional),
+            spec = string (optional),
             item = boolean (optional)
         }
     }
 ]]
-function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
+function OmniBar:BuildTrackedSpells(barFrame, barSettings)
     local trackedSpells = barFrame.trackedSpells
     wipe(trackedSpells)
     
@@ -153,6 +145,63 @@ function OmniBar:UpdateSpellTrackingForBar(barFrame, barSettings)
     end
 end
 
+function OmniBar:SetupBarIcons(barFrame, barSettings)
+    local trackedUnit = barSettings.trackedUnit
+    
+     if trackedUnit:match("^arena[1-5]$") then
+        -- something
+    elseif trackedUnit:match("^party[1-4]$") then
+        self:OnEventHandler(barFrame, "PARTY_MEMBERS_CHANGED", "editMode")
+    elseif trackedUnit == "target" then
+        self:OnEventHandler(barFrame, "PLAYER_TARGET_CHANGED")
+    elseif trackedUnit == "focus" then
+        self:OnEventHandler(barFrame, "PLAYER_FOCUS_CHANGED")
+    elseif trackedUnit == "allEnemies" and self.zone ~= "arena" then
+        self:OnEventHandler(barFrame, "PLAYER_TARGET_CHANGED")
+        self:OnEventHandler(barFrame, "PLAYER_FOCUS_CHANGED")
+    end
+end
+
+function OmniBar:UpdateBorder(barFrame, barSettings)
+    for i, button in ipairs(barFrame.icons) do
+        if barSettings.showBorder then
+            button.icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
+        else
+            button.icon:SetTexCoord(0.07, 0.9, 0.07, 0.9) 
+        end
+    end
+    print("Border: Icons left in pool:", #self.iconPool)
+end
+
+function OmniBar:UpdateIconVisibilityAndState(barFrame, barSettings)
+    local showUnusedIcons = barSettings.showUnusedIcons
+
+    if showUnusedIcons then
+        self:ResetIcons(barFrame)
+        self:SetupBarIcons(barFrame, barSettings)
+        self:UpdateUnusedAlpha(barFrame, barSettings)
+    else
+        self:ResetIcons(barFrame)
+    end
+ 
+    self:ToggleAnchorVisibility(barFrame)
+end
+
+function OmniBar:UpdateUnusedAlpha(barFrame, barSettings, singleIconUpdate)
+    if not barSettings.showUnusedIcons then return end
+
+    local unusedAlpha = barSettings.unusedAlpha
+
+    if not singleIconUpdate then
+        for _, icon in ipairs(barFrame.icons) do
+            icon:SetAlpha(unusedAlpha)
+        end
+        return
+    end
+    singleIconUpdate:SetAlpha(unusedAlpha)
+end
+
+
 function OmniBar:UpdateSwipeAlpha(barFrame, barSettings, singleIconUpdate)
     local swipeAlpha = barSettings.swipeAlpha
 
@@ -164,64 +213,4 @@ function OmniBar:UpdateSwipeAlpha(barFrame, barSettings, singleIconUpdate)
     end
 
     singleIconUpdate:SetAlpha(swipeAlpha)
-end
-
-local validWorldUnits = {
-    allEnemies = true,
-    target = true,
-    focus = true,
-}
-
-local function SetSpellTrackingEventForBar(barFrame, trackedUnit, zone)
-    if not validWorldUnits[trackedUnit] then 
-        return 
-    end
-    
-    if zone == "arena" then
-        barFrame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED") -- Event: UnitSpellCastSucceeded can handle all scenarios in arenas
-        if trackedUnit == "allEnemies" then
-            barFrame:UnregisterEvent("PLAYER_TARGET_CHANGED") 
-            barFrame:UnregisterEvent("PLAYER_FOCUS_CHANGED") 
-        end
-    else
-        print("Registered COMBAT_LOG_EVENT_UNFILTERED") 
-        barFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-        if trackedUnit == "allEnemies" then
-            barFrame:RegisterEvent("PLAYER_TARGET_CHANGED") 
-            barFrame:RegisterEvent("PLAYER_FOCUS_CHANGED") 
-        end
-    end
-end
-
-function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
-    local trackedUnit = barSettings.trackedUnit
-
-    -- Unregister previous events
-    self:UnregisterAllBarEvents(barFrame)
-    
-    if trackedUnit:match("^arena[1-5]$") then
-        barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
-        barFrame:RegisterEvent("UNIT_AURA")
-    elseif trackedUnit:match("^party[1-4]$") then
-        barFrame:RegisterEvent("PARTY_MEMBERS_CHANGED")
-        barFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
-    elseif trackedUnit == "target" then
-        barFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
-    elseif trackedUnit == "focus" then
-        barFrame:RegisterEvent("PLAYER_FOCUS_CHANGED") 
-    else -- All enemies
-        barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
-        barFrame:RegisterEvent("UNIT_AURA")
-    end
-
-    barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-    SetSpellTrackingEventForBar(barFrame, trackedUnit, self.zone)
-end
-
-
-function OmniBar:UpdateSpellTrackingEventForBars(zone)
-    for barKey, barFrame in pairs(self.barFrames) do
-        local trackedUnit = self.db.profile.bars[barKey].trackedUnit
-        SetSpellTrackingEventForBar(barFrame, trackedUnit, zone)
-    end
 end

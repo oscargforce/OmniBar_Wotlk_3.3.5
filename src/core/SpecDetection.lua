@@ -76,7 +76,7 @@ end
 
 function OmniBar:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barSettings)
     if not validWorldUnits[unit] then return end
-    if barSettings.trackedUnit == "allEnemies" then return end
+    -- if barSettings.trackedUnit == "allEnemies" then return end --- Why did I have this check ??? 
 
     local barKey = barFrame.key
     if HasBarProcessedUnit(barKey, unit) then
@@ -93,7 +93,6 @@ function OmniBar:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barS
     end
 
     local definedSpec = specDefiningSpells[spellName]
-    
     if definedSpec then
         local className = UnitClass(unit)
         local opponent = { className = className, spec = definedSpec }
@@ -152,7 +151,7 @@ local function SpellBelongsToSpec(spellData, opponent, spellName)
 end
 
 function OmniBar:OnSpecDetected(unit, opponent, barFrame, barSettings)
-    if #barFrame.icons == 0 then return end -- unsure why I have this check hehehe :P
+    --if #barFrame.icons == 0 then return end -- unsure why I have this check hehehe :P
 
     local needsRearranging = false
 

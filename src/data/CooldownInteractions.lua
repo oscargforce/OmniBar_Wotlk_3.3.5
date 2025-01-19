@@ -6,6 +6,7 @@ addon.resetCds = {
     }
 }
 
+print("CooldownInteractions.lua loaded")
 addon.sharedCds = {
     -- Warrior
     ["Shield Bash"] = {
