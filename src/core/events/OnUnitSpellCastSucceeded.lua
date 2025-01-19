@@ -90,13 +90,34 @@ local function UnitMatchesTrackedUnit(unit, trackedUnit)
     return strategy(unit, trackedUnit)
 end
 
--- Warmane fires UNIT_SPELLCAST_SUCCEEDED for each Penance tick, we need to filter out the first tick of the spell othwerwise we will display the icon multiple times.
-local function IsFirstPenanceTick(unit)
-    local name, _, _, _, startTime = UnitChannelInfo(unit)
-    if not name or (GetTime() - (startTime/1000)) > 0.2 then 
+-- Warmane fires duplicate UNIT_SPELLCAST_SUCCEEDED events for certain spells like Penance and Typhoon. We need to filter these out to avoid adding duplicate icons.
+local lastCastTimes = {}
+
+local brokenWarmaneSpells = {
+    ["Penance"] = true,
+    ["Typhoon"] = true
+}
+
+local function IsFirstSpellCast(unit, spellName, barKey)
+    if not brokenWarmaneSpells[spellName] then
+        return true
+    end
+
+    local currentTime = GetTime()
+    if not lastCastTimes[barKey] then
+        lastCastTimes[barKey] = {}
+    end
+
+    if not lastCastTimes[barKey][unit] then
+        lastCastTimes[barKey][unit] = {}
+    end
+
+    if lastCastTimes[barKey][unit][spellName] and (currentTime - lastCastTimes[barKey][unit][spellName]) < 2.2 then
+        print("BLOCKED:", unit, spellName)
         return false
     end
 
+    lastCastTimes[barKey][unit][spellName] = currentTime
     return true
 end
 
@@ -111,8 +132,9 @@ function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spel
     local spellData = barFrame.trackedSpells[spellName]
     if not spellData then return end
     if spellName == "Death Coil" and spellRank ~="Rank 6" then return end
-    if spellName == "Penance" and not IsFirstPenanceTick(unit) then return end
+    if not IsFirstSpellCast(unit, spellName, barFrame.key) then return end
 
+    print(unit)
     print("PASSED:", spellName)
     self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
 end

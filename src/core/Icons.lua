@@ -10,7 +10,7 @@ function OmniBar:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
     if spellData.race then  icon.race = spellData.race end
     if spellData.item then icon.item = spellData.item end
     if unitName then icon.unitName = unitName end
-    if unitType then icon.unitType = unit end
+    if unit then icon.unitType = unit end
 
     icon:Show()
     table.insert(barFrame.icons, icon)

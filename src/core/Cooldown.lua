@@ -129,7 +129,6 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellDat
 
     -- Get or create icon for this spell
     local unitName = cachedSpell and cachedSpell.playerName or GetUnitName(unit)
-    print("Unit name:", unitName)
     local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
 
     ActivateIcon(barFrame, barSettings, icon, spellData.duration, cachedSpell)

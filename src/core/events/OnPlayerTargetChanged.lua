@@ -153,7 +153,7 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
             end
 
             if hasCachedCooldown then
-                self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpells[spellName])
+                self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, hasCachedCooldown)
             end
         end
     end

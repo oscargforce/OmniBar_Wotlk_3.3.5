@@ -95,7 +95,7 @@ function OmniBar:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barS
     local definedSpec = specDefiningSpells[spellName]
     if definedSpec then
         local className = UnitClass(unit)
-        local opponent = { className = className, spec = definedSpec }
+        local opponent = { unitName = unitName, className = className, spec = definedSpec }
         self:OnSpecDetected(unit, opponent, barFrame, barSettings)
         MarkBarAsProcessed(barKey, unit)
     end
@@ -158,7 +158,7 @@ function OmniBar:OnSpecDetected(unit, opponent, barFrame, barSettings)
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         if SpellBelongsToSpec(spellData, opponent, spellName) then
             print("OnSpecDetected:", spellName)
-            self:CreateIconToBar(barFrame, spellName, spellData)
+            self:CreateIconToBar(barFrame, spellName, spellData, opponent.unitName, unit)
             needsRearranging = true
         end
     end
