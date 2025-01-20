@@ -67,6 +67,7 @@ local function StartCooldownShading(icon, duration, barSettings, barFrame, cache
 end
 
 local function ActivateIcon(barFrame, barSettings, icon, duration, cachedSpell)
+    barFrame.activeIcons[icon] = true
     OmniBar:ToggleAnchorVisibility(barFrame)
     StartCooldownShading(icon, duration, barSettings, barFrame, cachedSpell)
 end
@@ -78,28 +79,25 @@ local function HandleSharedCooldowns(spellName, barFrame, barSettings)
     for i, icon in ipairs(barFrame.icons) do
         if sharedCd[icon.spellName] then
             print("Shared cd cooldown for", icon.spellName)
-           
-            barFrame.activeIcons[icon] = true
             local sharedCdDuration = sharedCd[icon.spellName]
             ActivateIcon(barFrame, barSettings, icon, sharedCdDuration)
         end
     end
 end
 
-local function GetUnitGUIDForCooldown(self, unit, cachedSpell)
+local function GetUnitNameForCooldown(unit, cachedSpell)
     local mappedUnit = MapPetToPlayerUnit(unit)
-    if self.zone == "arena" then
-        return self.arenaOpponents[mappedUnit] and self.arenaOpponents[mappedUnit].unitGUID
+    if OmniBar.zone == "arena" then
+        return OmniBar.arenaOpponents[mappedUnit] and OmniBar.arenaOpponents[mappedUnit].unitGUID
     end
 
-    return UnitGUID(mappedUnit)
+    return cachedSpell and cachedSpell.playerName or GetUnitName(mappedUnit)
 end
 
 local function RemoveInactiveIconsInWorldZone(icon, barFrame, barSettings)
     if OmniBar.zone == "arena" then return end
     if barSettings.trackedUnit ~= "allEnemies" then return end
     
-    local currentUnitGUID = UnitGUID(icon.unitType)
     local currentUnitName = GetUnitName(icon.unitType)
 
     if icon.unitName ~= currentUnitName or
@@ -119,14 +117,14 @@ end
 
 -- TEST ALL ENEMIES IN WORLD, TARGET AND FOCUS SAME CLASS
 function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpell)
+    local unitName = GetUnitNameForCooldown(unit, cachedSpell)
+
     if barSettings.showUnusedIcons then
         self:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
-        local unitName = MapPetToPlayerUnit(unit)
         HandleSharedCooldowns(spellName, barFrame, barSettings)
 
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName and icon.unitName == unitName then
-                barFrame.activeIcons[icon] = true
                 ActivateIcon(barFrame, barSettings, icon, spellData.duration, cachedSpell)
                 return
             end  
@@ -135,8 +133,6 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellDat
         return
     end
 
-    -- Get or create icon for this spell
-    local unitName = cachedSpell and cachedSpell.playerName or GetUnitName(unit)
     -- Maybe need to map pet unit to player unit here
     local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
 
@@ -146,9 +142,9 @@ end
 
 
 function OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
-    if barSettings.showUnusedIcons then 
-        barFrame.activeIcons[icon] = nil
+    barFrame.activeIcons[icon] = nil
 
+    if barSettings.showUnusedIcons then 
         self:ResetIconState(icon)
         RemoveInactiveIconsInWorldZone(icon, barFrame, barSettings)
         self:UpdateUnusedAlpha(barFrame, barSettings, icon) 

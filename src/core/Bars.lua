@@ -25,7 +25,7 @@ function OmniBar:SetPosition(barFrame, newPosition)
 end
 
 function OmniBar:ToggleAnchorVisibility(barFrame)
-    if #barFrame.icons > 0 or next(barFrame.activeIcons) then
+    if next(barFrame.activeIcons) then
         barFrame.anchor:Hide()
     else
         barFrame.anchor:Show()

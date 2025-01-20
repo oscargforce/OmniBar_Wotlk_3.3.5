@@ -109,7 +109,8 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
         local isEnemyPet, unit = PlayerNameMatchesTrackedUnit(playerName, trackedUnit)
       
         if isEnemyPet then
-            self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
+            local cachedSpell = self.combatLogCache[playerName][spellName]
+            self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpell)
         end
     end
  

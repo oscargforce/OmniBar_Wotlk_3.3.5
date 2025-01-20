@@ -7,6 +7,7 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local UnitIsEnemy = UnitIsEnemy
 local UnitIsUnit = UnitIsUnit
 local UnitChannelInfo = UnitChannelInfo
+local UnitIsPlayer = UnitIsPlayer
 
 local arenaUnits = {
     ["arena1"] = true,
@@ -133,8 +134,9 @@ function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spel
     if not spellData then return end
     if spellName == "Death Coil" and spellRank ~="Rank 6" then return end
     if not IsFirstSpellCast(unit, spellName, barFrame.key) then return end
+    -- Prevent showing icons for enemy pets in the open world, let the combat log handle this.
+    if self.zone ~= "arena" and not UnitIsPlayer(unit) and UnitIsEnemy(unit, "player") then return end
 
-    print(unit)
     print("PASSED:", spellName)
     self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
 end

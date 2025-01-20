@@ -1,23 +1,34 @@
+
+
+TODOS: 
+
+    2) Update unit aura detection in world if I want to have that there. If so need to update OnPlayerTargetChanged, OnUnitAura, SpecDetection
+    3) Remove showing items for hostile players, keep party members as is. Since its impossible to know what trinkets is equpped, better to hide until used.
+    4) Add shared cds and reset cds logic, WIP
+
+
+
+Folder Structure:
 OmniBar/
-├── core/
-│   ├── init.lua              # Core initialization, addon setup
-│   ├── cooldowns.lua         # Cooldown tracking logic
-│   ├── icons.lua            # Icon creation and management
-│   ├── bars.lua             # Bar creation and management
-│   ├── cache.lua            # Combat log and unit caching
-│   └── constants.lua        # Shared constants/enums
-├── events/
-│   ├── combat.lua           # Combat log event handling
-│   ├── unit.lua             # Unit-related events (target, focus etc)
-│   ├── party.lua            # Party/raid events
-│   └── arena.lua            # Arena-specific events
-├── data/
-│   ├── spells               # Spell data
-│   └── specs.lua            # Spec detection data
-├── options/
-│   ├── panel.lua            # Main options panel
-│   └── bars.lua             # Bar-specific options
-└── utils/
-    ├── debug.lua            # Debug utilities
-    └── helpers.lua          # Shared helper functions
+├── arts/                    # Art assets and textures
+│   └── *.blp               # Blizzard texture files
+├── libs/                    # Third-party libraries
+│   ├── AceAddon-3.0/       # Ace3 addon framework
+│   ├── AceConfig-3.0/      # Configuration library
+│   ├── AceGUI-3.0/        # GUI framework
+│   ├── AceDB-3.0/         # Database library
+│   └── ...                # Other Ace3 modules
+├── src/                    # Source code
+│   ├── core/              # Core functionality
+│   ├── data/              # Game data and constants
+│   ├── options/           # Options UI and settings
+│   └── widgets/           # Custom UI widgets
+│   └── Main.lua           # Main entry point of the addon
+├── embeds.xml             # Library embedding
+├── load.xml               # Addon load order
+├── OmniBar.toc           # Addon manifest
+└── ViewTable.lua          # Debug utility
+
+
+
 
