@@ -5,6 +5,7 @@
     <Script file="src\data\TalentTreeCoordinates.lua"/>
     <Script file="src\data\SpecSpells.lua"/>
     <Script file="src\data\CooldownInteractions.lua"/>
+    <Script file="src\data\Mappings.lua"/>
 
     <!-- Core -->
     <Script file="src\Main.lua"/>

@@ -21,10 +21,10 @@ local processedBars = {}
             spec = nil
         }
 
-        return unitClass, unitRace
+        return unitClass, unitRace, unitName
     end
 
-    return arenaOpponents[unit].className, arenaOpponents[unit].race
+    return arenaOpponents[unit].className, arenaOpponents[unit].race, arenaOpponents[unit].unitName
 end
 
 -- Reset state of the unit data and processed bars.
@@ -93,12 +93,12 @@ local function HandleAllArenaUnits(barFrame, barSettings, barKey, unit, updateRe
         return
     end
 
-    local unitClass, unitRace = GetUnitData(unit)
+    local unitClass, unitRace, unitName = GetUnitData(unit)
     MarkBarAsProcessed(barKey, unit)
 
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         if ShouldTrackSpell(spellName, spellData, unitClass, unitRace) then
-            OmniBar:CreateIconToBar(barFrame, spellName, spellData)
+            OmniBar:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
         end
     end
 
@@ -133,12 +133,12 @@ function OmniBar:OnArenaOpponentUpdate(barFrame, event, unit, updateReason)
         return
     end
 
-    local unitClass, unitRace = GetUnitData(unit)
+    local unitClass, unitRace, unitName = GetUnitData(unit)
     MarkBarAsProcessed(barKey, unit)
 
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         if ShouldTrackSpell(spellName, spellData, unitClass, unitRace) then
-            self:CreateIconToBar(barFrame, spellName, spellData)
+            self:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
         end
     end
 

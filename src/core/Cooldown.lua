@@ -1,6 +1,7 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local addonName, addon = ...
 local sharedCds = addon.sharedCds
+local MapPetToPlayerUnit = addon.MapPetToPlayerUnit
 local GetTime = GetTime
 local GetUnitName = GetUnitName
 local UnitExists = UnitExists
@@ -48,19 +49,17 @@ local function StartCooldownShading(icon, duration, barSettings, barFrame, cache
     icon.cooldown:SetCooldown(startTime, duration)
     icon.cooldown:SetAlpha(barSettings.swipeAlpha)
 
-    print("StartCooldownShading Icons pool before:", #OmniBar.iconPool)
     local lastUpdate = 0
     icon.timerFrame:Show() 
     icon.timerFrame:SetScript("OnUpdate", function(self, elapsed)
         lastUpdate = lastUpdate + elapsed
-        if lastUpdate >= 0.2 then
+        if lastUpdate >= 0.1 then
             local timeLeft = endTime - GetTime()
             if timeLeft > 0 then
                 -- need to add condition here, if barSettings.noCountdownText, return early
                 icon.countdownText:SetText(formatTimeText(timeLeft))
             else
                 OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
-                print("StartCooldownShading expired barFrame.icons:", #barFrame.icons)
             end
             lastUpdate = 0
         end
@@ -87,19 +86,26 @@ local function HandleSharedCooldowns(spellName, barFrame, barSettings)
     end
 end
 
+local function GetUnitGUIDForCooldown(self, unit, cachedSpell)
+    local mappedUnit = MapPetToPlayerUnit(unit)
+    if self.zone == "arena" then
+        return self.arenaOpponents[mappedUnit] and self.arenaOpponents[mappedUnit].unitGUID
+    end
+
+    return UnitGUID(mappedUnit)
+end
+
 local function RemoveInactiveIconsInWorldZone(icon, barFrame, barSettings)
     if OmniBar.zone == "arena" then return end
     if barSettings.trackedUnit ~= "allEnemies" then return end
     
+    local currentUnitGUID = UnitGUID(icon.unitType)
     local currentUnitName = GetUnitName(icon.unitType)
-    print("Checking icon removal for", icon.spellName, "unit type:", icon.unitType)
-    print("Current unit:", icon.unitType, "Current name:", currentUnitName, "Icon unit name:", icon.unitName)
 
     if icon.unitName ~= currentUnitName or
         (icon.unitType == "target" and not UnitExists("target")) or
         (icon.unitType == "focus" and not UnitExists("focus")) then
-        
-        print("Removing icon", icon.spellName, "from", icon.unitType)
+        print("RemoveInactiveIconsInWorldZone removing icon", icon.spellName, "from", icon.unitType, currentUnitName)
         OmniBar:ReturnIconToPool(icon)
         for i = #barFrame.icons, 1, -1 do
             if barFrame.icons[i] == icon then
@@ -111,13 +117,15 @@ local function RemoveInactiveIconsInWorldZone(icon, barFrame, barSettings)
     end 
 end
 
+-- TEST ALL ENEMIES IN WORLD, TARGET AND FOCUS SAME CLASS
 function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpell)
     if barSettings.showUnusedIcons then
         self:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
+        local unitName = MapPetToPlayerUnit(unit)
         HandleSharedCooldowns(spellName, barFrame, barSettings)
 
         for i, icon in ipairs(barFrame.icons) do
-            if icon.spellName == spellName then
+            if icon.spellName == spellName and icon.unitName == unitName then
                 barFrame.activeIcons[icon] = true
                 ActivateIcon(barFrame, barSettings, icon, spellData.duration, cachedSpell)
                 return
@@ -129,6 +137,7 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellDat
 
     -- Get or create icon for this spell
     local unitName = cachedSpell and cachedSpell.playerName or GetUnitName(unit)
+    -- Maybe need to map pet unit to player unit here
     local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
 
     ActivateIcon(barFrame, barSettings, icon, spellData.duration, cachedSpell)
@@ -147,7 +156,7 @@ function OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
         self:ReturnIconToPool(icon) 
         for i = #barFrame.icons, 1, -1 do
             if barFrame.icons[i] == icon then
-                print("Removed", barFrame.icons[i].spellName, "from barFrame.icons")
+                print("OnCooldownEnd removed", barFrame.icons[i].spellName, "from barFrame.icons")
                 table.remove(barFrame.icons, i) -- maybe add this to self:ArrangeIcons ?? Need to remove the icon from the icons table after cd is done
                 break
             end

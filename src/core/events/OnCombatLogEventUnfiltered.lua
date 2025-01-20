@@ -38,19 +38,19 @@ end
 local function PlayerNameMatchesTrackedUnit(playerName, trackedUnit)
     if trackedUnit ~= "allEnemies" then
         local unitName = GetUnitName(trackedUnit)
-        return playerName == unitName
+        return playerName == unitName, trackedUnit
     end
 
     for _, unit in ipairs({"target", "focus"}) do
         local unitName = GetUnitName(unit)
         if playerName == unitName then
             if UnitIsEnemy("player", unit) then
-                return true
+                return true, unit
             end
         end
     end
 
-    return false
+    return false, nil
 end
 
 
@@ -105,9 +105,12 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
     local barSettings = self.db.profile.bars[barFrame.key]
     local trackedUnit = barSettings.trackedUnit
 
-    if petOwnerName and PlayerNameMatchesTrackedUnit(playerName, trackedUnit) then 
-        print("PlayerNameMatchesTrackedUnit returns true")
-        self:OnCooldownUsed(barFrame, barSettings, "target", spellName, spellData)
+    if petOwnerName then 
+        local isEnemyPet, unit = PlayerNameMatchesTrackedUnit(playerName, trackedUnit)
+      
+        if isEnemyPet then
+            self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
+        end
     end
  
 end

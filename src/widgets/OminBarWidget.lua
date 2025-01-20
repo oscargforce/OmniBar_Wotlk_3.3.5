@@ -142,7 +142,7 @@ function CreateOmniBarWidget(barKey, settings)
         end
 
         newItemAnim:SetScript("OnFinished", function()
-            print("ANIMATION DONE")
+            -- TODO: highlight focus/target borders if all enemies
         end)
 
         local countdownFrame = CreateFrame("Frame", "$parentCountdownFrame", button)

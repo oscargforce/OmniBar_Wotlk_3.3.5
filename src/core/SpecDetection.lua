@@ -53,7 +53,7 @@ function OmniBar:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
 
     local barKey = barFrame.key
     if HasBarProcessedUnit(barKey, unit) then
-        print(barSettings.name, "returns because HasBarProcessedUnit")
+        print("SpecDetection", barSettings.name, "returns because HasBarProcessedUnit")
         return
     end
 
@@ -80,7 +80,7 @@ function OmniBar:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barS
 
     local barKey = barFrame.key
     if HasBarProcessedUnit(barKey, unit) then
-        print(barSettings.name, "returns because HasBarProcessedUnit")
+        print("SpecDetectionWorld", barSettings.name, "returns because HasBarProcessedUnit")
         return
     end
 
@@ -103,7 +103,7 @@ end
 
 function OmniBar:DetectSpecByAura(unit, barFrame, barSettings)
     local barKey = barFrame.key
-    if HasBarProcessedUnit(barKey, unit) then print(barSettings.name, "returns cuz HasBarProcessedUnit"); return end
+    if HasBarProcessedUnit(barKey, unit) then print("SpecDetectionAura",barSettings.name, "returns cuz HasBarProcessedUnit"); return end
 
     local opponent = self.arenaOpponents[unit]
     if not opponent then print(barSettings.name, "returns cuz no opponent"); return end
@@ -151,8 +151,6 @@ local function SpellBelongsToSpec(spellData, opponent, spellName)
 end
 
 function OmniBar:OnSpecDetected(unit, opponent, barFrame, barSettings)
-    --if #barFrame.icons == 0 then return end -- unsure why I have this check hehehe :P
-
     local needsRearranging = false
 
     for spellName, spellData in pairs(barFrame.trackedSpells) do

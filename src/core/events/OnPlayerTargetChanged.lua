@@ -75,7 +75,7 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         if barSettings.showUnusedIcons then
             if ShouldTrackSpell(spellName, spellData, unitClass, unitRace, cachedSpec) then
-                local icon = self:CreateIconToBar(barFrame, spellName, spellData)
+                local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
                 icon:SetAlpha(unusedAlpha)
             end
         end
@@ -99,6 +99,7 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
     local existingIcons = {}
     local showUnusedIcons = barSettings.showUnusedIcons
     -- Remove previous unit icons, but keep the ones that have an active cd timer.
+    
     for i = #barFrame.icons, 1, -1 do
         local icon = barFrame.icons[i]
         if not barFrame.activeIcons[icon] and showUnusedIcons then 
@@ -117,21 +118,29 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
         self:ArrangeIcons(barFrame, barSettings)
         return 
     end
-
-     -- Dont add dublicate icons if the same unit is target and focus.
-     if barSettings.trackedUnit == "allEnemies" and UnitIsUnit("focus", "target") then
+    
+    -- Dont add dublicate icons if the same unit is target and focus.
+    --[[
+        Issues with current approach:
+        If target and focus is the same unit, we wont add the cached spells to the bar.
+        Example, if we have two warlocks, we sometimes only add 1 spell instead of two. Not sure why but I think all is related to
+        our unitType checks and UnitIsUnit
+    ]]
+--[[     if UnitIsUnit("focus", "target") then
         for i, icon in ipairs(barFrame.icons) do
             if icon.unitType == "target" then
                 icon.unitType = "focus"
             end
-        end
+        end 
+        self:ArrangeIcons(barFrame, barSettings)
         return
-    end
-  
+    end 
+     ]]
     -- 2) Get basic unit information
     local unitClass = UnitClass(unit)
     local unitRace = UnitRace(unit)
     local unitName = GetUnitName(unit)
+    
     -- 3) Get cached data
     local cachedSpells = self.combatLogCache[unitName]
     local cachedSpec = cachedSpells and cachedSpells.spec
@@ -160,6 +169,5 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
 
     if showUnusedIcons then
         self:ArrangeIcons(barFrame, barSettings)
-        if spellName == "Penance" then viewTable(barFrame.icons) end
     end
 end

@@ -1,7 +1,7 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local _, addon = ...
 local talentTreeCoordinates = addon.talentTreeCoordinates
-local GetBuffNameFromTrinket = addon.GetBuffNameFromTrinket
+local MapTrinketNameToBuffName = addon.MapTrinketNameToBuffName
 local UnitGUID = UnitGUID
 local UnitClass = UnitClass
 local UnitRace = UnitRace
@@ -109,7 +109,7 @@ function OmniBar:OnInspectTalentReady(barFrame, event, ...)
         end
 
         if shouldTrack then
-            self:CreateIconToBar(barFrame, spellName, spellData)
+            self:CreateIconToBar(barFrame, spellName, spellData, "", trackedUnit)
         end
 
     end
@@ -127,7 +127,7 @@ function OmniBar:GetPartyUnitsTrinkets(trackedUnit)
         if itemLink then
             local itemName = GetItemInfo(itemLink)
             if itemName then
-                local trinketBuffName = GetBuffNameFromTrinket(itemName)
+                local trinketBuffName = MapTrinketNameToBuffName(itemName)
                 trinkets[trinketBuffName] = true
             end
         end

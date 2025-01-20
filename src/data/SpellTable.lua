@@ -1,18 +1,5 @@
 local addonName, addon = ...
 
-function addon.GetBuffNameFromTrinket(trinketName)
-    local nameMapping = {
-        ["Bauble of True Blood"] = "Release of Light",
-        ["Corroded Skeleton Key"] = "Hardened Skin",
-        ["Medallion of the Alliance"] = "PvP Trinket",
-        ["Medallion of the Horde"] = "PvP Trinket",
-        ["Satrina's Impeding Scarab"] = "Fortitude",
-        ["Sindragosa's Flawless Fang"] = "Aegis of Dalaran",
-    }
-    
-    return nameMapping[trinketName] or trinketName
-end
-
 addon.spellTable = { 
     ["General"] = {
         ["Arcane Torrent"] = { isTracking = false, duration = 120, spellId = 28730, race = "Blood Elf" },

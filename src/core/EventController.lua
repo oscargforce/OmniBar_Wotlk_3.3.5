@@ -1,13 +1,13 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 
-local validWorldUnits = {
+local trackedHostileUnits = {
     allEnemies = true,
     target = true,
     focus = true,
 }
 
 local function SetSpellTrackingEventForBar(barFrame, trackedUnit, zone)
-    if not validWorldUnits[trackedUnit] then 
+    if not trackedHostileUnits[trackedUnit] then 
         return 
     end
     
