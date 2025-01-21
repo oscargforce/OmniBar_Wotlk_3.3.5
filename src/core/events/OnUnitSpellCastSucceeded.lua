@@ -130,6 +130,8 @@ function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spel
     local barSettings = self.db.profile.bars[barFrame.key]
     if not UnitMatchesTrackedUnit(unit, barSettings.trackedUnit) then return end
 
+    self:SharedCooldownsHandler(spellName, unit, barFrame, barSettings)
+
     local spellData = barFrame.trackedSpells[spellName]
     if not spellData then return end
     if spellName == "Death Coil" and spellRank ~="Rank 6" then return end
@@ -140,4 +142,3 @@ function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spel
     print("PASSED:", unit, spellName)
     self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
 end
-

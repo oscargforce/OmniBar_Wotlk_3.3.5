@@ -16,6 +16,7 @@ addon.spellTable = {
         ["Sindragosa's Flawless Fang"] = { isTracking = false, duration = 60, spellId = 50364, item = true },
         ["Stoneform"] = { isTracking = false, duration = 120, spellId = 20594, race = "Dwarf" },
         ["War Stomp"] = { isTracking = false, duration = 120, spellId = 20549, race = "Tauren" },
+        ["Will of the Forsaken"] = { isTracking = false, duration = 120, spellId = 7744, race = "Undead" },
     },
     ["Death Knight"] = {
         ["Anti-Magic Zone"] = { isTracking = false, duration = 120, spellId = 51052, spec = "unholy" },

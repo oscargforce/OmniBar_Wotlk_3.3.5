@@ -5,7 +5,8 @@ local MapPetToPlayerUnit = addon.MapPetToPlayerUnit
 local GetTime = GetTime
 local GetUnitName = GetUnitName
 local UnitExists = UnitExists
-local unitGUID = unitGUID
+local UnitGUID = UnitGUID
+local UnitRace = UnitRace
 
 local COLORS = {
     WHITE = "|cFFFFFFFF",
@@ -73,19 +74,6 @@ local function ActivateIcon(barFrame, barSettings, icon, duration, cachedSpell)
     StartCooldownShading(icon, duration, barSettings, barFrame, cachedSpell)
 end
 
-local function HandleSharedCooldowns(spellName, barFrame, barSettings)
-    local sharedCd = sharedCds[spellName]
-    if not sharedCd then return end
-
-    for i, icon in ipairs(barFrame.icons) do
-        if sharedCd[icon.spellName] then
-            print("Shared cd cooldown for", icon.spellName)
-            local sharedCdDuration = sharedCd[icon.spellName]
-            ActivateIcon(barFrame, barSettings, icon, sharedCdDuration)
-        end
-    end
-end
-
 local function GetUnitGUIDForCooldown(unit, barKey, cachedSpell)
     local mappedUnit = MapPetToPlayerUnit(unit)
 
@@ -125,14 +113,59 @@ local function RemoveInactiveIconsInWorldZone(icon, barFrame, barSettings)
     end 
 end
 
+function OmniBar:SharedCooldownsHandler(spellName,unit, barFrame, barSettings, cachedSpell)
+    local sharedCd = sharedCds[spellName]
+    if not sharedCd then return end
+    
+    local unitGUID = GetUnitGUIDForCooldown(unit, barFrame.key, cachedSpell)
+
+    if not barSettings.showUnusedIcons then
+        for spell, spellConfig in pairs(sharedCd) do
+            local spellData = barFrame.trackedSpells[spell]
+
+            if spellConfig.showWhenHidden and spellData then
+                local shouldAddIcon = true
+                for i, icon in ipairs(barFrame.icons) do
+                    -- We only have active icons in barFrame.icons if showUnusedIcons is false, hence no need to check activeIcons table.
+                    if icon.spellName == spell and icon.unitGUID == unitGUID then
+                        shouldAddIcon = false
+                        break
+                    end
+                end
+
+                if shouldAddIcon then
+                    if spell == "Will of the Forsaken" and UnitRace(unit) ~= "Undead" then
+                        return
+                    end
+                    local icon = self:CreateIconToBar(barFrame, spell, spellData, unitGUID, unit)
+                    ActivateIcon(barFrame, barSettings, icon, spellConfig.duration, cachedSpell)
+                    print("Hidden shared cd cooldown for", icon.spellName)
+                end
+            end
+        end
+
+        return
+    end
+
+    for i, icon in ipairs(barFrame.icons) do
+        if not barFrame.activeIcons[icon] then
+            local spell = sharedCd[icon.spellName]
+
+            if spell and icon.unitGUID == unitGUID  then
+                print("Shared cd cooldown for", icon.spellName)
+                local sharedCdDuration = sharedCd[icon.spellName].duration
+                ActivateIcon(barFrame, barSettings, icon, spell.duration, cachedSpell)
+            end
+        end
+    end
+end
+
 -- TEST ALL ENEMIES IN WORLD, TARGET AND FOCUS SAME CLASS
 function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpell)
     local unitGUID = GetUnitGUIDForCooldown(unit, barFrame.key, cachedSpell)
 
     if barSettings.showUnusedIcons then
         self:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
-        HandleSharedCooldowns(spellName, barFrame, barSettings)
-
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName and icon.unitGUID == unitGUID then
                 ActivateIcon(barFrame, barSettings, icon, spellData.duration, cachedSpell)
