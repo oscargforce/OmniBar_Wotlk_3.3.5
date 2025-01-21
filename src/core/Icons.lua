@@ -1,6 +1,7 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
+local next = next
 
-function OmniBar:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
+function OmniBar:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
     local icon = self:GetIconFromPool(barFrame)
     icon.icon:SetTexture(spellData.icon)
     icon.spellName = spellName
@@ -9,7 +10,8 @@ function OmniBar:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
     icon.spellId = spellData.spellId
     if spellData.race then  icon.race = spellData.race end
     if spellData.item then icon.item = spellData.item end
-    if unitName then icon.unitName = unitName end
+    --if unitName then icon.unitName = unitName end
+    if unitGUID then icon.unitGUID = unitGUID end
     if unit then icon.unitType = unit end
 
     icon:Show()
@@ -76,12 +78,7 @@ end
 
 function OmniBar:RefreshBarsWithActiveIcons()
     for _, barFrame in pairs(self.barFrames) do
-        local showUnusedIcons = self.db.profile.bars[barFrame.key].showUnusedIcons
-        
-        local shouldRefresh = (showUnusedIcons and next(barFrame.activeIcons)) 
-        or (not showUnusedIcons and #barFrame.icons > 0)
-
-        if shouldRefresh then
+        if next(barFrame.activeIcons) then
             self:UpdateBar(barFrame.key, "refreshBarIconsState")
         end 
     end 

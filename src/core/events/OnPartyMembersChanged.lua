@@ -1,7 +1,7 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local _, addon = ...
 local talentTreeCoordinates = addon.talentTreeCoordinates
-local GetBuffNameFromTrinket = addon.GetBuffNameFromTrinket
+local MapTrinketNameToBuffName = addon.MapTrinketNameToBuffName
 local UnitGUID = UnitGUID
 local UnitClass = UnitClass
 local UnitRace = UnitRace
@@ -26,7 +26,6 @@ local GetItemInfo = GetItemInfo
 ]]
 
 
-local partyGUIDCache = {}
 local inspectQueue = InspectQueueOmniBar:New()
 
 
@@ -38,6 +37,7 @@ function OmniBar:OnPartyMembersChanged(barFrame, event, isInEditMode)
     
     local trackedUnit = barSettings.trackedUnit
     local currentPartyGUID = UnitGUID(trackedUnit)
+    local partyGUIDCache = self.partyGUIDCache
 
     if not partyGUIDCache[barKey] then
         partyGUIDCache[barKey] = {}
@@ -78,11 +78,12 @@ end
 function OmniBar:OnInspectTalentReady(barFrame, event, ...)
     print("OnInspectTalentReady")
     local barKey = barFrame.key
- 
-    local barSettings = self.db.profile.bars[barKey]
+    local barSettings = self.db.profile.bars[barFrame.key]
+
     local trackedUnit = barSettings.trackedUnit
     local className = UnitClass(trackedUnit)
     local race = UnitRace(trackedUnit)
+    local unitGUID = self.partyGUIDCache[barKey][trackedUnit]
     local unitTrinkets = self:GetPartyUnitsTrinkets(trackedUnit) 
 
     for spellName, spellData in pairs(barFrame.trackedSpells) do
@@ -109,7 +110,7 @@ function OmniBar:OnInspectTalentReady(barFrame, event, ...)
         end
 
         if shouldTrack then
-            self:CreateIconToBar(barFrame, spellName, spellData)
+            self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, trackedUnit)
         end
 
     end
@@ -127,7 +128,7 @@ function OmniBar:GetPartyUnitsTrinkets(trackedUnit)
         if itemLink then
             local itemName = GetItemInfo(itemLink)
             if itemName then
-                local trinketBuffName = GetBuffNameFromTrinket(itemName)
+                local trinketBuffName = MapTrinketNameToBuffName(itemName)
                 trinkets[trinketBuffName] = true
             end
         end
@@ -152,7 +153,7 @@ function OmniBar:CheckSpecAbilitiesForUnit(className, spellName)
 end
 
 function OmniBar:ClearPartyGUIDCache()
-    for barKey, partyGUIDs in pairs(partyGUIDCache) do
+    for barKey, partyGUIDs in pairs(self.partyGUIDCache) do
         for partyGUID, _ in pairs(partyGUIDs) do
             partyGUIDs[partyGUID] = ""
         end

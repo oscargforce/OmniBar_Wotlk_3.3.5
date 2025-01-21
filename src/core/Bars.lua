@@ -1,6 +1,6 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local addonName, addon = ...
-local GetBuffNameFromTrinket = addon.GetBuffNameFromTrinket
+local MapTrinketNameToBuffName = addon.MapTrinketNameToBuffName
 
 function OmniBar:CreateBar() 
     local barKey = self:GenerateUniqueKey()
@@ -25,7 +25,7 @@ function OmniBar:SetPosition(barFrame, newPosition)
 end
 
 function OmniBar:ToggleAnchorVisibility(barFrame)
-    if #barFrame.icons > 0 or next(barFrame.activeIcons) then
+    if next(barFrame.activeIcons) then
         barFrame.anchor:Hide()
     else
         barFrame.anchor:Show()
@@ -119,11 +119,11 @@ function OmniBar:BuildTrackedSpells(barFrame, barSettings)
                     return
                 end
 
-                spellName = GetBuffNameFromTrinket(spellName) -- if not trinket the func returns the orignal spellName
+                spellName = MapTrinketNameToBuffName(spellName) -- if not trinket the func returns the orignal spellName
 
                 if not trackedSpells[spellName] then
                     trackedSpells[spellName] = {
-                        duration = spellData.duration,
+                        duration = spellData.duration - 0.2, -- subtract 0.2 due to latencys
                         icon = spellData.icon,
                         priority = spellConfig.priority or 1,
                         className = className,

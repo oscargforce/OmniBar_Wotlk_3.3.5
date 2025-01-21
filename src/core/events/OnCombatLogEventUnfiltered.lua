@@ -38,19 +38,19 @@ end
 local function PlayerNameMatchesTrackedUnit(playerName, trackedUnit)
     if trackedUnit ~= "allEnemies" then
         local unitName = GetUnitName(trackedUnit)
-        return playerName == unitName
+        return playerName == unitName, trackedUnit
     end
 
     for _, unit in ipairs({"target", "focus"}) do
         local unitName = GetUnitName(unit)
         if playerName == unitName then
             if UnitIsEnemy("player", unit) then
-                return true
+                return true, unit
             end
         end
     end
 
-    return false
+    return false, nil
 end
 
 
@@ -89,7 +89,8 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
         spellId = spellId,
         spellName = spellName,
         timestamp = now, -- actually using this property
-        playerName = playerName -- using ths property
+        playerName = playerName, -- using ths property
+        isPet = petOwnerName and true or false -- using ths property
     }
 
     -- 4.1) Detect the spec of the player if it's not already cached.
@@ -105,9 +106,13 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
     local barSettings = self.db.profile.bars[barFrame.key]
     local trackedUnit = barSettings.trackedUnit
 
-    if petOwnerName and PlayerNameMatchesTrackedUnit(playerName, trackedUnit) then 
-        print("PlayerNameMatchesTrackedUnit returns true")
-        self:OnCooldownUsed(barFrame, barSettings, "target", spellName, spellData)
+    if petOwnerName then 
+        local isEnemyPet, unit = PlayerNameMatchesTrackedUnit(playerName, trackedUnit)
+      
+        if isEnemyPet then
+            local cachedSpell = self.combatLogCache[playerName][spellName]
+            self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpell)
+        end
     end
  
 end

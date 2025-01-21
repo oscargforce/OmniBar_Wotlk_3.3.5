@@ -5,20 +5,7 @@ local UnitIsUnit = UnitIsUnit
 local UnitClass = UnitClass
 local UnitRace = UnitRace
 local GetUnitName = GetUnitName
-
-
--- /dump OmniBar.combatLogCache  /dump OmniBar.barFrames["OmniBar4"].icons
-
---[[
-
-    
-    TODOS: 
-        1) Add spec spells to the bar if detected. 
-        2) Update unit aura detection in world if I want to have that there.
-        3) Remove showing items on target/focus and arena opponents, keep party members as is
-        4) Add shared cds and reset cds logic
-    
-]]
+local UnitGUID = UnitGUID
 
 local function ShouldTrackSpell(spellName, spellData, unitClass, unitRace, spec)
     if unitClass == spellData.className then
@@ -64,6 +51,7 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
     local unitClass = UnitClass(unit)
     local unitRace = UnitRace(unit)
     local unitName = GetUnitName(unit)
+    local unitGUID = UnitGUID(unit)
    
     -- 3) Get cached data+
     local cachedSpells = self.combatLogCache[unitName]
@@ -75,7 +63,7 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         if barSettings.showUnusedIcons then
             if ShouldTrackSpell(spellName, spellData, unitClass, unitRace, cachedSpec) then
-                local icon = self:CreateIconToBar(barFrame, spellName, spellData)
+                local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
                 icon:SetAlpha(unusedAlpha)
             end
         end
@@ -91,25 +79,48 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
 end
 
 
-function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
+function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)    
+    -- Early return if friendly player
     if UnitIsPlayer(unit) and not UnitIsEnemy("player", unit) then
-       return
+        return
     end 
+
+    -- Get unit states
+    local targetExists = UnitExists("target")
+    local focusExists = UnitExists("focus")
+    local isSameUnit = targetExists and focusExists and UnitIsUnit("target", "focus")
     
     local existingIcons = {}
     local showUnusedIcons = barSettings.showUnusedIcons
-    -- Remove previous unit icons, but keep the ones that have an active cd timer.
+    
+    -- Get unit names
+    local targetGUID = targetExists and UnitGUID("target")
+    local focusGUID = focusExists and UnitGUID("focus")
+    
+    -- Remove icons for units that are no longer referenced anywhere
     for i = #barFrame.icons, 1, -1 do
         local icon = barFrame.icons[i]
-        if not barFrame.activeIcons[icon] and showUnusedIcons then 
-            if icon.unitType == unit then
-                self:ReturnIconToPool(icon)
-                table.remove(barFrame.icons, i)
+        local keepIcon = barFrame.activeIcons[icon]
+
+        if not keepIcon and showUnusedIcons then
+            -- Keep if the unit name matches either current target or focus
+            keepIcon = (targetExists and icon.unitGUID == targetGUID) or
+                      (focusExists and icon.unitGUID == focusGUID)
+        end
+        
+        if keepIcon then
+            local key = icon.spellName .. icon.unitGUID
+            existingIcons[key] = icon
+            
+            -- Update the icon's unitType if needed
+            if targetExists and icon.unitGUID == targetGUID then
+                icon.unitType = "target"
+            elseif focusExists and icon.unitGUID == focusGUID then
+                icon.unitType = "focus"
             end
         else
-            print("Keeping icon", icon.spellName, "for unit", icon.unitType)
-            local key = icon.spellName .. icon.unitName
-            existingIcons[key] = icon
+            self:ReturnIconToPool(icon)
+            table.remove(barFrame.icons, i)
         end
     end
     
@@ -117,37 +128,33 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
         self:ArrangeIcons(barFrame, barSettings)
         return 
     end
-
-     -- Dont add dublicate icons if the same unit is target and focus.
-     if barSettings.trackedUnit == "allEnemies" and UnitIsUnit("focus", "target") then
-        for i, icon in ipairs(barFrame.icons) do
-            if icon.unitType == "target" then
-                icon.unitType = "focus"
-            end
-        end
+    
+    -- Don't add duplicate icons if the same unit is target and focus
+    if isSameUnit then
+        self:ArrangeIcons(barFrame, barSettings)
         return
     end
-  
-    -- 2) Get basic unit information
+    
+    -- Get unit info
     local unitClass = UnitClass(unit)
     local unitRace = UnitRace(unit)
     local unitName = GetUnitName(unit)
-    -- 3) Get cached data
+    local unitGUID = (unit == "target") and targetGUID or focusGUID
+    
     local cachedSpells = self.combatLogCache[unitName]
     local cachedSpec = cachedSpells and cachedSpells.spec
 
-    -- 4) Process tracked spells
     local unusedAlpha = barSettings.unusedAlpha
    
     for spellName, spellData in pairs(barFrame.trackedSpells) do
-        local iconKey = spellName .. unitName
+        local iconKey = spellName .. unitGUID
         local existingIcon = existingIcons[iconKey]
         local hasCachedCooldown = cachedSpells and cachedSpells[spellName]
     
         if not existingIcon then
             if showUnusedIcons then
                 if ShouldTrackSpell(spellName, spellData, unitClass, unitRace, cachedSpec) then
-                    local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
+                    local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
                     icon:SetAlpha(unusedAlpha)
                 end
             end
@@ -160,6 +167,5 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
 
     if showUnusedIcons then
         self:ArrangeIcons(barFrame, barSettings)
-        if spellName == "Penance" then viewTable(barFrame.icons) end
     end
 end

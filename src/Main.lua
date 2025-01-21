@@ -44,7 +44,9 @@ function OmniBar:OnInitialize()
     self.barFrames = {}
     self.barIndex = 1
     self.iconPool = {}
+    self.isArenaMatchInProgress = false -- maybe use later for onInventoryChanged
     self.arenaOpponents = {}
+    self.partyGUIDCache = {}
     self.combatLogCache = {}
     self.currentRealm = GetRealmName()
     self.db.RegisterCallback(self, "OnProfileChanged", "OnEnable")

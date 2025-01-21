@@ -6,6 +6,7 @@ local specDefiningAuras = addon.specDefiningAuras
 local UnitAura = UnitAura
 local GetUnitName = GetUnitName
 local UnitClass = UnitClass
+local UnitGUID = UnitGUID
 
 local processedBars = {}
 
@@ -53,7 +54,6 @@ function OmniBar:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
 
     local barKey = barFrame.key
     if HasBarProcessedUnit(barKey, unit) then
-        print(barSettings.name, "returns because HasBarProcessedUnit")
         return
     end
 
@@ -80,7 +80,7 @@ function OmniBar:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barS
 
     local barKey = barFrame.key
     if HasBarProcessedUnit(barKey, unit) then
-        print(barSettings.name, "returns because HasBarProcessedUnit")
+        print("SpecDetectionWorld", barSettings.name, "returns because HasBarProcessedUnit")
         return
     end
 
@@ -95,7 +95,8 @@ function OmniBar:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barS
     local definedSpec = specDefiningSpells[spellName]
     if definedSpec then
         local className = UnitClass(unit)
-        local opponent = { unitName = unitName, className = className, spec = definedSpec }
+        local unitGUID = UnitGUID(unit)
+        local opponent = { unitGUID = unitGUID, className = className, spec = definedSpec }
         self:OnSpecDetected(unit, opponent, barFrame, barSettings)
         MarkBarAsProcessed(barKey, unit)
     end
@@ -103,7 +104,7 @@ end
 
 function OmniBar:DetectSpecByAura(unit, barFrame, barSettings)
     local barKey = barFrame.key
-    if HasBarProcessedUnit(barKey, unit) then print(barSettings.name, "returns cuz HasBarProcessedUnit"); return end
+    if HasBarProcessedUnit(barKey, unit) then return end
 
     local opponent = self.arenaOpponents[unit]
     if not opponent then print(barSettings.name, "returns cuz no opponent"); return end
@@ -151,14 +152,12 @@ local function SpellBelongsToSpec(spellData, opponent, spellName)
 end
 
 function OmniBar:OnSpecDetected(unit, opponent, barFrame, barSettings)
-    --if #barFrame.icons == 0 then return end -- unsure why I have this check hehehe :P
-
     local needsRearranging = false
 
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         if SpellBelongsToSpec(spellData, opponent, spellName) then
             print("OnSpecDetected:", spellName)
-            self:CreateIconToBar(barFrame, spellName, spellData, opponent.unitName, unit)
+            self:CreateIconToBar(barFrame, spellName, spellData, opponent.unitGUID, unit)
             needsRearranging = true
         end
     end
