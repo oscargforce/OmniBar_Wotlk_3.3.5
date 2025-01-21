@@ -137,7 +137,7 @@ function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spel
     -- Prevent showing icons for enemy pets in the open world, let the combat log handle this.
     if self.zone ~= "arena" and not UnitIsPlayer(unit) and UnitIsEnemy(unit, "player") then return end
 
-    print("PASSED:", spellName)
+    print("PASSED:", unit, spellName)
     self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData)
 end
 

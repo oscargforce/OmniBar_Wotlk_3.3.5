@@ -4,6 +4,7 @@ local UnitAffectingCombat = UnitAffectingCombat
 local CheckInteractDistance = CheckInteractDistance
 local NotifyInspect = NotifyInspect
 local ClearInspectPlayer = ClearInspectPlayer
+local unitGUID = unitGUID
 
 --[[
       NOTE: WoW's 3.3.5 Inventory API can be unreliable, especially when trinkets are swapped quickly. 
@@ -54,10 +55,12 @@ function OmniBar:OnUnitInventoryChanged(barFrame, event, unit)
         end
     end
 
+    local unitGUID = unitGUID(trackedUnit)
+
     for trinketName, _ in pairs(unitTrinkets) do
         local spellData = barFrame.trackedSpells[trinketName] 
         if spellData and not iconTrinketsOnBar[trinketName] then
-            self:CreateIconToBar(barFrame, trinketName, spellData, "", trackedUnit)
+            self:CreateIconToBar(barFrame, trinketName, spellData, unitGUID, trackedUnit)
             needsRearranging = true
         end
     end

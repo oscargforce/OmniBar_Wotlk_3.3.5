@@ -5,6 +5,7 @@ local MapPetToPlayerUnit = addon.MapPetToPlayerUnit
 local GetTime = GetTime
 local GetUnitName = GetUnitName
 local UnitExists = UnitExists
+local unitGUID = unitGUID
 
 local COLORS = {
     WHITE = "|cFFFFFFFF",
@@ -85,25 +86,34 @@ local function HandleSharedCooldowns(spellName, barFrame, barSettings)
     end
 end
 
-local function GetUnitNameForCooldown(unit, cachedSpell)
+local function GetUnitGUIDForCooldown(unit, barKey, cachedSpell)
     local mappedUnit = MapPetToPlayerUnit(unit)
-    if OmniBar.zone == "arena" then
+
+    if mappedUnit:match("^arena[1-5]$") then
         return OmniBar.arenaOpponents[mappedUnit] and OmniBar.arenaOpponents[mappedUnit].unitGUID
     end
+  
+    if mappedUnit:match("^party[1-4]$") then
+        return OmniBar.partyGUIDCache[barKey] and OmniBar.partyGUIDCache[barKey][mappedUnit]
+    end
 
-    return cachedSpell and cachedSpell.playerName or GetUnitName(mappedUnit)
+    if cachedSpell and not cachedSpell.isPet then
+        return cachedSpell.sourceGUID
+    end
+
+    return UnitGUID(mappedUnit)
 end
 
 local function RemoveInactiveIconsInWorldZone(icon, barFrame, barSettings)
     if OmniBar.zone == "arena" then return end
     if barSettings.trackedUnit ~= "allEnemies" then return end
     
-    local currentUnitName = GetUnitName(icon.unitType)
+    local currentUnitGUID = UnitGUID(icon.unitType)
 
-    if icon.unitName ~= currentUnitName or
+    if icon.unitGUID ~= currentUnitGUID or
         (icon.unitType == "target" and not UnitExists("target")) or
         (icon.unitType == "focus" and not UnitExists("focus")) then
-        print("RemoveInactiveIconsInWorldZone removing icon", icon.spellName, "from", icon.unitType, currentUnitName)
+        print("RemoveInactiveIconsInWorldZone removing icon", icon.spellName, "from", icon.unitType, GetUnitName(icon.unitType))
         OmniBar:ReturnIconToPool(icon)
         for i = #barFrame.icons, 1, -1 do
             if barFrame.icons[i] == icon then
@@ -117,14 +127,14 @@ end
 
 -- TEST ALL ENEMIES IN WORLD, TARGET AND FOCUS SAME CLASS
 function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpell)
-    local unitName = GetUnitNameForCooldown(unit, cachedSpell)
+    local unitGUID = GetUnitGUIDForCooldown(unit, barFrame.key, cachedSpell)
 
     if barSettings.showUnusedIcons then
         self:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
         HandleSharedCooldowns(spellName, barFrame, barSettings)
 
         for i, icon in ipairs(barFrame.icons) do
-            if icon.spellName == spellName and icon.unitName == unitName then
+            if icon.spellName == spellName and icon.unitGUID == unitGUID then
                 ActivateIcon(barFrame, barSettings, icon, spellData.duration, cachedSpell)
                 return
             end  
@@ -134,7 +144,7 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellDat
     end
 
     -- Maybe need to map pet unit to player unit here
-    local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
+    local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
 
     ActivateIcon(barFrame, barSettings, icon, spellData.duration, cachedSpell)
     self:ArrangeIcons(barFrame, barSettings)

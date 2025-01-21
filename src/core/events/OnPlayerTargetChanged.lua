@@ -5,6 +5,7 @@ local UnitIsUnit = UnitIsUnit
 local UnitClass = UnitClass
 local UnitRace = UnitRace
 local GetUnitName = GetUnitName
+local UnitGUID = UnitGUID
 
 local function ShouldTrackSpell(spellName, spellData, unitClass, unitRace, spec)
     if unitClass == spellData.className then
@@ -50,6 +51,7 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
     local unitClass = UnitClass(unit)
     local unitRace = UnitRace(unit)
     local unitName = GetUnitName(unit)
+    local unitGUID = UnitGUID(unit)
    
     -- 3) Get cached data+
     local cachedSpells = self.combatLogCache[unitName]
@@ -61,7 +63,7 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         if barSettings.showUnusedIcons then
             if ShouldTrackSpell(spellName, spellData, unitClass, unitRace, cachedSpec) then
-                local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
+                local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
                 icon:SetAlpha(unusedAlpha)
             end
         end
@@ -92,8 +94,8 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
     local showUnusedIcons = barSettings.showUnusedIcons
     
     -- Get unit names
-    local targetName = targetExists and GetUnitName("target")
-    local focusName = focusExists and GetUnitName("focus")
+    local targetGUID = targetExists and UnitGUID("target")
+    local focusGUID = focusExists and UnitGUID("focus")
     
     -- Remove icons for units that are no longer referenced anywhere
     for i = #barFrame.icons, 1, -1 do
@@ -102,18 +104,18 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
 
         if not keepIcon and showUnusedIcons then
             -- Keep if the unit name matches either current target or focus
-            keepIcon = (targetExists and icon.unitName == targetName) or
-                      (focusExists and icon.unitName == focusName)
+            keepIcon = (targetExists and icon.unitGUID == targetGUID) or
+                      (focusExists and icon.unitGUID == focusGUID)
         end
         
         if keepIcon then
-            local key = icon.spellName .. icon.unitName
+            local key = icon.spellName .. icon.unitGUID
             existingIcons[key] = icon
             
             -- Update the icon's unitType if needed
-            if targetExists and icon.unitName == targetName then
+            if targetExists and icon.unitGUID == targetGUID then
                 icon.unitType = "target"
-            elseif focusExists and icon.unitName == focusName then
+            elseif focusExists and icon.unitGUID == focusGUID then
                 icon.unitType = "focus"
             end
         else
@@ -136,7 +138,8 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
     -- Get unit info
     local unitClass = UnitClass(unit)
     local unitRace = UnitRace(unit)
-    local unitName = (unit == "target") and targetName or focusName
+    local unitName = GetUnitName(unit)
+    local unitGUID = (unit == "target") and targetGUID or focusGUID
     
     local cachedSpells = self.combatLogCache[unitName]
     local cachedSpec = cachedSpells and cachedSpells.spec
@@ -144,14 +147,14 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
     local unusedAlpha = barSettings.unusedAlpha
    
     for spellName, spellData in pairs(barFrame.trackedSpells) do
-        local iconKey = spellName .. unitName
+        local iconKey = spellName .. unitGUID
         local existingIcon = existingIcons[iconKey]
         local hasCachedCooldown = cachedSpells and cachedSpells[spellName]
     
         if not existingIcon then
             if showUnusedIcons then
                 if ShouldTrackSpell(spellName, spellData, unitClass, unitRace, cachedSpec) then
-                    local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
+                    local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
                     icon:SetAlpha(unusedAlpha)
                 end
             end

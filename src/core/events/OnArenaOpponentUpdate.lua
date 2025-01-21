@@ -1,5 +1,5 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
-local GetUnitName = GetUnitName
+local UnitGUID = UnitGUID
 local UnitClass = UnitClass
 local UnitRace = UnitRace
 local UnitExists = UnitExists
@@ -11,20 +11,21 @@ local processedBars = {}
     local arenaOpponents = OmniBar.arenaOpponents
 
     if not arenaOpponents[unit] then
-        local unitName = GetUnitName(unit) 
+        local unitGUID = UnitGUID(unit)
+        print("GUID:", unit, unitGUID)
         local unitClass = UnitClass(unit) 
-        local unitRace = UnitRace(unit) 
+        local unitRace = UnitRace(unit)  
         arenaOpponents[unit] = {
-            unitName = unitName,
+            unitGUID = unitGUID,
             className = unitClass,
             race = unitRace,
             spec = nil
         }
 
-        return unitClass, unitRace, unitName
+        return unitClass, unitRace, unitGUID
     end
 
-    return arenaOpponents[unit].className, arenaOpponents[unit].race, arenaOpponents[unit].unitName
+    return arenaOpponents[unit].className, arenaOpponents[unit].race, arenaOpponents[unit].unitGUID
 end
 
 -- Reset state of the unit data and processed bars.
@@ -93,12 +94,12 @@ local function HandleAllArenaUnits(barFrame, barSettings, barKey, unit, updateRe
         return
     end
 
-    local unitClass, unitRace, unitName = GetUnitData(unit)
+    local unitClass, unitRace, unitGUID = GetUnitData(unit)
     MarkBarAsProcessed(barKey, unit)
 
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         if ShouldTrackSpell(spellName, spellData, unitClass, unitRace) then
-            OmniBar:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
+            OmniBar:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
         end
     end
 
@@ -128,17 +129,17 @@ function OmniBar:OnArenaOpponentUpdate(barFrame, event, unit, updateReason)
     end
 
     if updateReason ~= "seen" then return end
-
+    
     if AlreadyFilteredByClassAndRace(unit) and HasBarProcessedUnit(barKey, unit) then
         return
     end
 
-    local unitClass, unitRace, unitName = GetUnitData(unit)
+    local unitClass, unitRace, unitGUID = GetUnitData(unit)
     MarkBarAsProcessed(barKey, unit)
 
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         if ShouldTrackSpell(spellName, spellData, unitClass, unitRace) then
-            self:CreateIconToBar(barFrame, spellName, spellData, unitName, unit)
+            self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
         end
     end
 
@@ -166,8 +167,6 @@ function OmniBar:HandleMidGameReloadsForArenaUpdate()
                     end
                 end
 
-                -- Clear previous arena data and process current units
-                self:OnArenaOpponentUpdate(barFrame, "", "arena1", "cleared")
                 for _, unit in ipairs(existingUnits) do
                     self:OnArenaOpponentUpdate(barFrame, "", unit, "seen")
                 end
