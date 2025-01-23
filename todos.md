@@ -2,6 +2,10 @@
 
 TODOS: 
 
+    PRIO:
+        - test in arena with shared cds, both enemy and party
+        - add spec property to TalentTreeCoordinates.lua
+
     2) Update unit aura detection in world if I want to have that there. If so need to update OnPlayerTargetChanged, OnUnitAura, SpecDetection
     3) Remove showing items for hostile players, keep party members as is. Since its impossible to know what trinkets is equpped, better to hide until used.
     4) Add shared cds and reset cds logic, WIP

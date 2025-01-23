@@ -8,28 +8,25 @@ function OmniBar:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
     icon.priority = spellData.priority 
     icon.className = spellData.className
     icon.spellId = spellData.spellId
-    if spellData.race then  icon.race = spellData.race end
-    if spellData.item then icon.item = spellData.item end
-    --if unitName then icon.unitName = unitName end
-    if unitGUID then icon.unitGUID = unitGUID end
-    if unit then icon.unitType = unit end
+    icon.duration = spellData.duration
+    icon.race = spellData.race or nil
+    icon.item = spellData.item or nil
+    icon.unitGUID = unitGUID or nil
+    icon.unitType = unit or nil
 
     icon:Show()
     table.insert(barFrame.icons, icon)
     return icon
 end
 
--- Don't reset spellName, priority, class, to avoid affecting showUnusedIcons when the CD countdown ends.
+-- Avoid resetting spellName, priority, and className here to prevent issues with showUnusedIcons when the cooldown countdown ends.
 function OmniBar:ResetIconState(icon)
     icon.countdownText:SetText("")
     icon.timerFrame:Hide()
     icon.timerFrame:SetScript("OnUpdate", nil) -- Delete the timer
     icon.cooldown:Hide()
     icon.endTime = nil
-    icon.item = nil
-    icon.race = nil
-    --icon.unitType = nil
-    --icon.unitName = nil
+    icon.startTime = nil
 end
 
 function OmniBar:GetIconFromPool(barFrame)
@@ -58,6 +55,15 @@ end
 
 function OmniBar:ReturnIconToPool(icon)
     self:ResetIconState(icon)
+    icon.spellName = nil
+    icon.className = nil
+    icon.item = nil
+    icon.race = nil
+    icon.priority = nil
+    icon.spellId = nil
+    icon.duration = nil
+    icon.unitGUID = nil
+    icon.unitType = nil
     icon:StopNewIconAnimation()
     icon:Hide()
     icon:ClearAllPoints()

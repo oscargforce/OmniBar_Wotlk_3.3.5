@@ -6,7 +6,6 @@ local specDefiningAuras = addon.specDefiningAuras
 local UnitAura = UnitAura
 local GetUnitName = GetUnitName
 local UnitClass = UnitClass
-local UnitGUID = UnitGUID
 
 local processedBars = {}
 
@@ -23,6 +22,7 @@ local validWorldUnits = {
     ["focus"] = true,
 }
 
+
 local function MarkBarAsProcessed(barKey, unit)
     if not processedBars[barKey] then
         processedBars[barKey] = {}
@@ -34,19 +34,19 @@ local function HasBarProcessedUnit(barKey, unit)
     return processedBars[barKey] and processedBars[barKey][unit]
 end
 
+function OmniBar:GetSpecFromSpellTable(spellName)
+    return specDefiningSpells[spellName]
+end
+
 function OmniBar:ClearSpecProcessedData(unit)
     for barKey, units in pairs(processedBars) do
         units[unit] = nil
     end
 end
 
-function OmniBar:DetectSpecByCombatLogCache(spellName)
-    return specDefiningSpells[spellName]
-end
-
-function OmniBar:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
+function OmniBar:DetectSpecByAbility(spellName, unit, barFrame, barSettings, unitGUID)
     if self.zone ~= "arena" then 
-        self:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barSettings)
+        self:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barSettings, unitGUID)
         return 
     end
 
@@ -74,7 +74,7 @@ function OmniBar:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
     end
 end
 
-function OmniBar:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barSettings)
+function OmniBar:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barSettings, unitGUID)
     if not validWorldUnits[unit] then return end
     -- if barSettings.trackedUnit == "allEnemies" then return end --- Why did I have this check ??? 
 
@@ -88,14 +88,13 @@ function OmniBar:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barS
     local cachedData = self.combatLogCache[unitName]
 
     if cachedData and cachedData.spec then 
-        print(barSettings.name, "Detected spec for " .. unit .. ": " .. cachedData.spec .. " via combat log cache")
+        print(barSettings.name, "Detected spec for " .. unit .. ": " .. cachedData.spec .. " via combat log cache, exiting SpecDetection")
         return 
     end
 
     local definedSpec = specDefiningSpells[spellName]
     if definedSpec then
         local className = UnitClass(unit)
-        local unitGUID = UnitGUID(unit)
         local opponent = { unitGUID = unitGUID, className = className, spec = definedSpec }
         self:OnSpecDetected(unit, opponent, barFrame, barSettings)
         MarkBarAsProcessed(barKey, unit)
@@ -151,6 +150,7 @@ local function SpellBelongsToSpec(spellData, opponent, spellName)
     return spellData.spec == opponent.spec
 end
 
+-- Spec application
 function OmniBar:OnSpecDetected(unit, opponent, barFrame, barSettings)
     local needsRearranging = false
 
@@ -162,8 +162,60 @@ function OmniBar:OnSpecDetected(unit, opponent, barFrame, barSettings)
         end
     end
 
+    self:AdjustUnusedIconsCooldownForSpec(barFrame, opponent.unitGUID, opponent.spec)
+    
     if needsRearranging then
         self:ArrangeIcons(barFrame, barSettings)
         self:UpdateUnusedAlpha(barFrame, barSettings)
+    end
+end
+
+
+function OmniBar:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, spec)
+    for i, icon in ipairs(barFrame.icons) do 
+        if icon.unitGUID == unitGUID then
+            local spellData = barFrame.trackedSpells[icon.spellName]
+            if spellData.adjust and spellData.adjust[spec] then
+               icon.duration = spellData.adjust[spec]
+               print("AdjustUnusedIconsCooldownForSpec", icon.spellName, "to", spellData.adjust[spec], "seconds")
+           end
+        end
+   end
+end
+
+function OmniBar:AdjustCooldownForSpec(icon, spellData, mappedUnit, barKey, cachedSpell)
+    if cachedSpell then return end
+    if not spellData.adjust then return end
+
+    -- Arena spec handling
+    if self.zone == "arena" then
+        local spec = self.arenaOpponents[mappedUnit].spec or self.partyMemberSpecs[mappedUnit] or nil
+        if not spellData.adjust[spec] then return end
+
+        icon.duration = spellData.adjust[spec]
+        print("AdjustCooldownForSpecArena", icon.spellName, "to", spellData.adjust[spec], "seconds")
+        return
+    end 
+
+    -- World PvP spec handling
+    if mappedUnit:match("^party[1-4]$") then
+        print("AdjustCooldownForSpecWorldParty", barKey, mappedUnit, self.partyMemberSpecs[mappedUnit])
+        local spec = self.partyMemberSpecs[mappedUnit]
+
+        -- If party spec detection failed, use combatLogCache as last resort
+        if spec and spec ~= "" then 
+            if not spellData.adjust[spec] then return end
+    
+            icon.duration = spellData.adjust[spec]
+            print("AdjustCooldownForSpecWorldParty", icon.spellName, "to", spellData.adjust[spec], "seconds")
+            return
+        end
+    end
+
+    local playerName = GetUnitName(mappedUnit)
+    local cachedData = self.combatLogCache[playerName]
+    if cachedData and cachedData.spec and spellData.adjust[cachedData.spec] then
+        print("AdjustCooldownForSpecWorld", icon.spellName, "to", spellData.adjust[cachedData.spec], "seconds")
+        icon.duration = spellData.adjust[cachedData.spec]
     end
 end

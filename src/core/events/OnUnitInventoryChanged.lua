@@ -57,7 +57,7 @@ function OmniBar:OnUnitInventoryChanged(barFrame, event, unit)
         end
     end
 
-    local unitGUID = self.partyGUIDCache[barFrame.key][trackedUnit]   
+    local unitGUID = self.partyMemberGUIDs[barFrame.key][trackedUnit]   
   
     for trinketName, _ in pairs(unitTrinkets) do
         local spellData = barFrame.trackedSpells[trinketName] 

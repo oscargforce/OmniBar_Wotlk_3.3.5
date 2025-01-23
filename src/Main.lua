@@ -46,7 +46,8 @@ function OmniBar:OnInitialize()
     self.iconPool = {}
     self.isArenaMatchInProgress = false -- maybe use later for onInventoryChanged
     self.arenaOpponents = {}
-    self.partyGUIDCache = {}
+    self.partyMemberGUIDs = {}
+    self.partyMemberSpecs = {}
     self.combatLogCache = {}
     self.currentRealm = GetRealmName()
     self.db.RegisterCallback(self, "OnProfileChanged", "OnEnable")
@@ -163,6 +164,11 @@ function OmniBar:InitializeBar(barKey, settings)
         self:SetupBarIcons(barFrame, barSettings)
     else
         self:CreateIconsToPool(barFrame)
+
+        -- Trigger the event "party members changed" to detect the party members specs after a reload
+        if barSettings.trackedUnit:match("^party[1-4]$") then
+            self:SetupBarIcons(barFrame, barSettings)
+        end
     end  
    
 end

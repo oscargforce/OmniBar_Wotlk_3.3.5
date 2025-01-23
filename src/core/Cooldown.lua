@@ -30,19 +30,21 @@ local function formatTimeText(timeLeft)
     return string.format("%s%.0f%s", color, timeLeft, COLORS.END_TAG)
 end
 
-local function StartCooldownShading(icon, duration, barSettings, barFrame, cachedSpell)
+local function StartCooldownShading(icon, barSettings, barFrame, cachedSpell, sharedCdDuration)
     local now = GetTime()
     local startTime = now
-    local remainingDuration = duration
+    local duration = sharedCdDuration or icon.duration
+    local remainingDuration = sharedCdDuration or icon.duration
 
     if cachedSpell then
         remainingDuration = cachedSpell.expires - now
         startTime = cachedSpell.timestamp
-        duration = cachedSpell.duration 
+        duration = cachedSpell.duration  --I dont think this is needed.
     end
 
     local endTime = now + remainingDuration
     icon.endTime = endTime
+    icon.startTime = startTime
     icon:SetAlpha(1)
     if not cachedSpell then
         icon:PlayNewIconAnimation()
@@ -68,28 +70,28 @@ local function StartCooldownShading(icon, duration, barSettings, barFrame, cache
     end) 
 end
 
-local function ActivateIcon(barFrame, barSettings, icon, duration, cachedSpell)
+local function ActivateIcon(barFrame, barSettings, icon, cachedSpell, sharedCdDuration)
     barFrame.activeIcons[icon] = true
     OmniBar:ToggleAnchorVisibility(barFrame)
-    StartCooldownShading(icon, duration, barSettings, barFrame, cachedSpell)
+    StartCooldownShading(icon, barSettings, barFrame, cachedSpell, sharedCdDuration)
 end
 
 local function GetUnitGUIDForCooldown(unit, barKey, cachedSpell)
     local mappedUnit = MapPetToPlayerUnit(unit)
 
     if mappedUnit:match("^arena[1-5]$") then
-        return OmniBar.arenaOpponents[mappedUnit] and OmniBar.arenaOpponents[mappedUnit].unitGUID
+        return OmniBar.arenaOpponents[mappedUnit] and OmniBar.arenaOpponents[mappedUnit].unitGUID, mappedUnit
     end
   
     if mappedUnit:match("^party[1-4]$") then
-        return OmniBar.partyGUIDCache[barKey] and OmniBar.partyGUIDCache[barKey][mappedUnit]
+        return OmniBar.partyMemberGUIDs[barKey] and OmniBar.partyMemberGUIDs[barKey][mappedUnit], mappedUnit
     end
 
     if cachedSpell and not cachedSpell.isPet then
-        return cachedSpell.sourceGUID
+        return cachedSpell.sourceGUID, mappedUnit
     end
 
-    return UnitGUID(mappedUnit)
+    return UnitGUID(mappedUnit), mappedUnit
 end
 
 local function RemoveInactiveIconsInWorldZone(icon, barFrame, barSettings)
@@ -113,7 +115,7 @@ local function RemoveInactiveIconsInWorldZone(icon, barFrame, barSettings)
     end 
 end
 
-function OmniBar:SharedCooldownsHandler(spellName,unit, barFrame, barSettings, cachedSpell)
+function OmniBar:SharedCooldownsHandler(spellName, unit, barFrame, barSettings, cachedSpell)
     local sharedCd = sharedCds[spellName]
     if not sharedCd then return end
     
@@ -126,7 +128,6 @@ function OmniBar:SharedCooldownsHandler(spellName,unit, barFrame, barSettings, c
             if spellConfig.showWhenHidden and spellData then
                 local shouldAddIcon = true
                 for i, icon in ipairs(barFrame.icons) do
-                    -- We only have active icons in barFrame.icons if showUnusedIcons is false, hence no need to check activeIcons table.
                     if icon.spellName == spell and icon.unitGUID == unitGUID then
                         shouldAddIcon = false
                         break
@@ -138,8 +139,10 @@ function OmniBar:SharedCooldownsHandler(spellName,unit, barFrame, barSettings, c
                         return
                     end
                     local icon = self:CreateIconToBar(barFrame, spell, spellData, unitGUID, unit)
-                    ActivateIcon(barFrame, barSettings, icon, spellConfig.duration, cachedSpell)
+                    local sharedDuration = spellConfig.sharedDuration or nil
+                    ActivateIcon(barFrame, barSettings, icon, cachedSpell, sharedDuration)
                     print("Hidden shared cd cooldown for", icon.spellName)
+                    self:ArrangeIcons(barFrame, barSettings)
                 end
             end
         end
@@ -147,28 +150,35 @@ function OmniBar:SharedCooldownsHandler(spellName,unit, barFrame, barSettings, c
         return
     end
 
+    -- For showUnusedIcons
     for i, icon in ipairs(barFrame.icons) do
-        if not barFrame.activeIcons[icon] then
-            local spell = sharedCd[icon.spellName]
+        local spell = sharedCd[icon.spellName]
 
-            if spell and icon.unitGUID == unitGUID  then
+        if spell and icon.unitGUID == unitGUID then
+            local isActiveIcon = barFrame.activeIcons[icon]
+
+            if isActiveIcon and not spell.sharedDuration then
+                ActivateIcon(barFrame, barSettings, icon, cachedSpell)
+                print("isActiveIcon shared cd cooldown for", icon.spellName)
+            elseif not isActiveIcon then
+                local sharedCdDuration = spell.sharedDuration or nil
+                ActivateIcon(barFrame, barSettings, icon, cachedSpell, sharedCdDuration)
                 print("Shared cd cooldown for", icon.spellName)
-                local sharedCdDuration = sharedCd[icon.spellName].duration
-                ActivateIcon(barFrame, barSettings, icon, spell.duration, cachedSpell)
             end
         end
+
     end
 end
 
 -- TEST ALL ENEMIES IN WORLD, TARGET AND FOCUS SAME CLASS
 function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpell)
-    local unitGUID = GetUnitGUIDForCooldown(unit, barFrame.key, cachedSpell)
+    local unitGUID, mappedUnit = GetUnitGUIDForCooldown(unit, barFrame.key, cachedSpell)
 
     if barSettings.showUnusedIcons then
-        self:DetectSpecByAbility(spellName, unit, barFrame, barSettings)
-        for i, icon in ipairs(barFrame.icons) do
+        self:DetectSpecByAbility(spellName, unit, barFrame, barSettings, unitGUID)
+        for i, icon in ipairs(barFrame.icons) do --and not barFrame.activeIcons[icon]
             if icon.spellName == spellName and icon.unitGUID == unitGUID then
-                ActivateIcon(barFrame, barSettings, icon, spellData.duration, cachedSpell)
+                ActivateIcon(barFrame, barSettings, icon, cachedSpell)
                 return
             end  
         end
@@ -176,10 +186,10 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellDat
         return
     end
 
-    -- Maybe need to map pet unit to player unit here
     local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
+    self:AdjustCooldownForSpec(icon, spellData, mappedUnit, barFrame.key, cachedSpell)
 
-    ActivateIcon(barFrame, barSettings, icon, spellData.duration, cachedSpell)
+    ActivateIcon(barFrame, barSettings, icon, cachedSpell)
     self:ArrangeIcons(barFrame, barSettings)
 end
 

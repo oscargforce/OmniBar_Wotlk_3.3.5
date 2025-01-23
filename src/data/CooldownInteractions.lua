@@ -6,80 +6,85 @@ addon.resetCds = {
     }
 }
 
--- showWhenHidden is used to display shared cooldowns for bars that have showUnusedIcons disabled.
--- It is unnecessary to show all shared cooldowns if icons are hidden, as it would only clutter your UI.
--- Therefore, only the most important shared cooldowns are shown when icons are hidden.
+
+--[[
+    The `showWhenHidden` flag is used to display shared cooldowns for bars where `showUnusedIcons` is disabled.
+    It helps to avoid cluttering the UI by only showing the most important shared cooldowns when icons are hidden.
+
+    Note: Only set `sharedDuration` if it differs from the default or talent-specific duration of the spell.
+    For example, "Will of the Forsaken" shares a 45-second cooldown with the PvP trinket, while its default cooldown is 2 minutes.
+]]
 addon.sharedCds = {
     -- PvP Trinkets
     ["PvP Trinket"] = {
-        ["Will of the Forsaken"] = { duration = 45, showWhenHidden = true },
+        ["Will of the Forsaken"] = { sharedDuration = 45, showWhenHidden = true },
     }, 
     ["Will of the Forsaken"] = {
-        ["PvP Trinket"] = { duration = 45, showWhenHidden = true },
+        ["PvP Trinket"] = { sharedDuration = 45, showWhenHidden = true },
     }, 
 
     -- Druid
     ["Feral Charge - Bear"] = {
-        ["Feral Charge - Cat"] = { duration = 45 }
+        ["Feral Charge - Cat"] = {},
     }, 
     ["Feral Charge - Cat"] = {
-        ["Feral Charge - Bear"] = { duration = 45 }
+        ["Feral Charge - Bear"] = {},
     }, 
 
     -- Hunter
     ["Freezing Arrow"] = {
-        ["Freezing Trap"] = { duration = 28 },
-        ["Frost Trap"] = { duration = 28 },
+        ["Freezing Trap"] = {},
+        ["Frost Trap"] = {},
     },
     ["Frost Trap"] = {
-        ["Freezing Trap"] = { duration = 28 },
-        ["Freezing Arrow"] = { duration = 28 },
+        ["Freezing Trap"] = {},
+        ["Freezing Arrow"] = {},
     },
     ["Freezing Trap"] = {
-        ["Freezing Arrow"] = { duration = 28 },
-        ["Frost Trap"] = { duration = 28 },
+        ["Freezing Arrow"] = {},
+        ["Frost Trap"] = {},
     },
     ["Immolation Trap"] = {
-        ["Explosive Trap"] = { duration = 28 },
+        ["Explosive Trap"] = {},
     },
     ["Explosive Trap"] = {
-        ["Immolation Trap"] = { duration = 28 },
+        ["Immolation Trap"] = {},
     },
 
     -- Paladin
     ["Avenging Wrath"] = {
-        ["Divine Protection"] = { duration = 30 },
-        ["Divine Shield"] = { duration = 30, showWhenHidden = true },
-        ["Lay on Hands"] = { duration = 30 },
+        ["Divine Protection"] = { sharedDuration = 30 },
+        ["Divine Shield"] = { sharedDuration = 30, showWhenHidden = true },
+        ["Lay on Hands"] = { sharedDuration = 30 },
     },
     ["Divine Protection"] = {
-        ["Avenging Wrath"] = { duration = 30 },
+        ["Avenging Wrath"] = { sharedDuration = 30 },
     },
     ["Divine Shield"] = {
-        ["Avenging Wrath"] = { duration = 30 },
+        ["Avenging Wrath"] = { sharedDuration = 30 },
     },
     ["Lay on Hands"] = {
-        ["Avenging Wrath"] = { duration = 30 },
+        ["Avenging Wrath"] = { sharedDuration = 30 },
     },
     
     -- Warrior
     ["Shield Bash"] = {
-        ["Pummel"] = { duration = 10 }
+        ["Pummel"] = { sharedDuration = 12 }
     },
     ["Pummel"] = {
-        ["Shield Bash"] = { duration = 10 }
+        ["Shield Bash"] = { sharedDuration = 10 }
     },
     ["Recklessness"] = {
-        ["Shield Wall"] = { duration = 10, showWhenHidden = true },
-        ["Retaliation"] = { duration = 10 },
+        ["Shield Wall"] = { sharedDuration = 12, showWhenHidden = true },
+        ["Retaliation"] = { sharedDuration = 12 },
     },
     ["Shield Wall"] = {
-        ["Recklessness"] = { duration = 10 },
-        ["Retaliation"] = { duration = 10 },
+        ["Recklessness"] = { sharedDuration = 12 },
+        ["Retaliation"] = { sharedDuration = 12 },
     },
     ["Retaliation"] = {
-        ["Shield Wall"] = { duration = 10, showWhenHidden = true },
-        ["Recklessness"] = { duration = 10 },
+        ["Shield Wall"] = { sharedDuration = 12, showWhenHidden = true },
+        ["Recklessness"] = { sharedDuration = 12 },
     },
 }
 
