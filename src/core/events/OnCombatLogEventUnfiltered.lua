@@ -2,6 +2,10 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local GetTime = GetTime
 local GetUnitName = GetUnitName
 local UnitIsEnemy = UnitIsEnemy
+local GetPlayerInfoByGUID = GetPlayerInfoByGUID
+local addonName, addon = ...
+local sharedCds = addon.sharedCds
+local spellTable = addon.spellTable
 
 local ORIGINAL_SUMMON_TITLES = {
     UNITNAME_SUMMON_TITLE1,
@@ -63,10 +67,11 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
         return 
     end
 
-    -- 2) check if spell is in trackedSpells table
+    -- 2) check if spell is relevant
     local spellData = barFrame.trackedSpells[spellName]
-    
-    if not spellData then 
+    local sharedCd = sharedCds[spellName]
+
+    if not spellData and not sharedCd then 
         return 
     end
     
@@ -86,10 +91,31 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
         end
     end
 
+    local now = GetTime()
+
+    -- If the player does not track the spell, but it triggers a shared cooldown, cache it.
+    if not spellData and sharedCd then
+        local GENERAL_SPELLS = { ["Will of the Forsaken"] = true, ["PvP Trinket"] = true }
+        local className = GENERAL_SPELLS[spellName] and "General" or GetPlayerInfoByGUID(sourceGUID)
+        local spellDetails = spellTable[className][spellName]
+        local duration = spellDetails.adjust and spellDetails.adjust[playerCache.spec] or spellDetails.duration
+
+        playerCache[spellName] = {
+            duration = duration, 
+            expires = now + duration, 
+            timestamp = now, 
+            playerName = playerName, 
+            sharedCds = sharedCd,
+            createIcon = false
+        }
+        return
+    end
+
+
     -- 4.1.1) If the spec affects the cooldown duration, adjust it. For example, Shadow Priests have a shorter fear cooldown than Discipline Priests.
     local duration = spellData.adjust and spellData.adjust[playerCache.spec] or spellData.duration
+
     -- 4.2) Add the spell to the cache so that if we switch targets to this unit, the cooldown is already saved for display.
-    local now = GetTime()
     playerCache[spellName] = {
         duration = duration, -- actually using this property, dont think this is needed anymore. Im using icon.duration
         event = subEvent,
@@ -102,11 +128,13 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
         spellName = spellName,
         timestamp = now, -- actually using this property
         playerName = playerName, -- using ths property
-        isPet = petOwnerName and true or false -- using ths property
+        isPet = petOwnerName and true or false, -- using ths property
+        sharedCds = sharedCd or nil,
+        createIcon = true,
     }
 
     -- 5) Activate icons for enemy pet abilities. The event UnitSpellCastSucceeded is not triggered by enemy pets in the open world (though it does work in arenas). 
-    -- Similarly, Feign Death is not registered in the combat log. To work around this, we need to support each other, and UnitSpellCastSucceeded will handle the rest.
+    -- Similarly, Feign Death is not registered in the combat log. To work around this, the two events need to support each other.
     local barSettings = self.db.profile.bars[barFrame.key]
     local trackedUnit = barSettings.trackedUnit
 

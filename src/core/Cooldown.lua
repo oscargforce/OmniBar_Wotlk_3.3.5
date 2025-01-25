@@ -39,11 +39,13 @@ local function StartCooldownShading(icon, barSettings, barFrame, cachedSpell, sh
     if cachedSpell then
         remainingDuration = cachedSpell.expires - now
         startTime = cachedSpell.timestamp
-        duration = cachedSpell.duration  --I dont think this is needed.
+        if cachedSpell.duration then
+            duration = cachedSpell.duration 
+        end
     end
 
     local endTime = now + remainingDuration
-    icon.endTime = endTime
+    icon.endTime = endTime - 0.2 -- subtract 0.2 due to latencys,
     icon.startTime = startTime
     icon:SetAlpha(1)
     if not cachedSpell then

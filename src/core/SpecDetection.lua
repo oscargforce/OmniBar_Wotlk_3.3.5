@@ -189,7 +189,7 @@ function OmniBar:AdjustCooldownForSpec(icon, spellData, mappedUnit, barKey, cach
 
     -- Arena spec handling
     if self.zone == "arena" then
-        local spec = self.arenaOpponents[mappedUnit].spec or self.partyMemberSpecs[mappedUnit] or nil
+        local spec = self.arenaOpponents[mappedUnit] and self.arenaOpponents[mappedUnit].spec or self.partyMemberSpecs[mappedUnit]
         if not spellData.adjust[spec] then return end
 
         icon.duration = spellData.adjust[spec]

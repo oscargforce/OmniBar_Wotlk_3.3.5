@@ -123,7 +123,7 @@ function OmniBar:BuildTrackedSpells(barFrame, barSettings)
 
                 if not trackedSpells[spellName] then
                     trackedSpells[spellName] = {
-                        duration = spellData.duration - 0.2, -- subtract 0.2 due to latencys,
+                        duration = spellData.duration,
                         icon = spellData.icon,
                         priority = spellConfig.priority or 1,
                         className = className,
