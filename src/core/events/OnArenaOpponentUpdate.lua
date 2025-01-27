@@ -99,6 +99,8 @@ local function HandleAllArenaUnits(barFrame, barSettings, barKey, unit, updateRe
     local unitClass, unitRace, unitGUID = GetUnitData(unit)
     MarkBarAsProcessed(barKey, unit)
 
+    if not barSettings.showUnusedIcons then return end
+
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         if ShouldTrackSpell(spellName, spellData, unitClass, unitRace) then
             OmniBar:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
@@ -112,8 +114,6 @@ end
 function OmniBar:OnArenaOpponentUpdate(barFrame, event, unit, updateReason)
     local barKey = barFrame.key
     local barSettings = self.db.profile.bars[barKey]
-
-    if not barSettings.showUnusedIcons then return end
 
     local trackedUnit = barSettings.trackedUnit
 
@@ -140,6 +140,8 @@ function OmniBar:OnArenaOpponentUpdate(barFrame, event, unit, updateReason)
     local unitClass, unitRace, unitGUID = GetUnitData(unit)
     MarkBarAsProcessed(barKey, unit)
 
+    if not barSettings.showUnusedIcons then return end
+
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         if ShouldTrackSpell(spellName, spellData, unitClass, unitRace) then
             self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
@@ -157,29 +159,28 @@ function OmniBar:HandleMidGameReloadsForArenaUpdate()
     for barKey, barSettings in pairs(self.db.profile.bars) do
         local barFrame = self.barFrames[barKey]
 
-        if barSettings.showUnusedIcons then
-            -- Handle bars tracking all arena enemies
-            if barSettings.trackedUnit == "allEnemies" then
-                local existingUnits = {}
+        -- Handle bars tracking all arena enemies
+        if barSettings.trackedUnit == "allEnemies" then
+            local existingUnits = {}
 
-                -- Collect all active arena units
-                for i = 1, 5 do
-                    local unit = "arena" .. i
-                    if UnitExists(unit) then
-                        table.insert(existingUnits, unit)
-                    end
-                end
-
-                for _, unit in ipairs(existingUnits) do
-                    self:OnArenaOpponentUpdate(barFrame, "", unit, "seen")
-                end
-
-            -- Handle bars tracking specific arena units
-            elseif barSettings.trackedUnit:match("^arena[1-5]$") then
-                if UnitExists(barSettings.trackedUnit) then
-                    self:OnArenaOpponentUpdate(barFrame, "", barSettings.trackedUnit, "seen")
+            -- Collect all active arena units
+            for i = 1, 5 do
+                local unit = "arena" .. i
+                if UnitExists(unit) then
+                    table.insert(existingUnits, unit)
                 end
             end
+
+            for _, unit in ipairs(existingUnits) do
+                self:OnArenaOpponentUpdate(barFrame, "", unit, "seen")
+            end
+            
+        -- Handle bars tracking specific arena units
+        elseif barSettings.trackedUnit:match("^arena[1-5]$") then
+            if UnitExists(barSettings.trackedUnit) then
+                self:OnArenaOpponentUpdate(barFrame, "", barSettings.trackedUnit, "seen")
+            end
         end
+       
     end
 end
