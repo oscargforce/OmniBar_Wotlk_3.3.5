@@ -4,7 +4,6 @@ local UnitAffectingCombat = UnitAffectingCombat
 local CheckInteractDistance = CheckInteractDistance
 local NotifyInspect = NotifyInspect
 local ClearInspectPlayer = ClearInspectPlayer
-local unitGUID = unitGUID
 
 --[[
       NOTE: WoW's 3.3.5 Inventory API can be unreliable, especially when trinkets are swapped quickly. 
@@ -14,16 +13,19 @@ local unitGUID = unitGUID
 ]]
 
 function OmniBar:OnUnitInventoryChanged(barFrame, event, unit)
-    print("OnUnitInventoryChanged")
+    if self.isArenaMatchInProgress then return end
+
     local barSettings = self.db.profile.bars[barFrame.key]
 
     if not barSettings.showUnusedIcons then return end
 
     local trackedUnit = barSettings.trackedUnit
 
-    if trackedUnit ~= unit then return end
-
     if UnitAffectingCombat(trackedUnit) then return end
+    
+    if trackedUnit ~= unit then return end
+    
+    print("OnUnitInventoryChanged")
 
     local unitTrinkets = {}
     local didInspect = false
@@ -31,7 +33,7 @@ function OmniBar:OnUnitInventoryChanged(barFrame, event, unit)
 
     if CheckInteractDistance(trackedUnit, 1) then 
         NotifyInspect(trackedUnit)
-        print("NotifyInspect", trackedUnit)
+        print("OnUnitInventoryChanged NotifyInspect", trackedUnit)
         unitTrinkets = self:GetPartyUnitsTrinkets(trackedUnit) 
         didInspect = true
     end
@@ -55,8 +57,8 @@ function OmniBar:OnUnitInventoryChanged(barFrame, event, unit)
         end
     end
 
-    local unitGUID = unitGUID(trackedUnit)
-
+    local unitGUID = self.partyMemberGUIDs[barFrame.key][trackedUnit]   
+  
     for trinketName, _ in pairs(unitTrinkets) do
         local spellData = barFrame.trackedSpells[trinketName] 
         if spellData and not iconTrinketsOnBar[trinketName] then

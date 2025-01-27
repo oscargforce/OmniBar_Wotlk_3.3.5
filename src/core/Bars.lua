@@ -123,22 +123,16 @@ function OmniBar:BuildTrackedSpells(barFrame, barSettings)
 
                 if not trackedSpells[spellName] then
                     trackedSpells[spellName] = {
-                        duration = spellData.duration - 0.2, -- subtract 0.2 due to latencys
+                        duration = spellData.duration,
                         icon = spellData.icon,
                         priority = spellConfig.priority or 1,
                         className = className,
-                        spellId = spellData.spellId
+                        spellId = spellData.spellId,
+                        race = spellData.race or nil,
+                        spec = spellData.spec or nil,
+                        item = spellData.item or nil,
+                        adjust = spellData.adjust or nil,
                     }
-
-                    if spellData.race then
-                        trackedSpells[spellName].race = spellData.race
-                    end
-                    if spellData.spec then
-                        trackedSpells[spellName].spec = spellData.spec
-                    end
-                    if spellData.item then
-                        trackedSpells[spellName].item = spellData.item
-                    end
                 end
             end
         end

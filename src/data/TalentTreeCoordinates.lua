@@ -125,6 +125,7 @@ addon.talentTreeCoordinates = {
         ["Wyvern Sting"] = {
             talentGroup = 3,
             index = 20,
+            spec = "survival",
         },
     },
     ["Mage"] = {

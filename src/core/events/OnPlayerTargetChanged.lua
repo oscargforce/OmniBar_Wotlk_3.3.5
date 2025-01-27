@@ -30,6 +30,18 @@ local function ShouldTrackSpell(spellName, spellData, unitClass, unitRace, spec)
     return false
 end
 
+local function CreateSharedCdCache(spellCache, unitGUID)
+    local _, firstCd = next(spellCache.sharedCds)
+    local sharedDuration = firstCd.sharedDuration or 0
+    local expires = sharedDuration and spellCache.timestamp + sharedDuration or spellCache.expires
+    return {
+        sourceGUID = unitGUID,
+        playerName = spellCache.playerName,
+        timestamp = spellCache.timestamp,
+        expires = expires
+    }
+end
+
 function OmniBar:OnPlayerTargetChanged(barFrame, event)
     local unit = (event == "PLAYER_TARGET_CHANGED" and "target") or (event == "PLAYER_FOCUS_CHANGED" and "focus")
 
@@ -56,11 +68,15 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
     -- 3) Get cached data+
     local cachedSpells = self.combatLogCache[unitName]
     local cachedSpec = cachedSpells and cachedSpells.spec
+    local t = cachedSpec and cachedSpells.spec or "no spec"
+    print("|cFFFFFF00" .. "cachedSpec = " .. t .. "|r")
 
     -- 4) Process tracked spells
     local unusedAlpha = barSettings.unusedAlpha
     
     for spellName, spellData in pairs(barFrame.trackedSpells) do
+        local hasCachedCooldown = cachedSpells and cachedSpells[spellName] and cachedSpells[spellName].createIcon
+
         if barSettings.showUnusedIcons then
             if ShouldTrackSpell(spellName, spellData, unitClass, unitRace, cachedSpec) then
                 local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
@@ -68,8 +84,22 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
             end
         end
 
-        if cachedSpells and cachedSpells[spellName] then
-            self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpells[spellName])
+        if hasCachedCooldown then
+            self:OnCooldownUsed(barFrame, barSettings, unit, unitGUID, spellName, spellData, cachedSpells[spellName])
+        end
+    end
+
+    if cachedSpec then
+        self:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, cachedSpec, barSettings)
+    end
+
+    -- Icons reset on target/focus switches, and shared cooldowns aren't preserved. A fake combat log cache is used to handle this
+    if cachedSpells then
+        for spellName, spellCache in pairs(cachedSpells) do
+            if spellCache.sharedCds then
+                local sharedCdCache = CreateSharedCdCache(spellCache, unitGUID)
+                self:SharedCooldownsHandler(barFrame, barSettings, unit, unitGUID, spellName, sharedCdCache)
+            end
         end
     end
 
@@ -149,7 +179,7 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         local iconKey = spellName .. unitGUID
         local existingIcon = existingIcons[iconKey]
-        local hasCachedCooldown = cachedSpells and cachedSpells[spellName]
+        local hasCachedCooldown = cachedSpells and cachedSpells[spellName] and cachedSpells[spellName].createIcon
     
         if not existingIcon then
             if showUnusedIcons then
@@ -160,7 +190,21 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
             end
 
             if hasCachedCooldown then
-                self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, hasCachedCooldown)
+                self:OnCooldownUsed(barFrame, barSettings, unit, unitGUID, spellName, spellData, cachedSpells[spellName])
+            end
+        end
+    end
+
+    if cachedSpec then
+        self:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, cachedSpec, barSettings)
+    end
+
+     -- Icons reset on target/focus switches, and shared cooldowns aren't preserved. A fake combat log cache is used to handle this
+     if cachedSpells then
+        for spellName, spellCache in pairs(cachedSpells) do
+            if spellCache.sharedCds then
+                local sharedCdCache = CreateSharedCdCache(spellCache, unitGUID)
+                self:SharedCooldownsHandler(barFrame, barSettings, unit, unitGUID, spellName, sharedCdCache)
             end
         end
     end

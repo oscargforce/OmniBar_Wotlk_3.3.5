@@ -38,6 +38,7 @@ local function ClearUnitData(unit)
     end
 
     OmniBar:ClearSpecProcessedData(unit)
+    OmniBar.isArenaMatchInProgress = false
 end
 
 -- Mark the bar as processed for the unit. To prevent duplicate requests and icons.
@@ -94,6 +95,7 @@ local function HandleAllArenaUnits(barFrame, barSettings, barKey, unit, updateRe
         return
     end
 
+    OmniBar.isArenaMatchInProgress = true
     local unitClass, unitRace, unitGUID = GetUnitData(unit)
     MarkBarAsProcessed(barKey, unit)
 
@@ -134,6 +136,7 @@ function OmniBar:OnArenaOpponentUpdate(barFrame, event, unit, updateReason)
         return
     end
 
+    self.isArenaMatchInProgress = true
     local unitClass, unitRace, unitGUID = GetUnitData(unit)
     MarkBarAsProcessed(barKey, unit)
 
