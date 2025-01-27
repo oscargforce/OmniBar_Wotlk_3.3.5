@@ -158,7 +158,7 @@ function OmniBar:OnInspectTalentReady(barFrame, event, ...)
     
     if showUnusedIcons and spec ~= "" then
         print("|cFFFFFF00".."showUnusedIcons partyMemberSpec".. spec .. "|r")
-        self:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, spec)
+        self:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, spec, barSettings)
     end
 
     if showUnusedIcons then

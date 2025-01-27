@@ -2,6 +2,7 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local GetTime = GetTime
 local GetUnitName = GetUnitName
 local UnitIsEnemy = UnitIsEnemy
+local UnitGUID = UnitGUID
 local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local addonName, addon = ...
 local sharedCds = addon.sharedCds
@@ -70,8 +71,9 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
     -- 2) check if spell is relevant
     local spellData = barFrame.trackedSpells[spellName]
     local sharedCd = sharedCds[spellName]
+    local playerSpec = self:GetSpecFromSpellTable(spellName)
 
-    if not spellData and not sharedCd then 
+    if not spellData and not sharedCd and not playerSpec then 
         return 
     end
     
@@ -85,10 +87,14 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
 
     -- 4.1) Detect the spec of the player if it's not already cached.
     if not playerCache.spec then
-        local playerSpec = self:GetSpecFromSpellTable(spellName)
         if playerSpec then
             playerCache.spec = playerSpec
         end
+    end
+    
+    -- If the spell was only spec related we dont need more info, early return.
+    if not spellData and not sharedCd then 
+        return 
     end
 
     local now = GetTime()
@@ -97,6 +103,7 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
     if not spellData and sharedCd then
         local GENERAL_SPELLS = { ["Will of the Forsaken"] = true, ["PvP Trinket"] = true }
         local className = GENERAL_SPELLS[spellName] and "General" or GetPlayerInfoByGUID(sourceGUID)
+        print("Does not have spell in table if error", className, spellName, playerName)
         local spellDetails = spellTable[className][spellName]
         local duration = spellDetails.adjust and spellDetails.adjust[playerCache.spec] or spellDetails.duration
 
@@ -128,7 +135,6 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
         spellName = spellName,
         timestamp = now, -- actually using this property
         playerName = playerName, -- using ths property
-        isPet = petOwnerName and true or false, -- using ths property
         sharedCds = sharedCd or nil,
         createIcon = true,
     }
@@ -142,8 +148,9 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
         local isEnemyPet, unit = PlayerNameMatchesTrackedUnit(playerName, trackedUnit)
       
         if isEnemyPet then
+            local unitGUID = UnitGUID(unit)
             local cachedSpell = playerCache[spellName]
-            self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpell)
+            self:OnCooldownUsed(barFrame, barSettings, unit, unitGUID, spellName, spellData, cachedSpell)
         end
     end
  

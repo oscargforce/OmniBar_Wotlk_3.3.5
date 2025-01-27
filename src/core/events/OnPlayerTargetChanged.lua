@@ -38,8 +38,7 @@ local function CreateSharedCdCache(spellCache, unitGUID)
         sourceGUID = unitGUID,
         playerName = spellCache.playerName,
         timestamp = spellCache.timestamp,
-        expires = expires,
-        isPet = false
+        expires = expires
     }
 end
 
@@ -86,12 +85,12 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
         end
 
         if hasCachedCooldown then
-            self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpells[spellName])
+            self:OnCooldownUsed(barFrame, barSettings, unit, unitGUID, spellName, spellData, cachedSpells[spellName])
         end
     end
 
     if cachedSpec then
-        self:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, cachedSpec)
+        self:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, cachedSpec, barSettings)
     end
 
     -- Icons reset on target/focus switches, and shared cooldowns aren't preserved. A fake combat log cache is used to handle this
@@ -99,7 +98,7 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
         for spellName, spellCache in pairs(cachedSpells) do
             if spellCache.sharedCds then
                 local sharedCdCache = CreateSharedCdCache(spellCache, unitGUID)
-                self:SharedCooldownsHandler(spellName, unit, barFrame, barSettings, sharedCdCache)
+                self:SharedCooldownsHandler(barFrame, barSettings, unit, unitGUID, spellName, sharedCdCache)
             end
         end
     end
@@ -191,13 +190,13 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
             end
 
             if hasCachedCooldown then
-                self:OnCooldownUsed(barFrame, barSettings, unit, spellName, spellData, cachedSpells[spellName])
+                self:OnCooldownUsed(barFrame, barSettings, unit, unitGUID, spellName, spellData, cachedSpells[spellName])
             end
         end
     end
 
     if cachedSpec then
-        self:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, cachedSpec)
+        self:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, cachedSpec, barSettings)
     end
 
      -- Icons reset on target/focus switches, and shared cooldowns aren't preserved. A fake combat log cache is used to handle this
@@ -205,7 +204,7 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
         for spellName, spellCache in pairs(cachedSpells) do
             if spellCache.sharedCds then
                 local sharedCdCache = CreateSharedCdCache(spellCache, unitGUID)
-                self:SharedCooldownsHandler(spellName, unit, barFrame, barSettings, sharedCdCache)
+                self:SharedCooldownsHandler(barFrame, barSettings, unit, unitGUID, spellName, sharedCdCache)
             end
         end
     end
