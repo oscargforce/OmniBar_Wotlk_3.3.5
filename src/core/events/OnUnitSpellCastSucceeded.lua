@@ -142,6 +142,7 @@ function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spel
     
     local unitGUID = GetUnitGUID(mappedUnit, barKey)
     self:DetectSpecByAbility(spellName, mappedUnit, barFrame, barSettings, unitGUID)
+    self:ResetCooldownsForSpell(barFrame, barSettings, unitGUID, spellName)
     self:SharedCooldownsHandler(barFrame, barSettings, mappedUnit, unitGUID, spellName)
     local spellData = barFrame.trackedSpells[spellName]
 

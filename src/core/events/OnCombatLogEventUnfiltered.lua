@@ -7,6 +7,7 @@ local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 local addonName, addon = ...
 local sharedCds = addon.sharedCds
 local spellTable = addon.spellTable
+local resetCds = addon.resetCds
 
 local ORIGINAL_SUMMON_TITLES = {
     UNITNAME_SUMMON_TITLE1,
@@ -72,8 +73,9 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
     local spellData = barFrame.trackedSpells[spellName]
     local sharedCd = sharedCds[spellName]
     local playerSpec = self:GetSpecFromSpellTable(spellName)
+    local spellsToReset = resetCds[spellName]
 
-    if not spellData and not sharedCd and not playerSpec then 
+    if not spellData and not sharedCd and not playerSpec and not spellsToReset then 
         return 
     end
     
@@ -93,7 +95,7 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
     end
     
     -- If the spell was only spec related we dont need more info, early return.
-    if not spellData and not sharedCd then 
+    if not spellData and not sharedCd and not spellsToReset then 
         return 
     end
 
@@ -151,7 +153,13 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
             local unitGUID = UnitGUID(unit)
             local cachedSpell = playerCache[spellName]
             self:OnCooldownUsed(barFrame, barSettings, unit, unitGUID, spellName, spellData, cachedSpell)
+            return
         end
+    end
+
+    if spellsToReset then 
+        self:CleanPlayerCache(playerCache, now, playerName)
+        self:RemoveNonTargetActiveIcons(barFrame, barSettings, spellsToReset, playerCache[spellName])
     end
  
 end
