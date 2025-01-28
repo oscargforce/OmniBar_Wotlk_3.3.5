@@ -79,18 +79,12 @@ function OmniBar:DetectSpecByAbilityInWorldZones(spellName, unit, barFrame, barS
     -- if barSettings.trackedUnit == "allEnemies" then return end --- Why did I have this check ??? 
 
     local barKey = barFrame.key
-    if HasBarProcessedUnit(barKey, unit) then
-        print("SpecDetectionWorld", barSettings.name, "returns because HasBarProcessedUnit")
-        return
-    end
+    if HasBarProcessedUnit(barKey, unit) then return end
 
     local unitName = GetUnitName(unit)
     local cachedData = self.combatLogCache[unitName]
 
-    if cachedData and cachedData.spec then 
-        print(barSettings.name, "Detected spec for " .. unit .. ": " .. cachedData.spec .. " via combat log cache, exiting SpecDetection")
-        return 
-    end
+    if cachedData and cachedData.spec then return end
 
     local definedSpec = specDefiningSpells[spellName]
     if definedSpec then
@@ -158,12 +152,21 @@ function OmniBar:OnSpecDetected(unit, opponent, barFrame, barSettings)
         for spellName, spellData in pairs(barFrame.trackedSpells) do
             if SpellBelongsToSpec(spellData, opponent, spellName) then
                 print("OnSpecDetected:", spellName)
-                self:CreateIconToBar(barFrame, spellName, spellData, opponent.unitGUID, unit)
+                local icon = self:CreateIconToBar(barFrame, spellName, spellData, opponent.unitGUID, unit)
                 needsAlphaUpdate = true
+
+                if self.zone ~= "arena" then
+                    local playerName = GetUnitName(unit)
+                    local cachedData = self.combatLogCache[playerName]
+                    local hasCachedSpell = cachedData and cachedData[spellName]
+                    if hasCachedSpell then
+                        self:ActivateIcon(barFrame, barSettings, icon, cachedData[spellName])
+                    end
+                end
             end
         end
     end
-
+    
     self:AdjustUnusedIconsCooldownForSpec(barFrame, opponent.unitGUID, opponent.spec, barSettings)
     self:ArrangeIcons(barFrame, barSettings)
     
@@ -181,7 +184,7 @@ function OmniBar:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, spec, barS
                print("AdjustUnusedIconsCooldownForSpec", icon.spellName, "to", spellData.adjust[spec], "seconds")
                -- Update the cooldown timer for active icons when spec detection changes the cooldown duration.
                if barFrame.activeIcons[icon] then
-                   self:StartCooldownShading(icon, barSettings, barFrame, {
+                   self:ActivateIcon(barFrame, barSettings, icon, {
                        expires = icon.startTime + icon.duration,
                        timestamp = icon.startTime,
                        duration = icon.duration
@@ -191,17 +194,6 @@ function OmniBar:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, spec, barS
         end
    end
 end
-
--- Maybe not needed now.
---[[ local function UpdateActiveCooldownDurations(barFrame, barSettings, unit, unitGUID, spec)
-    if not HasBarProcessedUnit(barFrame.key, unit) and spec then
-        print("IM HERE BIIITCHHHHEEEESSSSSSSSSSSSSSSSSSSSSS")
-        -- Update the cooldown timer for active icons when spec detection changes the cooldown duration.
-        OmniBar:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, spec, barSettings)
-    
-        MarkBarAsProcessed(barFrame.key, unit)
-    end
-end ]]
 
 function OmniBar:AdjustCooldownForSpec(icon, spellData, unit, barFrame, barSettings, cachedSpell)
     if cachedSpell then return end

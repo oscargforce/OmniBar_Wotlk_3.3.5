@@ -32,7 +32,7 @@ end
 
 local function CreateSharedCdCache(spellCache, unitGUID)
     local _, firstCd = next(spellCache.sharedCds)
-    local sharedDuration = firstCd.sharedDuration or 0
+    local sharedDuration = firstCd.sharedDuration or nil
     local expires = sharedDuration and spellCache.timestamp + sharedDuration or spellCache.expires
     return {
         sourceGUID = unitGUID,
@@ -46,7 +46,7 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
     local unit = (event == "PLAYER_TARGET_CHANGED" and "target") or (event == "PLAYER_FOCUS_CHANGED" and "focus")
 
     -- 1) Clean up existing state
-    self:RemoveExpiredSpellsFromCombatLogCache()
+    self:CleanupCombatLogCache()
     self:ClearSpecProcessedData(unit)
 
     local barSettings = self.db.profile.bars[barFrame.key]
