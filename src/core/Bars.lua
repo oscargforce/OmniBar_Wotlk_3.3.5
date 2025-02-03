@@ -1,6 +1,7 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local addonName, addon = ...
 local MapTrinketNameToBuffName = addon.MapTrinketNameToBuffName
+local next = next
 
 function OmniBar:CreateBar() 
     local barKey = self:GenerateUniqueKey()
@@ -25,11 +26,17 @@ function OmniBar:SetPosition(barFrame, newPosition)
 end
 
 function OmniBar:ToggleAnchorVisibility(barFrame)
-    if next(barFrame.activeIcons) then
+    if next(barFrame.activeIcons) or self.db.profile.isBarsLocked then
         barFrame.anchor:Hide()
-    else
-        barFrame.anchor:Show()
+        return 
     end
+
+    if self.db.profile.bars[barFrame.key].showUnusedIcons and #barFrame.icons > 0 then
+        barFrame.anchor:Hide()
+        return
+    end
+    
+    barFrame.anchor:Show()
 end
 
 
@@ -85,24 +92,7 @@ function OmniBar:UpdateScale(barFrame, barSettings)
     barFrame.iconsContainer:SetScale(barSettings.scale)
 end
 
---[[ Updates the spell tracking for a specific bar
-    @param barFrame - The UI frame for the bar
-    @param barSettings - Saved variable for the bar eg self.profile.bars[barKey]
-    
-    Structure of trackedSpells:
-    {
-        [spellName] = {
-            duration = number,
-            icon = string,
-            priority = number,
-            className = string,
-            spellId = number,
-            race = string (optional),
-            spec = string (optional),
-            item = boolean (optional)
-        }
-    }
-]]
+
 function OmniBar:BuildTrackedSpells(barFrame, barSettings)
     local trackedSpells = barFrame.trackedSpells
     wipe(trackedSpells)

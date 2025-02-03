@@ -109,6 +109,7 @@ local function HandleAllArenaUnits(barFrame, barSettings, barKey, unit, updateRe
 
     OmniBar:ArrangeIcons(barFrame, barSettings)
     OmniBar:UpdateUnusedAlpha(barFrame, barSettings)
+    OmniBar:ToggleAnchorVisibility(barFrame)
 end
 
 function OmniBar:OnArenaOpponentUpdate(barFrame, event, unit, updateReason)
@@ -150,6 +151,7 @@ function OmniBar:OnArenaOpponentUpdate(barFrame, event, unit, updateReason)
 
     self:ArrangeIcons(barFrame, barSettings)
     self:UpdateUnusedAlpha(barFrame, barSettings)
+    self:ToggleAnchorVisibility(barFrame)
 end
 
 -- Util function called in OmniBar:PLAYER_ENTERING_WORLD()

@@ -56,7 +56,7 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
     end
    
     self:ResetIcons(barFrame)
-
+    self:ToggleAnchorVisibility(barFrame)
     if not UnitIsPlayer(unit) then return end
 
     -- 2) Get basic unit information
@@ -106,6 +106,8 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
     if barSettings.showUnusedIcons then
         self:ArrangeIcons(barFrame, barSettings)
     end
+    
+    self:ToggleAnchorVisibility(barFrame)
 end
 
 
@@ -113,7 +115,7 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
     -- Early return if friendly player
     if UnitIsPlayer(unit) and not UnitIsEnemy("player", unit) then
         return
-    end 
+    end  
 
     -- Get unit states
     local targetExists = UnitExists("target")
@@ -153,7 +155,9 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
             table.remove(barFrame.icons, i)
         end
     end
-    
+
+    self:ToggleAnchorVisibility(barFrame)
+
     if not UnitIsPlayer(unit) then 
         self:ArrangeIcons(barFrame, barSettings)
         return 
@@ -212,4 +216,6 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
     if showUnusedIcons then
         self:ArrangeIcons(barFrame, barSettings)
     end
+
+    self:ToggleAnchorVisibility(barFrame)
 end

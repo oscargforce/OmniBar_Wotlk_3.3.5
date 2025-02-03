@@ -91,8 +91,10 @@ function OmniBar:RefreshBarsWithActiveIcons()
 end
 
 function OmniBar:MakeFrameDraggable(icon, barFrame)
-    icon:SetMovable(true)
-    icon:EnableMouse(true)
+    local isLocked = self.db.profile.isBarsLocked
+    
+    icon:SetMovable(not isLocked)
+    icon:EnableMouse(not isLocked)
      -- Clear old scripts to avoid dragging the wrong bar
     icon:SetScript("OnMouseDown", nil)
     icon:SetScript("OnMouseUp", nil)
@@ -110,4 +112,16 @@ function OmniBar:MakeFrameDraggable(icon, barFrame)
             OmniBar:SetPosition(barFrame, { point = point, relativePoint = relativePoint, x = x, y = y })
         end
     end)
+end
+
+function OmniBar:ToggleIconLock(barFrame, isBarsLocked)
+    for _, icon in ipairs(barFrame.icons) do
+        if isBarsLocked then
+            icon:SetMovable(false)
+            icon:EnableMouse(false)
+        else
+            icon:SetMovable(true)
+            icon:EnableMouse(true)
+        end
+    end
 end
