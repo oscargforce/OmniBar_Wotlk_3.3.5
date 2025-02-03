@@ -154,7 +154,7 @@ end
 
 function OmniBar:ResetCooldownsForSpell(barFrame, barSettings, unitGUID, spellName)
     -- Using the combat log to reset cooldowns for all enemies outside of the arena. This approach ensures cooldowns are accurately reset for non-targeted units since they persist when switching targets in non-arena scenarios.
-    if barSettings.trackedUnit == "allEnemies" and self.zone ~= "arena" then return end
+    if barSettings.trackedUnit == "allEnemies" and self.zone ~= "arena" and spellName ~= "Summon Felhunter" then return end
     
     local resetSpells = resetCds[spellName]
     if not resetSpells then return end
