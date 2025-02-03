@@ -28,3 +28,16 @@ local petToPlayerMap = {
 function addon.MapPetToPlayerUnit(unit)
     return petToPlayerMap[unit] or unit
 end
+
+local warlockDeathCoilSpells = { 
+    [6789] = true, -- Death Coil (Rank 1)
+    [17925] = true, -- Death Coil (Rank 2)
+    [17926] = true, -- Death Coil (Rank 3)
+    [27223] = true, -- Death Coil (Rank 4)
+    [47859] = true, -- Death Coil (Rank 5)
+    [47860] = true, -- Death Coil (Rank 6)
+}
+
+function addon.IsWarlockDeathCoilSpell(spellId)
+    return warlockDeathCoilSpells[spellId]
+end

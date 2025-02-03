@@ -168,6 +168,7 @@ function OmniBar:OnInspectTalentReady(barFrame, event, ...)
 
     self.partyMemberSpecs[trackedUnit] = spec
 
+    self:ToggleAnchorVisibility(barFrame)
     inspectQueue:InspectComplete(barFrame)
 end
 

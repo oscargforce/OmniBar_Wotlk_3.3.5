@@ -36,6 +36,26 @@ function OmniBar:SetupOptions()
                     print("Testing mode enabled...") 
                 end,
             },
+            lockBarsButton = {
+                order = 4,
+                type = "execute",
+                name = function()
+                    return self.db.profile.isBarsLocked and "Unlock Bars" or "Lock Bars" 
+                end,
+                desc = "Lock all bars positions",
+                width = 0.65,
+                func = function(info, v)
+                    self.db.profile.isBarsLocked = not self.db.profile.isBarsLocked
+                    local isBarsLocked = self.db.profile.isBarsLocked
+
+                    for barKey, barFrame in pairs(self.barFrames) do
+                        barFrame.anchor:SetMovable(not isBarsLocked)
+                        barFrame.anchor:EnableMouse(not isBarsLocked)
+                        self:ToggleAnchorVisibility(barFrame)      
+                        self:ToggleIconLock(barFrame, isBarsLocked)        
+                    end
+                end,
+            },
             general = {
                 type = "group",
                 name = "General Settings",

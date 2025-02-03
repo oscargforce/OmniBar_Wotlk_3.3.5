@@ -8,6 +8,7 @@ local addonName, addon = ...
 local sharedCds = addon.sharedCds
 local spellTable = addon.spellTable
 local resetCds = addon.resetCds
+local IsWarlockDeathCoilSpell = addon.IsWarlockDeathCoilSpell
 
 local ORIGINAL_SUMMON_TITLES = {
     UNITNAME_SUMMON_TITLE1,
@@ -77,6 +78,10 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
 
     if not spellData and not sharedCd and not playerSpec and not spellsToReset then 
         return 
+    end
+
+    if spellName == "Death Coil" and not IsWarlockDeathCoilSpell(spellId) then
+        return
     end
     
     -- 3) If spell was casted by a pet, map it to the pet owners name.
