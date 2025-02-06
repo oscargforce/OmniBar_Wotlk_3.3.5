@@ -11,20 +11,13 @@ local function SetSpellTrackingEventForBar(barFrame, trackedUnit, zone)
         return 
     end
     
+    -- Event: UnitSpellCastSucceeded can handle all scenarios in arenas
     if zone == "arena" then
         print("Unregister COMBAT_LOG_EVENT_UNFILTERED") 
-        barFrame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED") -- Event: UnitSpellCastSucceeded can handle all scenarios in arenas
-        if trackedUnit == "allEnemies" then
-            barFrame:UnregisterEvent("PLAYER_TARGET_CHANGED") 
-            barFrame:UnregisterEvent("PLAYER_FOCUS_CHANGED") 
-        end
+        barFrame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     else
         print("Registered COMBAT_LOG_EVENT_UNFILTERED") 
         barFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-        if trackedUnit == "allEnemies" then
-            barFrame:RegisterEvent("PLAYER_TARGET_CHANGED") 
-            barFrame:RegisterEvent("PLAYER_FOCUS_CHANGED") 
-        end
     end
 end
 
@@ -56,6 +49,8 @@ function OmniBar:UpdateUnitEventTracking(barFrame, barSettings)
     else -- All enemies
         barFrame:RegisterEvent("ARENA_OPPONENT_UPDATE")
         barFrame:RegisterEvent("UNIT_AURA")
+        barFrame:RegisterEvent("PLAYER_TARGET_CHANGED") 
+        barFrame:RegisterEvent("PLAYER_FOCUS_CHANGED")
     end
 
     barFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")

@@ -5,7 +5,8 @@ combatTimerFrame:Hide()
 
 function OmniBar:PLAYER_REGEN_ENABLED()
     if self.zone == "arena" then return end
-
+    if self.isDuelInProgress then return end
+    
     local timeRemaining = 30
     
     combatTimerFrame:Show()
@@ -24,6 +25,7 @@ end
 
 function OmniBar:PLAYER_REGEN_DISABLED()
     if self.zone == "arena" then return end
+    if self.isDuelInProgress then return end
 
     combatTimerFrame:SetScript("OnUpdate", nil)
     combatTimerFrame:Hide() 

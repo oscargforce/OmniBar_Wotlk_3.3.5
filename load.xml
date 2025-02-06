@@ -13,6 +13,7 @@
     <Script file="src\core\Cache.lua"/>
     <Script file="src\core\Cooldown.lua"/>
     <Script file="src\core\Icons.lua"/>
+    <Script file="src\core\IconHighlights.lua"/>
     <Script file="src\core\InspectQueue.lua"/>
     <Script file="src\core\Layout.lua"/>
     <Script file="src\core\SpecDetection.lua"/>

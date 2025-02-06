@@ -23,10 +23,6 @@ local function ShouldTrackSpell(spellName, spellData, unitClass, unitRace, spec)
         return unitRace ~= "Human"
     end
 
-    if spellData.item then
-        return true
-    end
-
     return false
 end
 
@@ -42,14 +38,23 @@ local function CreateSharedCdCache(spellCache, unitGUID)
     }
 end
 
+local function IsFriendlyPlayer(unit)
+    return UnitIsPlayer(unit) and not UnitIsEnemy("player", unit)
+end
+
 function OmniBar:OnPlayerTargetChanged(barFrame, event)
     local unit = (event == "PLAYER_TARGET_CHANGED" and "target") or (event == "PLAYER_FOCUS_CHANGED" and "focus")
+    local barSettings = self.db.profile.bars[barFrame.key]
+
+    if self.zone == "arena" and barSettings.trackedUnit == "allEnemies" then
+        self:UpdateArenaUnitHighlights(barFrame, barSettings, unit)
+        return
+    end
 
     -- 1) Clean up existing state
     self:CleanupCombatLogCache()
     self:ClearSpecProcessedData(unit)
 
-    local barSettings = self.db.profile.bars[barFrame.key]
     if barSettings.trackedUnit == "allEnemies" then
         self:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
         return
@@ -112,8 +117,7 @@ end
 
 
 function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)    
-    -- Early return if friendly player
-    if UnitIsPlayer(unit) and not UnitIsEnemy("player", unit) then
+    if IsFriendlyPlayer(unit) then
         return
     end  
 
@@ -160,12 +164,14 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
 
     if not UnitIsPlayer(unit) then 
         self:ArrangeIcons(barFrame, barSettings)
+        self:UpdateWorldUnitHighlights(barFrame, barSettings, targetExists, focusExists, isSameUnit)
         return 
     end
     
     -- Don't add duplicate icons if the same unit is target and focus
     if isSameUnit then
         self:ArrangeIcons(barFrame, barSettings)
+        self:UpdateWorldUnitHighlights(barFrame, barSettings, targetExists, focusExists, isSameUnit)
         return
     end
     
@@ -218,4 +224,5 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
     end
 
     self:ToggleAnchorVisibility(barFrame)
+    self:UpdateWorldUnitHighlights(barFrame, barSettings, targetExists, focusExists, nil, targetGUID, focusGUID)
 end
