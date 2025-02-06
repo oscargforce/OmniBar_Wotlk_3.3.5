@@ -64,6 +64,8 @@ function OmniBar:ReturnIconToPool(icon)
     icon.duration = nil
     icon.unitGUID = nil
     icon.unitType = nil
+    icon.targetHighlight:Hide()
+    icon.focusHighlight:Hide()
     icon:StopNewIconAnimation()
     icon:Hide()
     icon:ClearAllPoints()

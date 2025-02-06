@@ -12,6 +12,8 @@ local DEFAULT_BAR_SETTINGS = {
     position = { point = "CENTER", relativePoint = "CENTER", x = 0, y = 0 },
     showBorder = true,
     isRowGrowingUpwards = true,
+    highlightTarget = true,
+    highlightFocus = true,
     maxIconsPerRow = 15,
     maxIconsTotal = 30,
     margin = 4,
@@ -50,6 +52,8 @@ function OmniBar:OnInitialize()
     self.partyMemberSpecs = {}
     self.combatLogCache = {}
     self.currentRealm = GetRealmName()
+    self.isDuelInProgress = false
+    self.localPlayerName = GetUnitName("player")
     self.db.RegisterCallback(self, "OnProfileChanged", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")
@@ -76,9 +80,9 @@ function OmniBar:OnEnable()
         self:InitializeBar(defaultKey)
     else
         -- Else initialize existing bars from the database
-        for barKey, settings in pairs(self.db.profile.bars) do
+        for barKey, barSettings in pairs(self.db.profile.bars) do
             print("Adding existing bars")
-            self:InitializeBar(barKey, settings)
+            self:InitializeBar(barKey, barSettings)
         end
 
     end

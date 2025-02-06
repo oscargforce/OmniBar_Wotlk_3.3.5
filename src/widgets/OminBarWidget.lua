@@ -1,12 +1,12 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 
 -- Factory function to create a new OmniBar instance
-function CreateOmniBarWidget(barKey, settings)
+function CreateOmniBarWidget(barKey, barSettings)
     -- Create the main frame (OmniBar)
     local omniBarFrame = CreateFrame("Frame", barKey, UIParent)
     omniBarFrame:SetSize(1, 1)  -- Placeholder size
 
-    local position = settings.position
+    local position = barSettings.position
     omniBarFrame:SetPoint(position.point, UIParent, position.relativePoint, position.x, position.y)
     omniBarFrame:SetFrameStrata("MEDIUM")
     omniBarFrame:SetMovable(true)
@@ -15,7 +15,7 @@ function CreateOmniBarWidget(barKey, settings)
 
     -- Create the anchor frame
     local anchor = CreateFrame("Frame", "$parentAnchor", omniBarFrame)
-    anchor:SetSize(settings.anchorWidth, 30)
+    anchor:SetSize(barSettings.anchorWidth, 30)
     anchor:SetPoint("CENTER")
     anchor:EnableMouse(true)
     anchor:SetClampedToScreen(true)
@@ -29,7 +29,7 @@ function CreateOmniBarWidget(barKey, settings)
 
     -- Text label for the anchor
     local text = anchor:CreateFontString("$parentText", "ARTWORK", "GameFontNormal")
-    text:SetText(settings.name)
+    text:SetText(barSettings.name)
     text:SetPoint("CENTER")
     text:SetTextColor(1, 1, 0, 1)
     omniBarFrame.text = text
@@ -41,7 +41,7 @@ function CreateOmniBarWidget(barKey, settings)
     local iconsContainer = CreateFrame("Frame", "$parentIcons", omniBarFrame)
     iconsContainer:SetSize(1, 1)  -- Placeholder size
     iconsContainer:SetPoint("CENTER", anchor)
-    iconsContainer:SetScale(settings.scale)
+    iconsContainer:SetScale(barSettings.scale)
 
     -- Button template (action buttons for OmniBar)
     local function CreateOmniBarIcon(iconPath)
@@ -56,27 +56,32 @@ function CreateOmniBarWidget(barKey, settings)
         icon:SetAlpha(1) -- sets SetPoint and Size to match button:)
         button.icon = icon
 
-        
-        if settings.showBorder then
+        if barSettings.showBorder then
 			icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
 	    else
 		    icon:SetTexCoord(0.07, 0.9, 0.07, 0.9)
 		end
-        
-    --[[  
-        RENAME: To like FocusTexture, target Texure etc...
+       
+        local targetHighlight = button:CreateTexture("$parentTargetHighlight", "OVERLAY")
+        targetHighlight:SetTexture("Interface\\AddOns\\OmniBar\\arts\\UI-ActionButton-Border.blp")
+        targetHighlight:SetDrawLayer("ARTWORK", 1)
+        targetHighlight:SetPoint("CENTER", button, "CENTER", 0.7, 0.5) 
+        targetHighlight:SetSize(70, 70) 
+        targetHighlight:SetBlendMode("ADD") 
+        --targetHighlight:SetTexCoord(0.2, 0.8, 0.2, 0.8)
+        targetHighlight:SetVertexColor(0.639, 0.207, 0.933, 1) -- purple color, kinda cool
+        targetHighlight:Hide()
+        button.targetHighlight = targetHighlight
 
-        local border = button:CreateTexture("$parentBorder", "OVERLAY")
-        border:SetTexture("Interface\\AddOns\\OmniBar\\arts\\UI-ActionButton-Border.blp")
-        border:SetDrawLayer("ARTWORK", 1) -- z-index for textures.
-        border:SetPoint("CENTER", button, "CENTER", 0.7, 0.5) -- 0.9 also good
-        border:SetSize(70, 70) -- small .blp image, need to be scaled to match button
-        border:SetBlendMode("ADD") -- This makes the dark background in the image transperent
-      -- border:SetVertexColor(0.639, 0.207, 0.933, 1) -- purple color, kinda cool
-      --. border:SetTexCoord(0.2, 0.8, 0.2, 0.8)
-        border:Hide()   
-        button.border = border 
-        ]]
+        local focusHighlight = button:CreateTexture("$parentFocusHighlight", "OVERLAY")
+        focusHighlight:SetTexture("Interface\\AddOns\\OmniBar\\arts\\UI-ActionButton-Border.blp")
+        focusHighlight:SetDrawLayer("ARTWORK", 1)
+        focusHighlight:SetPoint("CENTER", button, "CENTER", 0.7, 0.5) 
+        focusHighlight:SetSize(70, 70) 
+        focusHighlight:SetBlendMode("ADD") 
+        focusHighlight:SetVertexColor(1, 0.843, 0, 1) -- gold yellow color
+        focusHighlight:Hide()
+        button.focusHighlight = focusHighlight
 
         -- New Item animation
         local newItemGlow = button:CreateTexture("$parentNewItem", "OVERLAY")
@@ -132,6 +137,9 @@ function CreateOmniBarWidget(barKey, settings)
         flashPhase2:SetChange(-1) 
 
         function button:PlayNewIconAnimation()
+            targetHighlight:Hide()
+            focusHighlight:Hide()
+            
             flashAnim:Play()
             newItemAnim:Play()
         end
@@ -141,8 +149,14 @@ function CreateOmniBarWidget(barKey, settings)
 	        if newItemAnim:IsPlaying() then newItemAnim:Stop() end
         end
 
+        function button:IsAnimating()
+            return flashAnim:IsPlaying() or newItemAnim:IsPlaying()
+        end
+
         newItemAnim:SetScript("OnFinished", function()
-            -- TODO: highlight focus/target borders if all enemies
+            local currentBarKey = button:GetParent():GetParent().key
+            local currentBarSettings = OmniBar.db.profile.bars[currentBarKey]
+            OmniBar:ShowHighlightAfterAnimation(button, currentBarSettings)
         end)
 
         local countdownFrame = CreateFrame("Frame", "$parentCountdownFrame", button)

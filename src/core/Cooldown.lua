@@ -141,11 +141,14 @@ function OmniBar:SharedCooldownsHandler(barFrame, barSettings, unit, unitGUID, s
 
             if isActiveIcon and not spell.sharedDuration then
                 self:ActivateIcon(barFrame, barSettings, icon, cachedSpell)
-                print("isActiveIcon shared cd cooldown for", icon.spellName)
             elseif not isActiveIcon then
                 local sharedCdDuration = spell.sharedDuration or nil
-                self:ActivateIcon(barFrame, barSettings, icon, cachedSpell, sharedCdDuration)
-                print("Shared cd cooldown for", icon.spellName)
+
+                if cachedSpell and cachedSpell.expires - GetTime() >= 0 then
+                    self:ActivateIcon(barFrame, barSettings, icon, cachedSpell, sharedCdDuration)
+                elseif not cachedSpell then
+                    self:ActivateIcon(barFrame, barSettings, icon, nil, sharedCdDuration)
+                end
             end
         end
 
@@ -187,8 +190,11 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, unitGUID, spellName
                 return
             end  
         end
-        -- icon not found on bar, simply exit the function
-        return
+
+        -- If the icon is not found on the bar, exit the function, unless its a trinket. We only display enemy trinkets on the bar when they are used. Except for PvP trinkets.
+        if not spellData.item then
+            return
+        end
     end
 
     local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)

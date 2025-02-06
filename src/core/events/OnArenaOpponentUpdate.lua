@@ -61,9 +61,8 @@ end
 
 local function ShouldTrackSpell(spellName, spellData, unitClass, unitRace)
     if unitClass == spellData.className then
-        if spellData.spec then 
-            return false 
-        end
+        if spellData.spec then return false end
+        
         return true
     end
 

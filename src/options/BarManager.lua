@@ -118,16 +118,6 @@ function OmniBar:AddBarToOptions(barKey)
                 end,
                 order = 5,
             },
-            adaptive = {
-                name = "As Enemies Appear",
-                desc = "Only show unused icons for arena opponents or enemies you target while in combat",
-                width = "normal",
-                type = "toggle",
-                order = 6,
-                set = function(info, state)
-                    print(info)
-                end,
-            },
             growUpward = {
                 name = "Grow Rows Upward",
                 desc = "Toggle the grow direction of the icons",
@@ -164,20 +154,25 @@ function OmniBar:AddBarToOptions(barKey)
             },
             highlightTarget = {
                 name = "Highlight Target",
-                desc = "Draw a border around your target",
+                desc = "Draw a border around your target icon cooldowns",
                 width = "normal",
                 type = "toggle",
-                order = 10,   
-                set = function(info, state)
-                    print(info)
+                order = 10,  
+                get = function() return self.db.profile.bars[barKey].highlightTarget end, 
+                set = function(info, value)
+                    self.db.profile.bars[barKey].highlightTarget = value
                 end,
             },
-            multiple = {
-                name = "Track Multiple Players",
-                desc = "If another player is detected using the same ability, a duplicate icon will be created and tracked separately",
+            highlightFocus = {
+                name = "Highlight Focus",
+                desc = "Draw a border around your focus icon cooldowns",
                 width = "normal",
                 type = "toggle",
-                order = 11,
+                order = 10.5,
+                get = function() return self.db.profile.bars[barKey].highlightFocus end,   
+                set = function(info, value)
+                    self.db.profile.bars[barKey].highlightFocus = value
+                end,
             },
             glow = {
                 name = "Glow Icons",

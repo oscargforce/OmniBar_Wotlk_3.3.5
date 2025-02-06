@@ -60,6 +60,19 @@ local function PlayerNameMatchesTrackedUnit(playerName, trackedUnit)
     return false, nil
 end
 
+local function GetSpellDuration(spellData, playerSpec)
+    if not spellData then
+        return 0
+    end
+    -- If the spec affects the cooldown duration, adjust it. For example, Shadow Priests have a shorter fear cooldown than Discipline Priests.
+    local hasSpecAdjustment = spellData.adjust and spellData.adjust[playerSpec]
+    if hasSpecAdjustment then
+        return spellData.adjust[playerSpec]
+    end
+
+    return spellData.duration
+end
+
 
 -- original omnibar also tracks SPELL_AURA_APPLIED 
 function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
@@ -125,9 +138,7 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
         return
     end
 
-
-    -- 4.1.1) If the spec affects the cooldown duration, adjust it. For example, Shadow Priests have a shorter fear cooldown than Discipline Priests.
-    local duration = spellData.adjust and spellData.adjust[playerCache.spec] or spellData.duration
+    local duration = GetSpellDuration(spellData, playerSpec)
 
     -- 4.2) Add the spell to the cache so that if we switch targets to this unit, the cooldown is already saved for display.
     playerCache[spellName] = {
