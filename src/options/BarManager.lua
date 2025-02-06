@@ -116,7 +116,7 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].showUnusedIcons = value
                     self:UpdateBar(barKey, "refreshBarIconsState")
                 end,
-                order = 5,
+                order = 4,
             },
             growUpward = {
                 name = "Grow Rows Upward",
@@ -128,7 +128,7 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].isRowGrowingUpwards = value
                     self:UpdateBar(barKey)
                 end,
-                order = 7,
+                order = 5,
             },
             cooldownCount = {
                 name = "Countdown Count",
@@ -138,14 +138,14 @@ function OmniBar:AddBarToOptions(barKey)
                 set = function(info, state)
                     print(info)
                 end,
-                order = 8,
+                order = 6,
             },
             border = {
                 name = "Show Border",
                 desc = "Draw a border around the icons",
                 width = "normal",
                 type = "toggle",
-                order = 9,
+                order = 7,
                 get = function() return self.db.profile.bars[barKey].showBorder end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].showBorder = value
@@ -157,34 +157,70 @@ function OmniBar:AddBarToOptions(barKey)
                 desc = "Draw a border around your target icon cooldowns",
                 width = "normal",
                 type = "toggle",
-                order = 10,  
+                order = 8,  
                 get = function() return self.db.profile.bars[barKey].highlightTarget end, 
                 set = function(info, value)
                     self.db.profile.bars[barKey].highlightTarget = value
+                    self:UpdateHighlightVisibility(self.barFrames[barKey], value, "target")
                 end,
+                disabled = function() return self.db.profile.bars[barKey].trackedUnit ~= "allEnemies" end,
+            },
+            targetHighlightColor = {
+                name = "Highlight Target Color",
+                desc = "Pick a color for the target highlight, defaults to purple",
+                width = "normal",
+                type = "color",
+                order = 8.5,  
+                get = function()  
+                    local color = self.db.profile.bars[barKey].targetHighlightColor
+                    return color.r, color.g, color.b, color.a
+                end, 
+                set = function(info, r, g, b, a)
+                    self.db.profile.bars[barKey].targetHighlightColor = { r = r, g = g, b = b, a = a }
+                    self:UpdateTargetHighlightColor(self.barFrames[barKey], r, g, b, a)
+                end,
+                hidden = function() return not self.db.profile.bars[barKey].highlightTarget or self.db.profile.bars[barKey].trackedUnit ~= "allEnemies"  end,
             },
             highlightFocus = {
                 name = "Highlight Focus",
                 desc = "Draw a border around your focus icon cooldowns",
                 width = "normal",
                 type = "toggle",
-                order = 10.5,
+                order = 9,
                 get = function() return self.db.profile.bars[barKey].highlightFocus end,   
                 set = function(info, value)
                     self.db.profile.bars[barKey].highlightFocus = value
+                    self:UpdateHighlightVisibility(self.barFrames[barKey], value, "focus")
                 end,
+                disabled = function() return self.db.profile.bars[barKey].trackedUnit ~= "allEnemies" end,
+            },
+            focusHighlightColor = {
+                name = "Highlight Focus Color",
+                desc = "Pick a color for the focuys highlight, defaults to yellow",
+                width = "normal",
+                type = "color",
+                order = 9.5,  
+                get = function() 
+                    local color = self.db.profile.bars[barKey].focusHighlightColor 
+                    return color.r, color.g, color.b, color.a
+                end, 
+                set = function(info, r, g, b, a)
+                    self.db.profile.bars[barKey].focusHighlightColor = { r = r, g = g, b = b, a = a }
+                    self:UpdateFocusHighlightColor(self.barFrames[barKey], r, g, b, a)
+                end,
+                hidden = function() return not self.db.profile.bars[barKey].highlightFocus or self.db.profile.bars[barKey].trackedUnit ~= "allEnemies" end,
             },
             glow = {
                 name = "Glow Icons",
                 desc = "Display a glow animation around an icon when it is activated",
                 width = "normal",
                 type = "toggle",
-                order = 12,
+                order = 10,
             },
             lineBreak2 = {
                 name = "",
                 type = "description",
-                order = 13,
+                order = 11,
             },
             align = {
                 name = "Alignment",
@@ -198,12 +234,12 @@ function OmniBar:AddBarToOptions(barKey)
                 set = function(info, value)
                     print(value)
                 end,
-                order = 14,
+                order = 12,
             },
             lineBreak3 = {
                 name = "",
                 type = "description",
-                order = 15,
+                order = 13,
             },
             size = {
                 name = "Size",
@@ -213,7 +249,7 @@ function OmniBar:AddBarToOptions(barKey)
                 max = 2.7,
                 step = 0.05,
                 width = "double",
-                order = 16,
+                order = 14,
                 get = function (info) return self.db.profile.bars[barKey].scale end,
                 set = function(info, value) 
                   --  local scaleRatio = value / 36 -- default size
@@ -224,7 +260,7 @@ function OmniBar:AddBarToOptions(barKey)
             sizeDesc = {
                 name = "Set the size of the icons" .. "\n",
                 type = "description",
-                order = 17,
+                order = 15,
             },
             columns = {
                 name = "Columns",
@@ -239,12 +275,12 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].maxIconsPerRow = value
                     self:UpdateBar(barKey, "arrangeIcons")
                 end,
-                order = 18,
+                order = 16,
             },
             columnsDesc = {
                 name = "Set the maximum icons per row" .. "\n",
                 type = "description",
-                order = 19,
+                order = 17,
             },
             maxIcons = {
                 name = "Icon Limit",
@@ -260,12 +296,12 @@ function OmniBar:AddBarToOptions(barKey)
                     self:UpdateBar(barKey)
                 end,
 
-                order = 20,
+                order = 18,
             },
             maxIconsDesc = {
                 name = "Set the maximum number of icons displayed on the bar" .. "\n",
                 type = "description",
-                order = 21,
+                order = 19,
             },
             margin = {
                 name = "Margin",
@@ -280,12 +316,12 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].margin = value
                     self:UpdateBar(barKey, "arrangeIcons")
                 end,
-                order = 22,
+                order = 20,
             },
             paddingDesc = {
                 name = "Set the space between icons" .. "\n",
                 type = "description",
-                order = 23,
+                order = 21,
             },
             unusedAlpha = {
                 name = "Unused Icon Transparency",
@@ -296,7 +332,7 @@ function OmniBar:AddBarToOptions(barKey)
                 max = 1,
                 step = 0.01,
                 width = "double",
-                order = 24,
+                order = 22,
                 get = function() return self.db.profile.bars[barKey].unusedAlpha end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].unusedAlpha = value
@@ -307,7 +343,7 @@ function OmniBar:AddBarToOptions(barKey)
             unusedAlphaDesc = {
                 name = "Set the transparency of unused icons" .. "\n",
                 type = "description",
-                order = 25,
+                order = 23,
             },
             swipeAlpha = {
                 name = "Swipe Transparency",
@@ -318,7 +354,7 @@ function OmniBar:AddBarToOptions(barKey)
                 max = 1,
                 step = 0.01,
                 width = "double",
-                order = 26,
+                order = 24,
                 get = function() return self.db.profile.bars[barKey].swipeAlpha end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].swipeAlpha = value
@@ -328,7 +364,7 @@ function OmniBar:AddBarToOptions(barKey)
             swipeAlphaDesc = {
                 name = "Set the transparency of the swipe animation" .. "\n",
                 type = "description",
-                order = 27,
+                order = 25,
             },
         }
     }

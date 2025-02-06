@@ -13,6 +13,8 @@ local DEFAULT_BAR_SETTINGS = {
     showBorder = true,
     isRowGrowingUpwards = true,
     highlightTarget = true,
+    targetHighlightColor = { r = 0.639, g = 0.207, b = 0.933, a = 1 }, 
+    focusHighlightColor = { r = 1, g = 0.843, b = 0, a = 1 }, 
     highlightFocus = true,
     maxIconsPerRow = 15,
     maxIconsTotal = 30,

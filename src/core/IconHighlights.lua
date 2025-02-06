@@ -140,3 +140,33 @@ function OmniBar:ShowHighlightAfterAnimation(icon, barSettings)
     end
 
 end
+
+--------------- Option Panel functions ----------------
+
+function OmniBar:UpdateHighlightVisibility(barFrame, featureIsEnabled, unit)
+    local unitGUID = unit == "target" and UnitGUID("target") or UnitGUID("focus")
+
+    for i, icon in ipairs(barFrame.icons) do
+        local highlight = unit == "target" and icon.targetHighlight or icon.focusHighlight
+
+        if unitGUID == icon.unitGUID then 
+            if featureIsEnabled then 
+                highlight:Show()
+            else
+                highlight:Hide()
+            end
+        end
+    end
+end
+
+function OmniBar:UpdateTargetHighlightColor(barFrame, r, g, b, a)
+    for i, icon in ipairs(barFrame.icons) do
+        icon.targetHighlight:SetVertexColor(r, g, b, a)
+    end
+end
+
+function OmniBar:UpdateFocusHighlightColor(barFrame, r, g, b, a)
+    for i, icon in ipairs(barFrame.icons) do
+        icon.focusHighlight:SetVertexColor(r, g, b, a)
+    end
+end

@@ -66,10 +66,10 @@ function CreateOmniBarWidget(barKey, barSettings)
         targetHighlight:SetTexture("Interface\\AddOns\\OmniBar\\arts\\UI-ActionButton-Border.blp")
         targetHighlight:SetDrawLayer("ARTWORK", 1)
         targetHighlight:SetPoint("CENTER", button, "CENTER", 0.7, 0.5) 
-        targetHighlight:SetSize(70, 70) 
+        targetHighlight:SetSize(72, 72) 
         targetHighlight:SetBlendMode("ADD") 
-        --targetHighlight:SetTexCoord(0.2, 0.8, 0.2, 0.8)
-        targetHighlight:SetVertexColor(0.639, 0.207, 0.933, 1) -- purple color, kinda cool
+        local targetColor = barSettings.targetHighlightColor
+        targetHighlight:SetVertexColor(targetColor.r, targetColor.g, targetColor.b, targetColor.a) -- purple color, kinda cool
         targetHighlight:Hide()
         button.targetHighlight = targetHighlight
 
@@ -77,9 +77,10 @@ function CreateOmniBarWidget(barKey, barSettings)
         focusHighlight:SetTexture("Interface\\AddOns\\OmniBar\\arts\\UI-ActionButton-Border.blp")
         focusHighlight:SetDrawLayer("ARTWORK", 1)
         focusHighlight:SetPoint("CENTER", button, "CENTER", 0.7, 0.5) 
-        focusHighlight:SetSize(70, 70) 
+        focusHighlight:SetSize(72, 72) 
         focusHighlight:SetBlendMode("ADD") 
-        focusHighlight:SetVertexColor(1, 0.843, 0, 1) -- gold yellow color
+        local focusColor = barSettings.focusHighlightColor
+        focusHighlight:SetVertexColor(focusColor.r, focusColor.g, focusColor.b, focusColor.a) -- gold yellow color
         focusHighlight:Hide()
         button.focusHighlight = focusHighlight
 
