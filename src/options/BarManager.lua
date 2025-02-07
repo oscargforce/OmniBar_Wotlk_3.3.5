@@ -179,15 +179,42 @@ function OmniBar:AddBarToOptions(barKey)
                 end,
                 order = 7,
             },
-            cooldownCount = {
-                name = "Countdown Count",
-                desc = "Allow Blizzard and other addons to display countdown text on the icons",
+            customCountdownText = {
+                name = "Custom Countdown Text",
+                desc = "Enable custom countdown text positioning and styling.\n\n" ..
+                       "|cFFFFD100Note:|r This will disable OmniCC for this bar to prevent duplicate timers.\n\n" ..
+                       "Use the settings below to adjust text position and appearance.",
                 width = "normal",
                 type = "toggle",
-                set = function(info, state)
-                    print(info)
+                get = function() return self.db.profile.bars[barKey].customCountdownText end,
+                set = function(info, value)
+                    self.db.profile.bars[barKey].customCountdownText = value
                 end,
                 order = 8,
+            },
+            countdownTextXOffset = {
+                name = "Countdown Text Position",
+                desc = "Offset the countdown text horizontally for an |cFFFF0000Afflicted|r addon-style appearance.\n\n|cFFFFD100Note:|r Adjust the 'margin' slider to control vertical spacing between icons.",
+                type = "select",
+                width = "normal",
+                values = {
+                    [0] = "Center",
+                    [34] = "Right",
+                    [-34] = "Left",
+                },
+                get = function() return self.db.profile.bars[barKey].countdownTextXOffset end,
+                set = function(info, value)
+                    self.db.profile.bars[barKey].countdownTextXOffset = value
+                    local barFrame = self.barFrames[barKey]
+
+                    for _, icon in ipairs(barFrame.icons) do
+                        icon.countdownText:SetPoint("CENTER", icon.countdownFrame, "CENTER", value, 0)
+                    end
+
+                    self:ArrangeIcons(barFrame, self.db.profile.bars[barKey])
+                end,
+                order = 8.5,
+                hidden = function() return not self.db.profile.bars[barKey].customCountdownText end,
             },
             border = {
                 name = "Show Border",

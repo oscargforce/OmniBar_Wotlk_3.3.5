@@ -106,6 +106,7 @@ addon.sharedCds = {
         ["Divine Protection"] = { sharedDuration = 30 },
         ["Divine Shield"] = { sharedDuration = 30, showWhenHidden = true },
         ["Lay on Hands"] = { sharedDuration = 30 },
+        ["Hand of Protection"] = { sharedDuration = 30 },
     },
     ["Divine Protection"] = {
         ["Avenging Wrath"] = { sharedDuration = 30 },

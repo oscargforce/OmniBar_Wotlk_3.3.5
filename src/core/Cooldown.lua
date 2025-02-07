@@ -19,7 +19,7 @@ local function formatTimeText(timeLeft)
     local color
     if timeLeft >= 60 then
         -- Show minutes (e.g., 1m, 2m, etc.)
-        local minutes = math.floor((timeLeft / 60) + 0.5) -- math.round hack in lua, now it matches omnicc timer :)
+        local minutes = math.floor((timeLeft / 60) + 0.5) -- math.round hack in lua, now it matches OmniCC timer :)
         color = COLORS.WHITE
         return string.format("%s%dm%s", color, minutes, COLORS.END_TAG)
     elseif timeLeft > 5 then
@@ -35,6 +35,7 @@ local function StartCooldownShading(icon, barSettings, barFrame, cachedSpell, sh
     local startTime = now
     local duration = sharedCdDuration or icon.duration
     local remainingDuration = sharedCdDuration or icon.duration
+    local customCountdownText = barSettings.customCountdownText
 
     if cachedSpell then
         remainingDuration = cachedSpell.expires - now
@@ -52,6 +53,12 @@ local function StartCooldownShading(icon, barSettings, barFrame, cachedSpell, sh
         icon:PlayNewIconAnimation()
     end
 
+    if customCountdownText then
+        icon.countdownText:ClearAllPoints()
+        icon.countdownText:SetPoint("CENTER", icon.countdownFrame, "CENTER", barSettings.countdownTextXOffset, 0)
+    end
+
+    icon.cooldown.noCooldownCount = customCountdownText -- Disables OmniCC if true
     icon.cooldown:SetCooldown(startTime, duration)
     icon.cooldown:SetAlpha(barSettings.swipeAlpha)
 
@@ -64,7 +71,9 @@ local function StartCooldownShading(icon, barSettings, barFrame, cachedSpell, sh
             local timeLeft = endTime - GetTime()
             if timeLeft > 0 then
                 -- need to add condition here, if barSettings.noCountdownText, return early
-                icon.countdownText:SetText(formatTimeText(timeLeft))
+                if customCountdownText then 
+                    icon.countdownText:SetText(formatTimeText(timeLeft))
+                end
             else
                 OmniBar:OnCooldownEnd(icon, barFrame, barSettings)
             end
