@@ -168,6 +168,7 @@ function CreateOmniBarWidget(barKey, barSettings)
         countdownText:SetFont("Fonts\\FRIZQT__.TTF", 15)
         countdownText:SetText("") 
         countdownText:SetTextColor(1, 1, 1, 1) 
+        button.countdownFrame = countdownFrame
         button.countdownText = countdownText
     
 
