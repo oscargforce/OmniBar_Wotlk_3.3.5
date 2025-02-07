@@ -7,6 +7,7 @@ local wipe = wipe
 
 local DEFAULT_BAR_SETTINGS = {
     name = "OmniBar",
+    iconAlignment = "CENTER",
     anchorWidth = 80,
     scale = 1,
     position = { point = "CENTER", relativePoint = "CENTER", x = 0, y = 0 },
