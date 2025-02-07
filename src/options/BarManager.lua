@@ -79,6 +79,7 @@ function OmniBar:AddBarToOptions(barKey)
             trackedUnit = {
                 name = "Track",
                 type = "select",
+                desc = "Choose the unit to track cooldowns for",
                 values = {
                     ["allEnemies"] = "All Enemies",
                     ["target"] = "Target",
@@ -105,6 +106,26 @@ function OmniBar:AddBarToOptions(barKey)
                 name = "",
                 type = "description",
                 order = 3,
+            },
+            iconSortingMethod = {
+                name = "Sort Icons By",
+                type = "select",
+                desc = "Sort icons by remaining time or the time they were added to the bar.\n\n|cFFFFFF00Note:|r This feature is only available when |cFFFF0000'Show Unused Icons'|r is disabled. Otherwise, icons are sorted by priority.",
+                values = {
+                    ["remainingTime"] = "Remaining time",
+                    ["timeAdded"] = "Time added",
+                },
+                get = function() return self.db.profile.bars[barKey].iconSortingMethod end,
+                set = function(info, value)
+                    self.db.profile.bars[barKey].iconSortingMethod = value
+                end,
+                disabled = function() return self.db.profile.bars[barKey].showUnusedIcons end,
+                order = 3.4,
+            },
+            lineBreak2 = {
+                name = "",
+                type = "description",
+                order = 3.5,
             },
             iconAlignment = {
                 name = "Icon Alignment",
@@ -245,7 +266,7 @@ function OmniBar:AddBarToOptions(barKey)
                 type = "toggle",
                 order = 14,
             },
-            lineBreak2 = {
+            lineBreak4 = {
                 name = "",
                 type = "description",
                 order = 15,
@@ -404,7 +425,7 @@ function OmniBar:AddBarToOptions(barKey)
                         desc = {
                             type = "description",
                             order = 0,
-                            name = "Enable 'Show Unused Icons' and track spells for this class to configure their priority order.\n\nHigher priority items are positioned closer to the first icon on the bar.",
+                            name = "|cFFFFD100Enable|r |cFFFF0000'Show Unused Icons'|r and track spells for this class to configure their priority order.\n\n|cFF00FF00Higher priority|r items are positioned closer to the first icon on the bar.",
                         },
                     } 
                 },

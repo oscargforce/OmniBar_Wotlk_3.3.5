@@ -2,28 +2,37 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 
 local BASE_ICON_SIZE = 36
 
-local function SortIcons(barFrame, showUnusedIcons)
-    if not showUnusedIcons then
-        -- Sort icons based on endTime (or default to math.huge)
-        table.sort(barFrame.icons, function(a, b)
-            local aEndTime = a.endTime or math.huge
-            local bEndTime = b.endTime or math.huge 
-            return aEndTime < bEndTime
-        end) 
-    else
-        table.sort(barFrame.icons, function (a, b) 
-            -- Sort alphabetically by className
-            if a.className ~= b.className then
-                return a.className < b.className 
-            end
+local function SortIconsByPriority(barFrame)
+    table.sort(barFrame.icons, function(a, b)
+        -- First sort alphabetically by className
+        if a.className ~= b.className then
+            return a.className < b.className 
+        end
+        
+        -- Then by priority
+        if a.priority ~= b.priority then
+            return a.priority > b.priority
+        end
+        
+        -- Finally by spell ID for consistent ordering
+        return a.spellId < b.spellId
+    end)
+end
 
-            -- Sort by priority within the same class
-            if a.priority == b.priority then
-                return a.spellId < b.spellId
-            end
-            return a.priority > b.priority    
-        end)
-    end 
+local function SortIconsByRemainingTime(barFrame)
+    table.sort(barFrame.icons, function(a, b)
+        local aEndTime = a.endTime or math.huge
+        local bEndTime = b.endTime or math.huge 
+        return aEndTime < bEndTime
+    end)
+end
+
+local function SortIcons(barFrame, showUnusedIcons, iconSortingMethod)
+    if showUnusedIcons then
+        SortIconsByPriority(barFrame)
+    elseif iconSortingMethod == "remainingTime" then
+        SortIconsByRemainingTime(barFrame)
+    end
 end
 
 
@@ -37,7 +46,7 @@ local function CenteredGridLayout(barFrame, barSettings, skipSort)
     local numActive = #barFrame.icons
 
     if not skipSort then 
-        SortIcons(barFrame, barSettings.showUnusedIcons) 
+        SortIcons(barFrame, barSettings.showUnusedIcons, barSettings.iconSortingMethod) 
     end
 
      -- Remove excess icons if necessary
@@ -90,7 +99,7 @@ local function DirectionalFlowLayout(barFrame, barSettings, skipSort)
     local padding = BASE_ICON_SIZE 
 
     if not skipSort then 
-        SortIcons(barFrame, barSettings.showUnusedIcons) 
+        SortIcons(barFrame, barSettings.showUnusedIcons, barSettings.iconSortingMethod) 
     end
 
     for i, icon in ipairs(barFrame.icons) do

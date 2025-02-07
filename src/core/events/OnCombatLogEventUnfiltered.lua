@@ -123,7 +123,7 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
     if not spellData and sharedCd then
         local GENERAL_SPELLS = { ["Will of the Forsaken"] = true, ["PvP Trinket"] = true }
         local className = GENERAL_SPELLS[spellName] and "General" or GetPlayerInfoByGUID(sourceGUID)
-        print("Does not have spell in table if error", className, spellName, playerName)
+        if not className then return end
         local spellDetails = spellTable[className][spellName]
         local duration = spellDetails.adjust and spellDetails.adjust[playerCache.spec] or spellDetails.duration
 
