@@ -106,6 +106,34 @@ function OmniBar:AddBarToOptions(barKey)
                 type = "description",
                 order = 3,
             },
+            iconAlignment = {
+                name = "Icon Alignment",
+                desc = "Choose how icons align within the bar:\n\n" ..
+                        "1) |cFFFFFF00Center|r – The default OmniBar layout. Icons grow from the middle.\n\n" ..
+                        "2) |cFFFFFF00Left|r – Icons grow from the left side of the anchor.\n\n" ..
+                        "3) |cFFFFFF00Right|r – Icons grow from the right side of the anchor.\n\n" ..
+                        "|cFF00FF00Recommended for party units: Left or Right alignment|r",
+                type = "select",
+                values = {
+                    CENTER = "Center",
+                    LEFT = "Left",
+                    RIGHT = "Right",
+                },
+                get = function() return self.db.profile.bars[barKey].iconAlignment end,
+                set = function(info, value)
+                    local barSettings = self.db.profile.bars[barKey]
+                    local barFrame = self.barFrames[barKey]
+
+                    barSettings.iconAlignment = value
+                    self:ArrangeIcons(barFrame, barSettings)
+                end,
+                order = 4,
+            },
+            lineBreak3 = {
+                name = "",
+                type = "description",
+                order = 5,
+            },
             showUnusedIcons = {
                 name = "Show Unused Icons",
                 desc = "Icons will always remain visible",
@@ -116,7 +144,7 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].showUnusedIcons = value
                     self:UpdateBar(barKey, "refreshBarIconsState")
                 end,
-                order = 4,
+                order = 6,
             },
             growUpward = {
                 name = "Grow Rows Upward",
@@ -128,7 +156,7 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].isRowGrowingUpwards = value
                     self:UpdateBar(barKey)
                 end,
-                order = 5,
+                order = 7,
             },
             cooldownCount = {
                 name = "Countdown Count",
@@ -138,14 +166,14 @@ function OmniBar:AddBarToOptions(barKey)
                 set = function(info, state)
                     print(info)
                 end,
-                order = 6,
+                order = 8,
             },
             border = {
                 name = "Show Border",
                 desc = "Draw a border around the icons",
                 width = "normal",
                 type = "toggle",
-                order = 7,
+                order = 9,
                 get = function() return self.db.profile.bars[barKey].showBorder end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].showBorder = value
@@ -157,7 +185,7 @@ function OmniBar:AddBarToOptions(barKey)
                 desc = "Draw a border around your target icon cooldowns",
                 width = "normal",
                 type = "toggle",
-                order = 8,  
+                order = 10,  
                 get = function() return self.db.profile.bars[barKey].highlightTarget end, 
                 set = function(info, value)
                     self.db.profile.bars[barKey].highlightTarget = value
@@ -170,7 +198,7 @@ function OmniBar:AddBarToOptions(barKey)
                 desc = "Pick a color for the target highlight, defaults to purple",
                 width = "normal",
                 type = "color",
-                order = 8.5,  
+                order = 11,  
                 get = function()  
                     local color = self.db.profile.bars[barKey].targetHighlightColor
                     return color.r, color.g, color.b, color.a
@@ -186,7 +214,7 @@ function OmniBar:AddBarToOptions(barKey)
                 desc = "Draw a border around your focus icon cooldowns",
                 width = "normal",
                 type = "toggle",
-                order = 9,
+                order = 12,
                 get = function() return self.db.profile.bars[barKey].highlightFocus end,   
                 set = function(info, value)
                     self.db.profile.bars[barKey].highlightFocus = value
@@ -199,7 +227,7 @@ function OmniBar:AddBarToOptions(barKey)
                 desc = "Pick a color for the focuys highlight, defaults to yellow",
                 width = "normal",
                 type = "color",
-                order = 9.5,  
+                order = 13,  
                 get = function() 
                     local color = self.db.profile.bars[barKey].focusHighlightColor 
                     return color.r, color.g, color.b, color.a
@@ -215,31 +243,12 @@ function OmniBar:AddBarToOptions(barKey)
                 desc = "Display a glow animation around an icon when it is activated",
                 width = "normal",
                 type = "toggle",
-                order = 10,
+                order = 14,
             },
             lineBreak2 = {
                 name = "",
                 type = "description",
-                order = 11,
-            },
-            align = {
-                name = "Alignment",
-                desc = "Set the alignment of the icons to the anchor",
-                type = "select",
-                values = {
-                    CENTER = "Center",
-                    LEFT = "Left",
-                    RIGHT = "Right",
-                },
-                set = function(info, value)
-                    print(value)
-                end,
-                order = 12,
-            },
-            lineBreak3 = {
-                name = "",
-                type = "description",
-                order = 13,
+                order = 15,
             },
             size = {
                 name = "Size",
@@ -249,7 +258,7 @@ function OmniBar:AddBarToOptions(barKey)
                 max = 2.7,
                 step = 0.05,
                 width = "double",
-                order = 14,
+                order = 16,
                 get = function (info) return self.db.profile.bars[barKey].scale end,
                 set = function(info, value) 
                   --  local scaleRatio = value / 36 -- default size
@@ -260,7 +269,7 @@ function OmniBar:AddBarToOptions(barKey)
             sizeDesc = {
                 name = "Set the size of the icons" .. "\n",
                 type = "description",
-                order = 15,
+                order = 17,
             },
             columns = {
                 name = "Columns",
@@ -275,12 +284,12 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].maxIconsPerRow = value
                     self:UpdateBar(barKey, "arrangeIcons")
                 end,
-                order = 16,
+                order = 18,
             },
             columnsDesc = {
                 name = "Set the maximum icons per row" .. "\n",
                 type = "description",
-                order = 17,
+                order = 19,
             },
             maxIcons = {
                 name = "Icon Limit",
@@ -296,12 +305,12 @@ function OmniBar:AddBarToOptions(barKey)
                     self:UpdateBar(barKey)
                 end,
 
-                order = 18,
+                order = 20,
             },
             maxIconsDesc = {
                 name = "Set the maximum number of icons displayed on the bar" .. "\n",
                 type = "description",
-                order = 19,
+                order = 21,
             },
             margin = {
                 name = "Margin",
@@ -316,12 +325,12 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].margin = value
                     self:UpdateBar(barKey, "arrangeIcons")
                 end,
-                order = 20,
+                order = 22,
             },
             paddingDesc = {
                 name = "Set the space between icons" .. "\n",
                 type = "description",
-                order = 21,
+                order = 23,
             },
             unusedAlpha = {
                 name = "Unused Icon Transparency",
@@ -332,7 +341,7 @@ function OmniBar:AddBarToOptions(barKey)
                 max = 1,
                 step = 0.01,
                 width = "double",
-                order = 22,
+                order = 24,
                 get = function() return self.db.profile.bars[barKey].unusedAlpha end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].unusedAlpha = value
@@ -343,7 +352,7 @@ function OmniBar:AddBarToOptions(barKey)
             unusedAlphaDesc = {
                 name = "Set the transparency of unused icons" .. "\n",
                 type = "description",
-                order = 23,
+                order = 25,
             },
             swipeAlpha = {
                 name = "Swipe Transparency",
@@ -354,7 +363,7 @@ function OmniBar:AddBarToOptions(barKey)
                 max = 1,
                 step = 0.01,
                 width = "double",
-                order = 24,
+                order = 26,
                 get = function() return self.db.profile.bars[barKey].swipeAlpha end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].swipeAlpha = value
@@ -364,7 +373,7 @@ function OmniBar:AddBarToOptions(barKey)
             swipeAlphaDesc = {
                 name = "Set the transparency of the swipe animation" .. "\n",
                 type = "description",
-                order = 25,
+                order = 27,
             },
         }
     }
