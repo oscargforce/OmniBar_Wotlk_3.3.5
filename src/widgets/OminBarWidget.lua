@@ -116,7 +116,6 @@ function CreateOmniBarWidget(barKey, barSettings)
         transition:SetTexCoord(0.52343750, 0.97656250, 0.25781250, 0.36914063)
         transition:SetAlpha(0) 
     
-        -- Create Texture B (Alpha Fade Out)
         local border = button:CreateTexture(nil, "OVERLAY") 
         border:SetTexture("Interface\\AddOns\\OmniBar\\arts\\textures.blp") -- bottom purple image in the blp file
         border:SetSize(58, 57)
@@ -124,7 +123,6 @@ function CreateOmniBarWidget(barKey, barSettings)
         border:SetTexCoord(0.52343750, 0.97656250, 0.38476563, 0.49609375)
         border:SetAlpha(0)
     
-        -- Create Texture C (Alpha Fade In and Out)
         local glow = button:CreateTexture(nil, "OVERLAY")
         glow:SetTexture("Interface\\AddOns\\OmniBar\\arts\\iconalert.blp") -- white glowing border image in the blp file
         glow:SetSize(58, 57)
