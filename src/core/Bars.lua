@@ -51,7 +51,7 @@ function OmniBar:UpdateBar(barKey, specificUpdate)
         resetIcons = function() self:ResetIcons(barFrame) end,
         buildSpellTracking = function() self:BuildTrackedSpells(barFrame, barSettings) end,
         setUpIcons = function() self:SetupBarIcons(barFrame, barSettings) end,
-        border = function() self:UpdateBorder(barFrame, barSettings) end,
+        border = function() self:UpdateBorders(barFrame, barSettings) end,
         arrangeIcons = function() self:ArrangeIcons(barFrame, barSettings, true) end,
         refreshBarIconsState = function() self:UpdateIconVisibilityAndState(barFrame, barSettings) end,
         unusedAlpha = function() self:UpdateUnusedAlpha(barFrame, barSettings) end,
@@ -146,13 +146,9 @@ function OmniBar:SetupBarIcons(barFrame, barSettings)
     end
 end
 
-function OmniBar:UpdateBorder(barFrame, barSettings)
-    for i, button in ipairs(barFrame.icons) do
-        if barSettings.showBorder then
-            button.icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
-        else
-            button.icon:SetTexCoord(0.07, 0.9, 0.07, 0.9) 
-        end
+function OmniBar:UpdateBorders(barFrame, barSettings)
+    for i, icon in ipairs(barFrame.icons) do
+        self:UpdateIconBorder(barSettings.showBorder, icon)
     end
     print("Border: Icons left in pool:", #self.iconPool)
 end

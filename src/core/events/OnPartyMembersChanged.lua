@@ -146,7 +146,7 @@ function OmniBar:OnInspectTalentReady(barFrame, event, ...)
         end
 
         if shouldTrack and showUnusedIcons then
-            self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, trackedUnit)
+            self:CreateIconToBar(barFrame, barSettings.showBorder, spellName, spellData, unitGUID, trackedUnit)
         end
 
     end

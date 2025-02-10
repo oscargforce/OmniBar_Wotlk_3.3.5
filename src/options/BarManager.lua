@@ -102,11 +102,6 @@ function OmniBar:AddBarToOptions(barKey)
                 end,
                 order = 2,
             },
-            lineBreak1 = {
-                name = "",
-                type = "description",
-                order = 3,
-            },
             iconSortingMethod = {
                 name = "Sort Icons By",
                 type = "select",
@@ -120,12 +115,23 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].iconSortingMethod = value
                 end,
                 disabled = function() return self.db.profile.bars[barKey].showUnusedIcons end,
-                order = 3.4,
+                order = 3,
             },
-            lineBreak2 = {
-                name = "",
-                type = "description",
-                order = 3.5,
+            glowSetting = {
+                name = "Glow Animation for Icons",
+                desc = "Choose whether to display a glow animation around an icon when it is activated.",
+                type = "select",
+                width = "normal",
+                values = {
+                    ["none"] = "None",
+                    ["omnicd"] = "OmniCD",
+                    ["default"] = "Default",
+                },
+                get = function() return self.db.profile.bars[barKey].glowSetting end,
+                set = function(info, value)
+                    self.db.profile.bars[barKey].glowSetting = value
+                end,
+                order = 4,
             },
             iconAlignment = {
                 name = "Icon Alignment",
@@ -148,12 +154,12 @@ function OmniBar:AddBarToOptions(barKey)
                     barSettings.iconAlignment = value
                     self:ArrangeIcons(barFrame, barSettings)
                 end,
-                order = 4,
+                order = 5,
             },
             lineBreak3 = {
                 name = "",
                 type = "description",
-                order = 5,
+                order = 6,
             },
             showUnusedIcons = {
                 name = "Show Unused Icons",
@@ -165,7 +171,7 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].showUnusedIcons = value
                     self:UpdateBar(barKey, "refreshBarIconsState")
                 end,
-                order = 6,
+                order = 7,
             },
             growUpward = {
                 name = "Grow Rows Upward",
@@ -177,20 +183,21 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].isRowGrowingUpwards = value
                     self:UpdateBar(barKey)
                 end,
-                order = 7,
+                order = 8,
             },
             customCountdownText = {
                 name = "Custom Countdown Text",
                 desc = "Enable custom countdown text positioning and styling.\n\n" ..
+                       "Example: Offset the countdown text horizontally for an |cFFFF0000Afflicted|r addon-style appearance.\n\n" ..
                        "|cFFFFD100Note:|r This will disable OmniCC for this bar to prevent duplicate timers.\n\n" ..
-                       "Use the settings below to adjust text position and appearance.",
+                       "Use the added dropdown to adjust text position and appearance.",
                 width = "normal",
                 type = "toggle",
                 get = function() return self.db.profile.bars[barKey].customCountdownText end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].customCountdownText = value
                 end,
-                order = 8,
+                order = 9,
             },
             countdownTextXOffset = {
                 name = "Countdown Text Position",
@@ -213,7 +220,7 @@ function OmniBar:AddBarToOptions(barKey)
 
                     self:ArrangeIcons(barFrame, self.db.profile.bars[barKey])
                 end,
-                order = 8.5,
+                order = 10,
                 hidden = function() return not self.db.profile.bars[barKey].customCountdownText end,
             },
             border = {
@@ -221,7 +228,7 @@ function OmniBar:AddBarToOptions(barKey)
                 desc = "Draw a border around the icons",
                 width = "normal",
                 type = "toggle",
-                order = 9,
+                order = 11,
                 get = function() return self.db.profile.bars[barKey].showBorder end,
                 set = function(info, value)
                     self.db.profile.bars[barKey].showBorder = value
@@ -233,7 +240,7 @@ function OmniBar:AddBarToOptions(barKey)
                 desc = "Draw a border around your target icon cooldowns",
                 width = "normal",
                 type = "toggle",
-                order = 10,  
+                order = 12,  
                 get = function() return self.db.profile.bars[barKey].highlightTarget end, 
                 set = function(info, value)
                     self.db.profile.bars[barKey].highlightTarget = value
@@ -246,7 +253,7 @@ function OmniBar:AddBarToOptions(barKey)
                 desc = "Pick a color for the target highlight, defaults to purple",
                 width = "normal",
                 type = "color",
-                order = 11,  
+                order = 13,  
                 get = function()  
                     local color = self.db.profile.bars[barKey].targetHighlightColor
                     return color.r, color.g, color.b, color.a
@@ -262,7 +269,7 @@ function OmniBar:AddBarToOptions(barKey)
                 desc = "Draw a border around your focus icon cooldowns",
                 width = "normal",
                 type = "toggle",
-                order = 12,
+                order = 14,
                 get = function() return self.db.profile.bars[barKey].highlightFocus end,   
                 set = function(info, value)
                     self.db.profile.bars[barKey].highlightFocus = value
@@ -275,7 +282,7 @@ function OmniBar:AddBarToOptions(barKey)
                 desc = "Pick a color for the focuys highlight, defaults to yellow",
                 width = "normal",
                 type = "color",
-                order = 13,  
+                order = 15,  
                 get = function() 
                     local color = self.db.profile.bars[barKey].focusHighlightColor 
                     return color.r, color.g, color.b, color.a
@@ -285,18 +292,6 @@ function OmniBar:AddBarToOptions(barKey)
                     self:UpdateFocusHighlightColor(self.barFrames[barKey], r, g, b, a)
                 end,
                 hidden = function() return not self.db.profile.bars[barKey].highlightFocus or self.db.profile.bars[barKey].trackedUnit ~= "allEnemies" end,
-            },
-            glow = {
-                name = "Glow Icons",
-                desc = "Display a glow animation around an icon when it is activated",
-                width = "normal",
-                type = "toggle",
-                order = 14,
-            },
-            lineBreak4 = {
-                name = "",
-                type = "description",
-                order = 15,
             },
             size = {
                 name = "Size",

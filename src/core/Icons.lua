@@ -1,7 +1,7 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local next = next
 
-function OmniBar:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
+function OmniBar:CreateIconToBar(barFrame, showBorder, spellName, spellData, unitGUID, unit)
     local icon = self:GetIconFromPool(barFrame)
     icon.icon:SetTexture(spellData.icon)
     icon.spellName = spellName
@@ -14,9 +14,18 @@ function OmniBar:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
     icon.unitGUID = unitGUID or nil
     icon.unitType = unit or nil
 
+    self:UpdateIconBorder(showBorder, icon)
     icon:Show()
     table.insert(barFrame.icons, icon)
     return icon
+end
+
+function OmniBar:UpdateIconBorder(showBorder, icon)
+    if showBorder then
+        icon.icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
+    else
+        icon.icon:SetTexCoord(0.07, 0.9, 0.07, 0.9) 
+    end
 end
 
 -- Avoid resetting spellName, priority, and className here to prevent issues with showUnusedIcons when the cooldown countdown ends.

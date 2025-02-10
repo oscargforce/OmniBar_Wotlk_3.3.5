@@ -50,7 +50,7 @@ local function StartCooldownShading(icon, barSettings, barFrame, cachedSpell, sh
     icon.startTime = startTime
     icon:SetAlpha(1)
     if not cachedSpell then
-        icon:PlayNewIconAnimation()
+        icon:PlayNewIconAnimation(barSettings.glowSetting)
     end
 
     if customCountdownText then
@@ -130,7 +130,7 @@ function OmniBar:SharedCooldownsHandler(barFrame, barSettings, unit, unitGUID, s
                     if spell == "Will of the Forsaken" and UnitRace(unit) ~= "Undead" then
                         return
                     end
-                    local icon = self:CreateIconToBar(barFrame, spell, spellData, unitGUID, unit)
+                    local icon = self:CreateIconToBar(barFrame, barSettings.showBorder, spell, spellData, unitGUID, unit)
                     local sharedDuration = spellConfig.sharedDuration or nil
                     self:ActivateIcon(barFrame, barSettings, icon, cachedSpell, sharedDuration)
                     print("Hidden shared cd cooldown for", icon.spellName)
@@ -206,7 +206,7 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, unitGUID, spellName
         end
     end
 
-    local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
+    local icon = self:CreateIconToBar(barFrame, barSettings.showBorder, spellName, spellData, unitGUID, unit)
     self:AdjustCooldownForSpec(icon, spellData, unit, barFrame, barSettings, cachedSpell)
 
     self:ActivateIcon(barFrame, barSettings, icon, cachedSpell)

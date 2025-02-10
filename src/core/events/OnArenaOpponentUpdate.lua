@@ -102,7 +102,7 @@ local function HandleAllArenaUnits(barFrame, barSettings, barKey, unit, updateRe
 
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         if ShouldTrackSpell(spellName, spellData, unitClass, unitRace) then
-            OmniBar:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
+            OmniBar:CreateIconToBar(barFrame, barSettings.showBorder, spellName, spellData, unitGUID, unit)
         end
     end
 
@@ -144,7 +144,7 @@ function OmniBar:OnArenaOpponentUpdate(barFrame, event, unit, updateReason)
 
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         if ShouldTrackSpell(spellName, spellData, unitClass, unitRace) then
-            self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
+            self:CreateIconToBar(barFrame, barSettings.showBorder, spellName, spellData, unitGUID, unit)
         end
     end
 

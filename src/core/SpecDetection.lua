@@ -152,7 +152,7 @@ function OmniBar:OnSpecDetected(unit, opponent, barFrame, barSettings)
         for spellName, spellData in pairs(barFrame.trackedSpells) do
             if SpellBelongsToSpec(spellData, opponent, spellName) then
                 print("OnSpecDetected:", spellName)
-                local icon = self:CreateIconToBar(barFrame, spellName, spellData, opponent.unitGUID, unit)
+                local icon = self:CreateIconToBar(barFrame, barSettings.showBorder, spellName, spellData, opponent.unitGUID, unit)
                 needsAlphaUpdate = true
 
                 if self.zone ~= "arena" then
