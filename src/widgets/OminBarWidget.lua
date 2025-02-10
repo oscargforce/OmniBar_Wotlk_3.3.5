@@ -52,8 +52,8 @@ function CreateOmniBarWidget(barKey, barSettings)
         local icon = button:CreateTexture("$parentIcon", "ARTWORK")
         icon:SetTexture(iconPath)
         icon:SetDrawLayer("ARTWORK", 2) -- put it above the Border
-        icon:SetAllPoints(button) -- sets SetPoint and Size to match button:)
-        icon:SetAlpha(1) -- sets SetPoint and Size to match button:)
+        icon:SetAllPoints(button)
+        icon:SetAlpha(1)
         button.icon = icon
 
         if barSettings.showBorder then
@@ -61,34 +61,120 @@ function CreateOmniBarWidget(barKey, barSettings)
 	    else
 		    icon:SetTexCoord(0.07, 0.9, 0.07, 0.9)
 		end
+
+        local countdownFrame = CreateFrame("Frame", "$parentCountdownFrame", button)
+        countdownFrame:SetAllPoints(button)
+        countdownFrame:SetFrameLevel(7) 
+        local countdownText = countdownFrame:CreateFontString("$parentCountdown", "OVERLAY", "GameFontNormalLarge")
+        countdownText:SetPoint("CENTER", countdownFrame, "CENTER", 0, 0)
+        countdownText:SetFont("Fonts\\FRIZQT__.TTF", 15)
+        countdownText:SetText("") 
+        countdownText:SetTextColor(1, 1, 1, 1) 
+        button.countdownFrame = countdownFrame
+        button.countdownText = countdownText
+    
+
+        local cooldown = CreateFrame("Cooldown", "$parentCooldown", button, "CooldownFrameTemplate")
+        cooldown:SetAllPoints(icon)
+        cooldown:SetReverse(true)
+        cooldown:SetFrameLevel(6) 
+        button.cooldown = cooldown
+
+        local timerFrame = CreateFrame("Frame")
+        timerFrame:Hide()
+        button.timerFrame = timerFrame
        
         local targetHighlight = button:CreateTexture("$parentTargetHighlight", "OVERLAY")
-        targetHighlight:SetTexture("Interface\\AddOns\\OmniBar\\arts\\UI-ActionButton-Border.blp")
-        targetHighlight:SetDrawLayer("ARTWORK", 1)
-        targetHighlight:SetPoint("CENTER", button, "CENTER", 0.7, 0.5) 
-        targetHighlight:SetSize(72, 72) 
+        targetHighlight:SetTexture("Interface\\AddOns\\OmniBar\\arts\\textures.blp")
+        targetHighlight:SetTexCoord(0.52343750, 0.97656250, 0.38476563, 0.49609375)
+        targetHighlight:SetSize(72, 72)
+        targetHighlight:SetPoint("CENTER", button, "CENTER")
         targetHighlight:SetBlendMode("ADD") 
+        targetHighlight:SetDrawLayer("ARTWORK", 1)
         local targetColor = barSettings.targetHighlightColor
-        targetHighlight:SetVertexColor(targetColor.r, targetColor.g, targetColor.b, targetColor.a) -- purple color, kinda cool
+        targetHighlight:SetVertexColor(targetColor.r, targetColor.g, targetColor.b, targetColor.a)
         targetHighlight:Hide()
         button.targetHighlight = targetHighlight
 
         local focusHighlight = button:CreateTexture("$parentFocusHighlight", "OVERLAY")
-        focusHighlight:SetTexture("Interface\\AddOns\\OmniBar\\arts\\UI-ActionButton-Border.blp")
-        focusHighlight:SetDrawLayer("ARTWORK", 1)
-        focusHighlight:SetPoint("CENTER", button, "CENTER", 0.7, 0.5) 
-        focusHighlight:SetSize(72, 72) 
+        focusHighlight:SetTexture("Interface\\AddOns\\OmniBar\\arts\\textures.blp")
+        focusHighlight:SetTexCoord(0.52343750, 0.97656250, 0.38476563, 0.49609375)
+        focusHighlight:SetSize(72, 72)
+        focusHighlight:SetPoint("CENTER", button, "CENTER")
         focusHighlight:SetBlendMode("ADD") 
+        focusHighlight:SetDrawLayer("ARTWORK", 1)
         local focusColor = barSettings.focusHighlightColor
-        focusHighlight:SetVertexColor(focusColor.r, focusColor.g, focusColor.b, focusColor.a) -- gold yellow color
+        focusHighlight:SetVertexColor(focusColor.r, focusColor.g, focusColor.b, focusColor.a)
         focusHighlight:Hide()
         button.focusHighlight = focusHighlight
 
-        -- New Item animation
+       ------------------- OmniCD ANIMATION --------------------
+        local transition = button:CreateTexture(nil, "OVERLAY")
+        transition:SetTexture("Interface\\AddOns\\OmniBar\\arts\\textures.blp") -- top purple image in the blp file
+        transition:SetSize(42, 41)
+        transition:SetPoint("CENTER", button, "CENTER")
+        transition:SetTexCoord(0.52343750, 0.97656250, 0.25781250, 0.36914063)
+        transition:SetAlpha(0) 
+    
+        -- Create Texture B (Alpha Fade Out)
+        local border = button:CreateTexture(nil, "OVERLAY") 
+        border:SetTexture("Interface\\AddOns\\OmniBar\\arts\\textures.blp") -- bottom purple image in the blp file
+        border:SetSize(58, 57)
+        border:SetPoint("CENTER", button, "CENTER")
+        border:SetTexCoord(0.52343750, 0.97656250, 0.38476563, 0.49609375)
+        border:SetAlpha(0)
+    
+        -- Create Texture C (Alpha Fade In and Out)
+        local glow = button:CreateTexture(nil, "OVERLAY")
+        glow:SetTexture("Interface\\AddOns\\OmniBar\\arts\\iconalert.blp") -- white glowing border image in the blp file
+        glow:SetSize(58, 57)
+        glow:SetPoint("CENTER", button, "CENTER")
+        glow:SetTexCoord(0.00781250, 0.50781250, 0.53515625, 0.78515625)
+        glow:SetAlpha(0)
+        
+        local transitionAnim = transition:CreateAnimationGroup()
+        local transitionAlpha = transitionAnim:CreateAnimation("Alpha")
+        transitionAlpha:SetDuration(0.15)
+        transitionAlpha:SetChange(1)
+    
+        local transitionScale = transitionAnim:CreateAnimation("Scale")
+        transitionScale:SetStartDelay(0.15)
+        transitionScale:SetDuration(0.2)
+        transitionScale:SetScale(1.381, 1.381)
+    
+        local borderAnim = border:CreateAnimationGroup()
+        local borderAlpha = borderAnim:CreateAnimation("Alpha")
+        borderAlpha:SetChange(1)
+        borderAlpha:SetOrder(1)
+    
+        local borderAlphaFade = borderAnim:CreateAnimation("Alpha")
+        borderAlphaFade:SetStartDelay(0.22)
+        borderAlphaFade:SetDuration(0.13)
+        borderAlphaFade:SetChange(-1)
+        borderAlphaFade:SetOrder(2)
+    
+        local glowAnim = glow:CreateAnimationGroup()
+        local glowIn = glowAnim:CreateAnimation("Alpha")
+        glowIn:SetDuration(0.15)
+        glowIn:SetChange(1)
+    
+        local glowOut = glowAnim:CreateAnimation("Alpha")
+        glowOut:SetDuration(0.15)
+        glowOut:SetChange(-1)
+        glowOut:SetOrder(2)
+
+        local function PlayOmniCDAnimation()
+            glowAnim:Play()
+            borderAnim:Play()
+            transitionAnim:Play()
+        end
+
+        ------------------- DEFAULT ANIMATION --------------------
+
         local newItemGlow = button:CreateTexture("$parentNewItem", "OVERLAY")
         newItemGlow:SetTexture("Interface\\AddOns\\OmniBar\\arts\\Bags.blp")
-        newItemGlow:SetTexCoord(0.542969, 0.695312, 0.164062, 0.316406) -- bags-blue-glow
-        newItemGlow:SetAllPoints(button)
+        newItemGlow:SetTexCoord(0.542969, 0.695312, 0.164062, 0.316406) -- bags-blue-glow 
+        newItemGlow:SetAllPoints(button) 
         newItemGlow:SetBlendMode("ADD")
         newItemGlow:SetAlpha(0)
 
@@ -135,23 +221,36 @@ function CreateOmniBarWidget(barKey, barSettings)
         flashPhase2:SetSmoothing("OUT") 
         flashPhase2:SetDuration(1) 
         flashPhase2:SetOrder(2) 
-        flashPhase2:SetChange(-1) 
+        flashPhase2:SetChange(-1)
 
-        function button:PlayNewIconAnimation()
-            targetHighlight:Hide()
-            focusHighlight:Hide()
-            
+        local function PlayDefaultAnimation()
             flashAnim:Play()
             newItemAnim:Play()
         end
 
+        function button:PlayNewIconAnimation(glowSetting)
+            if glowSetting == "none" then return end
+
+            targetHighlight:Hide()
+            focusHighlight:Hide()
+
+             if glowSetting == "omnicd" then
+                PlayOmniCDAnimation()
+             else
+                PlayDefaultAnimation()
+             end
+        end
+
         function button:StopNewIconAnimation()
-            if flashAnim:IsPlaying() then flashAnim:Stop() end
-	        if newItemAnim:IsPlaying() then newItemAnim:Stop() end
+           if flashAnim:IsPlaying() then flashAnim:Stop() end
+	       if newItemAnim:IsPlaying() then newItemAnim:Stop() end
+           if glowAnim:IsPlaying() then glowAnim:Stop() end
+           if borderAnim:IsPlaying() then borderAnim:Stop() end
+           if transitionAnim:IsPlaying() then transitionAnim:Stop() end
         end
 
         function button:IsAnimating()
-            return flashAnim:IsPlaying() or newItemAnim:IsPlaying()
+           return flashAnim:IsPlaying() or newItemAnim:IsPlaying() or glowAnim:IsPlaying() or borderAnim:IsPlaying() or transitionAnim:IsPlaying()
         end
 
         newItemAnim:SetScript("OnFinished", function()
@@ -160,31 +259,11 @@ function CreateOmniBarWidget(barKey, barSettings)
             OmniBar:ShowHighlightAfterAnimation(button, currentBarSettings)
         end)
 
-        local countdownFrame = CreateFrame("Frame", "$parentCountdownFrame", button)
-        countdownFrame:SetAllPoints(button)
-        countdownFrame:SetFrameLevel(7) 
-        local countdownText = countdownFrame:CreateFontString("$parentCountdown", "OVERLAY", "GameFontNormalLarge")
-        countdownText:SetPoint("CENTER", countdownFrame, "CENTER", 0, 0)
-        countdownText:SetFont("Fonts\\FRIZQT__.TTF", 15)
-        countdownText:SetText("") 
-        countdownText:SetTextColor(1, 1, 1, 1) 
-        button.countdownFrame = countdownFrame
-        button.countdownText = countdownText
-    
-
-        local cooldown = CreateFrame("Cooldown", "$parentCooldown", button, "CooldownFrameTemplate")
-        cooldown:SetAllPoints(icon)
-        cooldown:SetReverse(true)
-        cooldown:SetFrameLevel(6) 
-        button.cooldown = cooldown
-
-        local timerFrame = CreateFrame("Frame")
-        timerFrame:Hide()
-        button.timerFrame = timerFrame
-
-        -- add this in initializeBar?
-        -- Scripts for cooldown finish and interaction
-     --   Cooldown:SetScript("OnHide", OmniBar_CooldownFinish) -- Assumes OmniBar_CooldownFinish is defined
+        transitionAnim:SetScript("OnFinished", function()
+            local currentBarKey = button:GetParent():GetParent().key
+            local currentBarSettings = OmniBar.db.profile.bars[currentBarKey]
+            OmniBar:ShowHighlightAfterAnimation(button, currentBarSettings)
+        end)
 
         return button
     end
@@ -194,53 +273,3 @@ function CreateOmniBarWidget(barKey, barSettings)
 
     return omniBarFrame
 end
-
- --[[ EXAMPLE WHAT THE TABLE BAR1 TABLE WOULD LOOK LIKE
-
-self.barFrames = {
- ["OmniBar1"] = {
-    key = "OmniBar1",
-    CreateOmniBarIcon = function:1234,
-    trackedCooldowns = {
-        ["Mind Freeze"] = {
-            duration = 120,
-            icon = path,
-        },
-    },
-    activeCooldowns = {
-        ["Mind Freeze"] = { endTime = 140 }
-        ["Berserking"] = { endTime = 140 }
-    }, 
-    icons = {
-        [1] = {
-            icon = {
-                [0] = userdata: 0xE7AF150,
-            },
-            border = {
-                [0] = userdata: 0xE7AF150,
-            },
-            cooldown = {
-                [0] = userdata: 0xDE2FDAC,
-            },
-             countdownText = {
-                 [0] = userdata: 0xD865A98,   
-            },
-        },
-    },
-    anchor = {
-        [0] = userdata: 0xE5994B0,
-    },
-    iconsContainer = {
-        [0] = userdata: 0xE5994B0,
-    },
-    background = {
-        [0] = userdata: 0xE7A91C5,
-    },
-    text = {
-        [0] = userdata: 0xD865A98,
-        [1] = userdata: 0xE5977FC,
-    },
-}
-}
-
-]]

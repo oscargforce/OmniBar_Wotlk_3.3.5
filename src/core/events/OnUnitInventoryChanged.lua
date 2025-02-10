@@ -62,7 +62,7 @@ function OmniBar:OnUnitInventoryChanged(barFrame, event, unit)
     for trinketName, _ in pairs(unitTrinkets) do
         local spellData = barFrame.trackedSpells[trinketName] 
         if spellData and not iconTrinketsOnBar[trinketName] then
-            self:CreateIconToBar(barFrame, trinketName, spellData, unitGUID, trackedUnit)
+            self:CreateIconToBar(barFrame, barSettings.showBorder, trinketName, spellData, unitGUID, trackedUnit)
             needsRearranging = true
         end
     end

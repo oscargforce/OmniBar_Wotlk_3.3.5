@@ -3,8 +3,19 @@ local UnitExists = UnitExists
 local UnitIsUnit = UnitIsUnit
 local UnitGUID = UnitGUID
 
-local function ShowHighlight(icon, unitGUID, highlight)
+local function SetHighlightColor(unit, highlight, barSettings)
+   if unit == "target" then
+        local targetColor = barSettings.targetHighlightColor
+        highlight:SetVertexColor(targetColor.r, targetColor.g, targetColor.b, targetColor.a)
+    else
+        local focusColor = barSettings.focusHighlightColor
+        highlight:SetVertexColor(focusColor.r, focusColor.g, focusColor.b, focusColor.a)
+    end 
+end
+
+local function ShowHighlight(icon, unitGUID, highlight, barSettings)
     if icon.unitGUID == unitGUID then
+        SetHighlightColor(icon.unitType, highlight, barSettings)
         highlight:Show()
     end
 end
@@ -30,13 +41,13 @@ local function UpdateTargetFocusHighlight(barSettings, icon, targetExists, focus
     if targetExists and focusExists then
         if isSameUnit then
             if icon.unitType == "target" or icon.unitType == "focus" then
-                ShowHighlight(icon, targetGUID, icon.targetHighlight)
+                ShowHighlight(icon, targetGUID, icon.targetHighlight, barSettings)
             end
         else
             if icon.unitType == "target" then
-                ShowHighlight(icon, targetGUID, icon.targetHighlight)
+                ShowHighlight(icon, targetGUID, icon.targetHighlight, barSettings)
             elseif icon.unitType == "focus" then
-                ShowHighlight(icon, focusGUID, icon.focusHighlight)
+                ShowHighlight(icon, focusGUID, icon.focusHighlight, barSettings)
             end
         end
     end
@@ -82,14 +93,19 @@ function OmniBar:UpdateArenaUnitHighlights(barFrame, barSettings, unit)
         icon.focusHighlight:Hide()
 
         if isSameUnit and icon.unitGUID == targetGUID then 
+            SetHighlightColor("target", icon.targetHighlight, barSettings)
             icon.targetHighlight:Show()
         elseif targetExists and focusExists and icon.unitGUID == targetGUID then
+            SetHighlightColor("target", icon.targetHighlight, barSettings)
             icon.targetHighlight:Show()
         elseif targetExists and focusExists and icon.unitGUID == focusGUID then
+            SetHighlightColor("focus", icon.focusHighlight, barSettings)
             icon.focusHighlight:Show()
         elseif focusExists and not targetExists and icon.unitGUID == focusGUID then
+            SetHighlightColor("focus", icon.focusHighlight, barSettings)
             icon.focusHighlight:Show()
         elseif targetExists and not focusExists and icon.unitGUID == targetGUID then
+            SetHighlightColor("target", icon.targetHighlight, barSettings)
             icon.targetHighlight:Show()
         end
     end

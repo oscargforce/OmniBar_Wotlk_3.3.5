@@ -84,7 +84,7 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
 
         if barSettings.showUnusedIcons then
             if ShouldTrackSpell(spellName, spellData, unitClass, unitRace, cachedSpec) then
-                local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
+                local icon = self:CreateIconToBar(barFrame, barSettings.showBorder, spellName, spellData, unitGUID, unit)
                 icon:SetAlpha(unusedAlpha)
             end
         end
@@ -119,7 +119,7 @@ end
 function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)    
     if IsFriendlyPlayer(unit) then
         return
-    end  
+    end
 
     -- Get unit states
     local targetExists = UnitExists("target")
@@ -194,7 +194,7 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
         if not existingIcon then
             if showUnusedIcons then
                 if ShouldTrackSpell(spellName, spellData, unitClass, unitRace, cachedSpec) then
-                    local icon = self:CreateIconToBar(barFrame, spellName, spellData, unitGUID, unit)
+                    local icon = self:CreateIconToBar(barFrame, barSettings.showBorder, spellName, spellData, unitGUID, unit)
                     icon:SetAlpha(unusedAlpha)
                 end
             end

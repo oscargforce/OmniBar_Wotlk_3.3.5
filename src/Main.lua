@@ -13,6 +13,7 @@ local DEFAULT_BAR_SETTINGS = {
     countdownTextXOffset = 0,
     anchorWidth = 80,
     scale = 1,
+    glowSetting = "default",
     position = { point = "CENTER", relativePoint = "CENTER", x = 0, y = 0 },
     showBorder = true,
     isRowGrowingUpwards = true,
