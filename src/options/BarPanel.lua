@@ -535,10 +535,9 @@ function OmniBar:AddBarToOptions(barKey)
                     return bar.cooldowns[className][spellName].priority
                 end,
                 set = function(info, value)
-                    local bar = self.db.profile.bars[barKey]
-                
-                    bar.cooldowns[className][spellName].priority = value
-                    self:UpdateBar(barKey)
+                    self.db.profile.bars[barKey].cooldowns[className][spellName].priority = value
+                    self:UpdatePriority(barKey)
+                    
                 end,
                 disabled = function ()
                     local bar = self.db.profile.bars[barKey]

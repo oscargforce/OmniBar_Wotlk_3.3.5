@@ -17,6 +17,7 @@
     <Script file="src\core\InspectQueue.lua"/>
     <Script file="src\core\Layout.lua"/>
     <Script file="src\core\SpecDetection.lua"/>
+    <Script file="src\core\TestMode.lua"/>
 
     <!-- Events -->
     <Script file="src\core\EventController.lua"/>
@@ -35,7 +36,8 @@
     <Script file="src\widgets\OminBarWidget.lua"/>
 
     <!-- Options -->
-    <Script file="src\options\Panel.lua"/>
-    <Script file="src\options\BarManager.lua"/>
+    <Script file="src\options\ContainerPanel.lua"/>
+    <Script file="src\options\BarPanel.lua"/>
+    <Script file="src\options\TestPanel.lua"/>
 
 </Ui>

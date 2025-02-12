@@ -22,7 +22,7 @@ function OmniBar:SetupOptions()
                 name = "Create Bar",
                 desc = "Create a new bar",
                 width = 0.7,
-                func = function(info)
+                func = function()
                     self:CreateBar()
                 end,
             },
@@ -32,8 +32,8 @@ function OmniBar:SetupOptions()
                 name = "Test bars",
                 desc = "Tests all bars",
                 width = 0.7,
-                func = function(info)
-                    print("Testing mode enabled...") 
+                func = function()
+                    self:OpenTestPanel()
                 end,
             },
             lockBarsButton = {

@@ -39,6 +39,9 @@ function OmniBar:ToggleAnchorVisibility(barFrame)
     barFrame.anchor:Show()
 end
 
+function OmniBar:GetBarData(barKey)
+    return self.barFrames[barKey], self.db.profile.bars[barKey]
+end
 
 function OmniBar:UpdateBar(barKey, specificUpdate)
     local barFrame = self.barFrames[barKey]
@@ -193,4 +196,22 @@ function OmniBar:UpdateSwipeAlpha(barFrame, barSettings, singleIconUpdate)
     end
 
     singleIconUpdate:SetAlpha(swipeAlpha)
+end
+
+function OmniBar:UpdatePriority(barKey)
+    local barFrame, barSettings = self:GetBarData(barKey)
+
+    local trackedSpells = barFrame.trackedSpells
+
+    for spellName, spellData in pairs(trackedSpells) do
+        spellData.priority = barSettings.cooldowns[spellData.className][spellName].priority or 1
+    end
+
+    if #barFrame.icons > 0 then
+        for i, icon in ipairs(barFrame.icons) do
+            icon.priority = barSettings.cooldowns[icon.className][icon.spellName].priority or 1
+        end
+
+        self:ArrangeIcons(barFrame, barSettings)
+    end
 end
