@@ -27,11 +27,23 @@ local function SortIconsByRemainingTime(barFrame)
     end)
 end
 
+local function SortIconsByTimeAdded(barFrame)
+    table.sort(barFrame.icons, function(a, b)
+        if a.startTime == b.startTime then
+            return a.spellId < b.spellId
+        end
+
+        return a.startTime < b.startTime
+    end)
+end
+
 local function SortIcons(barFrame, showUnusedIcons, iconSortingMethod)
     if showUnusedIcons then
         SortIconsByPriority(barFrame)
     elseif iconSortingMethod == "remainingTime" then
         SortIconsByRemainingTime(barFrame)
+    elseif iconSortingMethod == "timeAdded" then
+        SortIconsByTimeAdded(barFrame)
     end
 end
 

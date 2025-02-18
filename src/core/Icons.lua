@@ -82,7 +82,6 @@ function OmniBar:ReturnIconToPool(icon)
     table.insert(self.iconPool, icon)
 end
 
-
 function OmniBar:ResetIcons(barFrame)
     for _, icon in ipairs(barFrame.icons) do
         self:ReturnIconToPool(icon)
@@ -96,7 +95,7 @@ end
 function OmniBar:RefreshBarsWithActiveIcons()
     for _, barFrame in pairs(self.barFrames) do
         if next(barFrame.activeIcons) then
-            self:UpdateBar(barFrame.key, "refreshBarIconsState")
+            self:RefreshIconVisibility(barFrame, self.db.profile.bars[barFrame.key])
         end 
     end 
 end

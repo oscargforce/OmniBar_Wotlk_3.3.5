@@ -13,6 +13,17 @@ function addon.MapTrinketNameToBuffName(trinketName)
     return trinketToBuffMap[trinketName] or trinketName
 end
 
+local buffToTrinketMap = {
+    ["Release of Light"] = "Bauble of True Blood",
+    ["Hardened Skin"] = "Corroded Skeleton Key",
+    ["Fortitude"] = "Satrina's Impeding Scarab",
+    ["Aegis of Dalaran"] = "Sindragosa's Flawless Fang",
+}
+
+function addon.MapBuffNameToTrinketName(buffName)
+    return buffToTrinketMap[buffName] or buffName
+end
+
 local petToPlayerMap = {
     ["arenapet1"] = "arena1",
     ["arenapet2"] = "arena2",
