@@ -60,6 +60,7 @@ function OmniBar:OnInitialize()
     self.combatLogCache = {}
     self.currentRealm = GetRealmName()
     self.isDuelInProgress = false
+    self.testModeEnabled = false 
     self.localPlayerName = GetUnitName("player")
     self.db.RegisterCallback(self, "OnProfileChanged", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")

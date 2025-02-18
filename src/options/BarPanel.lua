@@ -171,6 +171,7 @@ function OmniBar:AddBarToOptions(barKey)
                 set = function(info, value)
                     local barSettings = self.db.profile.bars[barKey]
                     barSettings.showUnusedIcons = value
+                    self:StopTestMode()
                     self:RefreshIconVisibility(self.barFrames[barKey], barSettings)
                 end,
                 order = 7,
@@ -308,7 +309,7 @@ function OmniBar:AddBarToOptions(barKey)
                 get = function (info) return self.db.profile.bars[barKey].scale end,
                 set = function(info, value) 
                     self.db.profile.bars[barKey].scale = value 
-                    self:UpdateScale(barKey)
+                    self:UpdateScale(barKey, value)
                 end,
             },
             sizeDesc = {

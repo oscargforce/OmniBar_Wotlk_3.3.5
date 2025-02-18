@@ -29,11 +29,17 @@ function OmniBar:SetupOptions()
             testButton = {
                 order = 3,
                 type = "execute",
-                name = "Test bars",
+                name = function() 
+                    return self.testModeEnabled and "Stop Testing" or "Test Bars"
+                end,
                 desc = "Tests all bars",
                 width = 0.7,
                 func = function()
-                    self:OpenTestPanel()
+                    if not self.testModeEnabled then
+                        self:OpenTestPanel()
+                    else
+                        self:StopTestMode()
+                    end
                 end,
             },
             lockBarsButton = {
@@ -109,6 +115,10 @@ function OmniBar:SetupOptions()
         if command == "reset" then
             wipe(self.combatLogCache)
             self:RefreshBarsWithActiveIcons()
+        elseif command == "test" then
+            self:OpenTestPanel()
+        elseif command == "test stop" then
+            self:StopTestMode()
         else
             -- Default behavior - open options
             InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)

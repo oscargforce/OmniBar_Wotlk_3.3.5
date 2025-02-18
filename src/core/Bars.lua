@@ -2,6 +2,7 @@ local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local addonName, addon = ...
 local spellTable = addon.spellTable
 local MapTrinketNameToBuffName = addon.MapTrinketNameToBuffName
+local MapBuffNameToTrinketName = addon.MapBuffNameToTrinketName
 local next = next
 
 --  This file contains functions to update the bar settings, which is configured in the options menu
@@ -166,7 +167,7 @@ function OmniBar:UpdateBarName(barKey)
     barFrame.anchor:SetSize(width, 30)
 end
 
-function OmniBar:UpdateScale(barKey)
+function OmniBar:UpdateScale(barKey, scaleValue)
     local barFrame, barSettings = self:GetBarData(barKey)
     barFrame.iconsContainer:SetScale(barSettings.scale)
 end
@@ -229,12 +230,14 @@ function OmniBar:UpdatePriority(barKey)
     local trackedSpells = barFrame.trackedSpells
 
     for spellName, spellData in pairs(trackedSpells) do
-        spellData.priority = barSettings.cooldowns[spellData.className][spellName].priority or 1
+        local mappedSpellName = MapBuffNameToTrinketName(spellName)
+        spellData.priority = barSettings.cooldowns[spellData.className][mappedSpellName].priority or 1
     end
 
     if #barFrame.icons > 0 then
         for i, icon in ipairs(barFrame.icons) do
-            icon.priority = barSettings.cooldowns[icon.className][icon.spellName].priority or 1
+            local mappedSpellName = MapBuffNameToTrinketName(icon.spellName)
+            icon.priority = barSettings.cooldowns[icon.className][mappedSpellName].priority or 1
         end
 
         self:ArrangeIcons(barFrame, barSettings)
