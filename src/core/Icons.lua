@@ -135,24 +135,3 @@ function OmniBar:ToggleIconLock(barFrame, isBarsLocked)
         end
     end
 end
-
-function OmniBar:UpdateCountdownFont()
-    local fontStyle = self.db.profile.fontStyle
-    local fontSize = self.db.profile.fontSize
-
-    for barKey, barFrame in pairs(self.barFrames) do
-        if #barFrame.icons > 0 then 
-            for i, icon in ipairs(barFrame.icons) do
-                icon.countdownText:SetFont(fontStyle, fontSize)
-            end
-        end
-    end
-
-    if #self.iconPool == 0 then 
-        return 
-    end
-
-    for i, icon in ipairs(self.iconPool) do
-        icon.countdownText:SetFont(fontStyle, fontSize)
-    end
-end

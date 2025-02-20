@@ -8,26 +8,22 @@ local UnitExists = UnitExists
 local UnitGUID = UnitGUID
 local UnitRace = UnitRace
 
-local COLORS = {
-    WHITE = "|cFFFFFFFF",
-    YELLOW = "|cFFFFFF00",
-    RED = "|cFFFF0000",
-    END_TAG = "|r"
-}
+local function FormatCountdownText(timeLeft, db)
+    local color, fontSize
 
-local function formatTimeText(timeLeft)
-    local color
     if timeLeft >= 60 then
         -- Show minutes (e.g., 1m, 2m, etc.)
         local minutes = math.floor((timeLeft / 60) + 0.5) -- math.round hack in lua, now it matches OmniCC timer :)
-        color = COLORS.WHITE
-        return string.format("%s%dm%s", color, minutes, COLORS.END_TAG)
+        return string.format("%dm", minutes), db.fontColorMinutes, db.fontSizeMinutes
     elseif timeLeft > 5 then
-        color = COLORS.YELLOW
+        color = db.fontColorSeconds
+        fontSize = db.fontSizeSeconds
     else
-        color = COLORS.RED
+        color = db.fontColorExpire
+        fontSize = db.fontSizeExpire
     end
-    return string.format("%s%.0f%s", color, timeLeft, COLORS.END_TAG)
+
+    return string.format("%.0f", timeLeft), color, fontSize
 end
 
 local function StartCooldownShading(icon, barSettings, barFrame, cachedSpell, sharedCdDuration)
@@ -63,6 +59,7 @@ local function StartCooldownShading(icon, barSettings, barFrame, cachedSpell, sh
     icon.cooldown:SetAlpha(barSettings.swipeAlpha)
 
     local lastUpdate = 0
+    local lastFont, lastSize
     icon.timerFrame:Show() 
     icon.timerFrame:SetScript("OnUpdate", nil) -- delete any existing timer
     icon.timerFrame:SetScript("OnUpdate", function(self, elapsed)
@@ -70,8 +67,19 @@ local function StartCooldownShading(icon, barSettings, barFrame, cachedSpell, sh
         if lastUpdate >= 0.1 then
             local timeLeft = endTime - GetTime()
             if timeLeft > 0 then
-                if customCountdownText then 
-                    icon.countdownText:SetText(formatTimeText(timeLeft))
+                if customCountdownText then
+                    local db = OmniBar.db.profile
+                    local text, color, size = FormatCountdownText(timeLeft, db) 
+
+                    -- Only update if font or size changed
+                    if lastFont ~= db.fontStyle or lastSize ~= size then
+                        icon.countdownText:SetFont(db.fontStyle, size)
+                        lastFont = db.fontStyle
+                        lastSize = size
+                    end
+                    
+                    icon.countdownText:SetTextColor(color.r, color.g, color.b, color.a)
+                    icon.countdownText:SetText(text)
                 end
             else
                 OmniBar:OnCooldownEnd(icon, barFrame, barSettings)

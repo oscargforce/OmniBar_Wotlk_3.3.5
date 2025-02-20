@@ -67,11 +67,9 @@ function CreateOmniBarWidget(barKey, barSettings)
         countdownFrame:SetFrameLevel(7) 
         local countdownText = countdownFrame:CreateFontString("$parentCountdown", "OVERLAY", "GameFontNormalLarge")
         countdownText:SetPoint("CENTER", countdownFrame, "CENTER", 0, 0)
-        countdownText:SetFont(OmniBar.db.profile.fontStyle, OmniBar.db.profile.fontSize)
-        countdownText:SetText("") 
-        countdownText:SetTextColor(1, 1, 1, 1) 
         button.countdownFrame = countdownFrame
         button.countdownText = countdownText
+     
 
         local cooldown = CreateFrame("Cooldown", "$parentCooldown", button, "CooldownFrameTemplate")
         cooldown:SetAllPoints(icon)
