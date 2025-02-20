@@ -70,7 +70,6 @@ local function StartCooldownShading(icon, barSettings, barFrame, cachedSpell, sh
         if lastUpdate >= 0.1 then
             local timeLeft = endTime - GetTime()
             if timeLeft > 0 then
-                -- need to add condition here, if barSettings.noCountdownText, return early
                 if customCountdownText then 
                     icon.countdownText:SetText(formatTimeText(timeLeft))
                 end

@@ -75,21 +75,13 @@ function OmniBar:SetupOptions()
                         set = function(info, value) self.db.profile.showOutOfRangeMessages = value end,
                         order = 1,
                     },
-                    lockBars = {
-                        type = "toggle",
-                        name = "Lock Bar Positions",
-                        desc = "When enabled, prevents bars from being moved around.",
-                        set = function(info, value) self.db.profile.lockBars = value end,
-                        get = function(info) return self.db.profile.lockBars end,
-                        order = 2,
-                    },
                     showInArena = {
                         type = "toggle",
                         name = "Show Bars in Arena",
                         desc = "Enable this option to show the cooldown bars in arena matches.",
                         set = function(info, value) self.db.profile.showInArena = value end,
                         get = function(info) return self.db.profile.showInArena end,
-                        order = 3,
+                        order = 2,
                     },
                     showInWorld = {
                         type = "toggle",
@@ -97,7 +89,43 @@ function OmniBar:SetupOptions()
                         desc = "Enable this option to show the cooldown bars in the world and battlegrounds.",
                         set = function(info, value) self.db.profile.showInWorld = value end,
                         get = function(info) return self.db.profile.showInWorld end,
+                        order = 3,
+                    },
+                    fontHeader = {
                         order = 4,
+                        type = "header",
+                        name = "Font Settings",
+                    }, 
+                    fontStyle = {
+                        type = "select",
+                        name = "Set Font Style",
+                        desc = "Select the font style for the cooldown text.",
+                        values = {
+                            ["Fonts\\FRIZQT__.TTF"] = "Friz Quadrata TT",
+                            ["Fonts\\ARIALN.TTF"] = "Arial Narrow",
+                            ["Fonts\\MORPHEUS.TT"] = "Morpheus",
+                            ["Fonts\\SKURRI.TTF"] = "Skurri", 
+                        },
+                        set = function(info, value) 
+                            self.db.profile.fontStyle = value
+                            self:UpdateCountdownFont() 
+                        end,
+                        get = function(info) return self.db.profile.fontStyle end,
+                        order = 5,
+                    },
+                    fontSize = {
+                        type = "range",
+                        name = "Set Font Size",
+                        desc = "Set the font size for the cooldown text.",
+                        min = 10,
+                        max = 20,
+                        step = 1,
+                        set = function(info, value) 
+                            self.db.profile.fontSize = value
+                            self:UpdateCountdownFont() 
+                        end,
+                        get = function(info) return self.db.profile.fontSize end,
+                        order = 5,
                     },
                 },
             },
