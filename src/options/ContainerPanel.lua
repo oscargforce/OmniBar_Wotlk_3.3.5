@@ -50,7 +50,7 @@ function OmniBar:SetupOptions()
                 end,
                 desc = "Lock all bars positions",
                 width = 0.65,
-                func = function(info, v)
+                func = function()
                     self.db.profile.isBarsLocked = not self.db.profile.isBarsLocked
                     local isBarsLocked = self.db.profile.isBarsLocked
 
@@ -71,25 +71,17 @@ function OmniBar:SetupOptions()
                         type = "toggle",
                         name = "Show Out of Range Messages",
                         desc = "When enabled, a message will be displayed when OmniBar is out of range to inspect a unit.",
-                        get = function(info) return self.db.profile.showOutOfRangeMessages end,
+                        get = function() return self.db.profile.showOutOfRangeMessages end,
                         set = function(info, value) self.db.profile.showOutOfRangeMessages = value end,
                         order = 1,
                     },
-                    lockBars = {
-                        type = "toggle",
-                        name = "Lock Bar Positions",
-                        desc = "When enabled, prevents bars from being moved around.",
-                        set = function(info, value) self.db.profile.lockBars = value end,
-                        get = function(info) return self.db.profile.lockBars end,
-                        order = 2,
-                    },
-                    showInArena = {
+--[[                     showInArena = {
                         type = "toggle",
                         name = "Show Bars in Arena",
                         desc = "Enable this option to show the cooldown bars in arena matches.",
                         set = function(info, value) self.db.profile.showInArena = value end,
                         get = function(info) return self.db.profile.showInArena end,
-                        order = 3,
+                        order = 2,
                     },
                     showInWorld = {
                         type = "toggle",
@@ -97,8 +89,118 @@ function OmniBar:SetupOptions()
                         desc = "Enable this option to show the cooldown bars in the world and battlegrounds.",
                         set = function(info, value) self.db.profile.showInWorld = value end,
                         get = function(info) return self.db.profile.showInWorld end,
+                        order = 3,
+                    }, ]]
+                    fontHeader = {
                         order = 4,
+                        type = "header",
+                        name = "Font Settings",
+                    }, 
+                    fontStyle = {
+                        type = "select",
+                        name = "Set Font Style",
+                        desc = "Select the font style for the cooldown text.",
+                        values = {
+                            ["Fonts\\FRIZQT__.TTF"] = "Friz Quadrata TT",
+                            ["Fonts\\ARIALN.TTF"] = "Arial Narrow",
+                            ["Fonts\\MORPHEUS.TT"] = "Morpheus",
+                            ["Fonts\\SKURRI.TTF"] = "Skurri", 
+                        },
+                        get = function() return self.db.profile.fontStyle end,
+                        set = function(info, value) self.db.profile.fontStyle = value end,
+                        order = 5,
                     },
+                    lineBreak1 = {
+                        name = " ",
+                        type = "description",
+                        order = 5.5,
+                    },
+                    descColor = {
+                        name = "Color and Font Size Settings",
+                        type = "description",
+                        order = 5.6,
+                    },
+                    lineBreak2 = {
+                        name = " ",
+                        type = "description",
+                        order = 5.7,
+                    },
+                    fontColorExpire = {
+                        type = "color",
+                        name = "Soon to Expire",
+                        desc = "Set the font color for cooldowns equal to or under 5 seconds.",
+                        get = function() 
+                            local color = self.db.profile.fontColorExpire
+                            return color.r, color.g, color.b, color.a
+                        end,
+                        set = function(info, r, g, b, a) 
+                            self.db.profile.fontColorExpire = { r = r, g = g, b = b, a = a } 
+                        end,
+                        order = 6,
+                    },
+                    fontSizeExpire = {
+                        type = "range",
+                        name = "Soon to Expire Font Size",
+                        desc = "Set the font size for cooldown text when the timer is 5 seconds or less.",
+                        width = "double",
+                        min = 10,
+                        max = 30,
+                        step = 1,
+                        get = function() return self.db.profile.fontSizeExpire end,
+                        set = function(info, value) 
+                            self.db.profile.fontSizeExpire = value end,
+                        order = 7,
+                    },
+                    fontColorSeconds = {
+                        type = "color",
+                        name = "Under a Minute",
+                        desc = "Set the font color for cooldowns under 60 seconds.",
+                        get = function() 
+                            local color = self.db.profile.fontColorSeconds
+                            return color.r, color.g, color.b, color.a
+                        end,
+                        set = function(info, r, g, b, a)
+                            self.db.profile.fontColorSeconds = { r = r, g = g, b = b, a = a } 
+                        end,
+                        order = 8,
+                    },
+                    fontSizeSeconds = {
+                        type = "range",
+                        name = "Under a Minute Font Size",
+                        desc = "Set the font size for cooldown text under 60 seconds.",
+                        width = "double",
+                        min = 10,
+                        max = 20,
+                        step = 1,
+                        get = function() return self.db.profile.fontSizeSeconds end,
+                        set = function(info, value) self.db.profile.fontSizeSeconds = value end,
+                        order = 9,
+                    },
+                    fontColorMinutes = {
+                        type = "color",
+                        name = "Minutes",
+                        desc = "Set the font color for cooldowns displayed in minutes.",
+                        get = function()
+                            local color = self.db.profile.fontColorMinutes 
+                            return color.r, color.g, color.b, color.a
+                        end,
+                        set = function(info, r, g, b, a) 
+                            self.db.profile.fontColorMinutes = { r = r, g = g, b = b, a = a } 
+                        end,
+                        order = 10,
+                    },
+                    fontSizeMinutes = {
+                        type = "range",
+                        name = "Minutes Font Size",
+                        desc = "Set the font size for cooldown text displayed in minutes.",
+                        width = "double",
+                        min = 10,
+                        max = 20,
+                        step = 1,
+                        get = function() return self.db.profile.fontSizeMinutes end,
+                        set = function(info, value) self.db.profile.fontSizeMinutes = value end,
+                        order = 11,
+                    },                    
                 },
             },
         },

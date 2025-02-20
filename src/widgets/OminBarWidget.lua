@@ -5,7 +5,7 @@ function CreateOmniBarWidget(barKey, barSettings)
     -- Create the main frame (OmniBar)
     local omniBarFrame = CreateFrame("Frame", barKey, UIParent)
     omniBarFrame:SetSize(1, 1)  -- Placeholder size
-
+    
     local position = barSettings.position
     omniBarFrame:SetPoint(position.point, UIParent, position.relativePoint, position.x, position.y)
     omniBarFrame:SetFrameStrata("MEDIUM")
@@ -55,7 +55,7 @@ function CreateOmniBarWidget(barKey, barSettings)
         icon:SetAllPoints(button)
         icon:SetAlpha(1)
         button.icon = icon
-
+       
         if barSettings.showBorder then
 			icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
 	    else
@@ -67,12 +67,9 @@ function CreateOmniBarWidget(barKey, barSettings)
         countdownFrame:SetFrameLevel(7) 
         local countdownText = countdownFrame:CreateFontString("$parentCountdown", "OVERLAY", "GameFontNormalLarge")
         countdownText:SetPoint("CENTER", countdownFrame, "CENTER", 0, 0)
-        countdownText:SetFont("Fonts\\FRIZQT__.TTF", 15)
-        countdownText:SetText("") 
-        countdownText:SetTextColor(1, 1, 1, 1) 
         button.countdownFrame = countdownFrame
         button.countdownText = countdownText
-    
+     
 
         local cooldown = CreateFrame("Cooldown", "$parentCooldown", button, "CooldownFrameTemplate")
         cooldown:SetAllPoints(icon)

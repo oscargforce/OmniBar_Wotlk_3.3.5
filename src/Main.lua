@@ -5,6 +5,21 @@ local GetSpellInfo = GetSpellInfo
 local GetItemInfo = GetItemInfo
 local wipe = wipe
 
+local DEFAULT_PROFILE_SETTINGS = {
+    profile = {
+        bars = {},
+        isBarsLocked = false,
+        showOutOfRangeMessages = true,
+        fontStyle = "Fonts\\FRIZQT__.TTF",
+        fontColorExpire = { r = 1, g = 0, b = 0, a = 1 },
+        fontSizeExpire = 22,
+        fontColorSeconds = { r = 1, g = 1, b = 0, a = 1 },
+        fontSizeSeconds = 18,
+        fontColorMinutes = { r = 1, g = 1, b = 1, a = 1 },
+        fontSizeMinutes = 18,
+    }
+}
+
 local DEFAULT_BAR_SETTINGS = {
     name = "OmniBar",
     iconAlignment = "CENTER",
@@ -49,7 +64,7 @@ end
 
 -- Register options and initialize the addon
 function OmniBar:OnInitialize()
-    self.db = LibStub("AceDB-3.0"):New("OMNIBAR_TEST", { profile = { bars = {}, isBarsLocked = false, showOutOfRangeMessages = true } })
+    self.db = LibStub("AceDB-3.0"):New("OMNIBAR_TEST", DEFAULT_PROFILE_SETTINGS)
     self.barFrames = {}
     self.barIndex = 1
     self.iconPool = {}
