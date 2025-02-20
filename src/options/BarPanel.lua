@@ -297,6 +297,18 @@ function OmniBar:AddBarToOptions(barKey)
                 end,
                 hidden = function() return not self.db.profile.bars[barKey].highlightFocus or self.db.profile.bars[barKey].trackedUnit ~= "allEnemies" end,
             },
+            showNames = {
+                name = "Show Names",
+                desc = "Show the player name of the spell",
+                width = "normal",
+                type = "toggle",
+                order = 15.5,  
+                get = function() return self.db.profile.bars[barKey].showNames end, 
+                set = function(info, value)
+                    self.db.profile.bars[barKey].showNames = value
+                end,
+                disabled = function() return self.db.profile.bars[barKey].trackedUnit ~= "allEnemies" end,
+            },
             size = {
                 name = "Size",
                 desc = "Set the size of the icons",

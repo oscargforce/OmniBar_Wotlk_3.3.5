@@ -1,5 +1,7 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local next = next
+local GetUnitName = GetUnitName
+local UnitExists = UnitExists
 
 function OmniBar:CreateIconToBar(barFrame, showBorder, spellName, spellData, unitGUID, unit)
     local icon = self:GetIconFromPool(barFrame)
@@ -75,6 +77,7 @@ function OmniBar:ReturnIconToPool(icon)
     icon.unitType = nil
     icon.targetHighlight:Hide()
     icon.focusHighlight:Hide()
+    icon.playerNameText:SetText("")
     icon:StopNewIconAnimation()
     icon:Hide()
     icon:ClearAllPoints()
@@ -134,4 +137,44 @@ function OmniBar:ToggleIconLock(barFrame, isBarsLocked)
             icon:EnableMouse(true)
         end
     end
+end
+
+local function GetCachedArenaUnitName(unit)
+    if OmniBar.arenaOpponents[unit] and OmniBar.arenaOpponents[unit].unitName then
+        return OmniBar.arenaOpponents[unit].unitName
+    end
+
+    local unitName = GetUnitName(unit)
+    OmniBar.arenaOpponents[unit].unitName = unitName
+
+    return unitName
+end
+
+function OmniBar:SetUnitNameTextForHiddenIcons(icon, cachedSpell, barSettings, unit)
+    if not barSettings.showNames then return end
+    if barSettings.trackedUnit ~= "allEnemies" then return end
+
+    if self.zone == "arena" then
+        playerName = GetCachedArenaUnitName(unit)
+    else
+        playerName = cachedSpell and cachedSpell.playerName or GetUnitName(unit)
+    end
+
+    icon.playerNameText:SetText(playerName)
+end
+
+function OmniBar:SetUnitNameText(icon, cachedSpell, barSettings, unit)
+    if not barSettings.showNames then return end
+    if barSettings.trackedUnit ~= "allEnemies" then return end
+    
+    if self.zone ~= "arena" then
+        if UnitExists("target") and UnitExists("focus") then
+            local playerName = cachedSpell and cachedSpell.playerName or GetUnitName(unit)
+            icon.playerNameText:SetText(playerName)
+        end
+        return
+    end
+
+    local playerName = GetCachedArenaUnitName(unit)
+    icon.playerNameText:SetText(playerName)
 end

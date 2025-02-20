@@ -3,7 +3,6 @@ local addonName, addon = ...
 local resetCds = addon.resetCds
 local sharedCds = addon.sharedCds
 local GetTime = GetTime
-local GetUnitName = GetUnitName
 local UnitExists = UnitExists
 local UnitGUID = UnitGUID
 local UnitRace = UnitRace
@@ -59,7 +58,9 @@ local function StartCooldownShading(icon, barSettings, barFrame, cachedSpell, sh
     icon.cooldown:SetAlpha(barSettings.swipeAlpha)
 
     local lastUpdate = 0
+    local db = OmniBar.db.profile
     local lastFont, lastSize
+
     icon.timerFrame:Show() 
     icon.timerFrame:SetScript("OnUpdate", nil) -- delete any existing timer
     icon.timerFrame:SetScript("OnUpdate", function(self, elapsed)
@@ -68,7 +69,6 @@ local function StartCooldownShading(icon, barSettings, barFrame, cachedSpell, sh
             local timeLeft = endTime - GetTime()
             if timeLeft > 0 then
                 if customCountdownText then
-                    local db = OmniBar.db.profile
                     local text, color, size = FormatCountdownText(timeLeft, db) 
 
                     -- Only update if font or size changed
@@ -98,6 +98,7 @@ end
 local function RemoveInactiveIconsInWorldZone(icon, barFrame, barSettings)
     if OmniBar.zone == "arena" then return end
     if barSettings.trackedUnit ~= "allEnemies" then return end
+    if barFrame.isInTestMode then return end
     
     local currentUnitGUID = UnitGUID(icon.unitType)
 
@@ -203,6 +204,7 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, unitGUID, spellName
         for i, icon in ipairs(barFrame.icons) do
             if icon.spellName == spellName and icon.unitGUID == unitGUID then
                 self:ActivateIcon(barFrame, barSettings, icon, cachedSpell)
+                self:SetUnitNameText(icon, cachedSpell, barSettings, unit)
                 return
             end  
         end
@@ -218,6 +220,7 @@ function OmniBar:OnCooldownUsed(barFrame, barSettings, unit, unitGUID, spellName
 
     self:ActivateIcon(barFrame, barSettings, icon, cachedSpell)
     self:ArrangeIcons(barFrame, barSettings)
+    self:SetUnitNameTextForHiddenIcons(icon, cachedSpell, barSettings, unit)
 end
 
 
