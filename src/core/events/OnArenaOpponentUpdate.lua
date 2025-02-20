@@ -12,7 +12,6 @@ local processedBars = {}
 
     if not arenaOpponents[unit] then
         local unitGUID = UnitGUID(unit)
-        print("GUID:", unit, unitGUID)
         local unitClass = UnitClass(unit) 
         local unitRace = UnitRace(unit)  
         arenaOpponents[unit] = {

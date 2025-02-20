@@ -69,8 +69,17 @@ function CreateOmniBarWidget(barKey, barSettings)
         countdownText:SetPoint("CENTER", countdownFrame, "CENTER", 0, 0)
         button.countdownFrame = countdownFrame
         button.countdownText = countdownText
-     
 
+        local playerNameFrame = CreateFrame("Frame", "$parentPlayerNameFrame", button)
+        playerNameFrame:SetAllPoints(button)
+        playerNameFrame:SetFrameLevel(7) 
+        local playerNameText = playerNameFrame:CreateFontString("$parentPlayerName", "OVERLAY", "GameFontNormalLarge")
+        playerNameText:SetSize(36, 10)
+        playerNameText:SetPoint("BOTTOM", playerNameFrame, "BOTTOM", 0, 0)
+        playerNameText:SetFont(OmniBar.db.profile.fontStyle, 8)
+        playerNameText:SetTextColor(1, 1, 1, 1)
+        button.playerNameText = playerNameText
+     
         local cooldown = CreateFrame("Cooldown", "$parentCooldown", button, "CooldownFrameTemplate")
         cooldown:SetAllPoints(icon)
         cooldown:SetReverse(true)

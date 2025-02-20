@@ -1,6 +1,14 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local wipe = wipe
 
+local function TestShowNamesFeature(barSettings, icon)
+    if barSettings.showNames and barSettings.trackedUnit == "allEnemies" then
+        icon.playerNameText:SetText("Name")
+    else
+        icon.playerNameText:SetText("")
+    end
+end
+
 local function PlayCooldownAnimation(barFrame, barSettings)
     local interval = 0.5
     local timeElapsed = 0
@@ -35,6 +43,7 @@ local function PlayCooldownAnimation(barFrame, barSettings)
                 local randomNumber = math.random(10, 15)
                 if not barFrame.activeIcons[icon] then
                     OmniBar:ActivateIcon(barFrame, barSettings, icon, nil , randomNumber)
+                    TestShowNamesFeature(barSettings, icon)
                 end
             end 
         end
@@ -81,6 +90,7 @@ local function PlayHiddenCooldownAnimation(barFrame, barSettings, spellsToPlay)
             local icon = OmniBar:CreateIconToBar(barFrame, barSettings.showBorder, spellData.spellName, spellData)
             OmniBar:ActivateIcon(barFrame, barSettings, icon, nil , randomNumber)
             OmniBar:ArrangeIcons(barFrame, barSettings)
+            TestShowNamesFeature(barSettings, icon)
             index = index + 1
            
         end

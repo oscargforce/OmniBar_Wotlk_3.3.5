@@ -43,6 +43,7 @@ local DEFAULT_BAR_SETTINGS = {
     unusedAlpha = 0.45,
     swipeAlpha = 0.65,
     trackedUnit = "allEnemies",
+    showNames = false,
     cooldowns = {},
 }
  
