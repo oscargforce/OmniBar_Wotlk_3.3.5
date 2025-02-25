@@ -9,6 +9,8 @@ local sharedCds = addon.sharedCds
 local spellTable = addon.spellTable
 local resetCds = addon.resetCds
 local IsWarlockDeathCoilSpell = addon.IsWarlockDeathCoilSpell
+local bit_band = bit.band
+local COMBATLOG_OBJECT_REACTION_HOSTILE = COMBATLOG_OBJECT_REACTION_HOSTILE
 
 local ORIGINAL_SUMMON_TITLES = {
     UNITNAME_SUMMON_TITLE1,
@@ -73,6 +75,9 @@ local function GetSpellDuration(spellData, playerSpec)
     return spellData.duration
 end
 
+local function IsSourceHostile(sourceFlags)
+	return bit_band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) == COMBATLOG_OBJECT_REACTION_HOSTILE
+end
 
 -- original omnibar also tracks SPELL_AURA_APPLIED 
 function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
@@ -177,5 +182,29 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
         self:CleanPlayerCache(playerCache, now, playerName)
         self:RemoveNonTargetActiveIcons(barFrame, barSettings, spellsToReset, playerCache[spellName])
     end
- 
+
+    -- Add the icon to the bar for non-targeted players
+    if spellData and self.localPlayerGUID == destGUID and barSettings.trackedUnit == "allEnemies" then
+        if not IsSourceHostile(sourceFlags) then return end
+
+        if sourceGUID == UnitGUID("target") or sourceGUID == UnitGUID("focus") then return end
+
+        if barSettings.showUnusedIcons then
+            local shouldAddNewIcon = true
+            for icon, _ in pairs(barFrame.activeIcons) do
+                if icon.spellName == spellName and icon.unitGUID == sourceGUID then
+                    shouldAddNewIcon = false
+                    break
+                end
+            end
+
+            if shouldAddNewIcon then
+                local icon = self:CreateIconToBar(barFrame, barSettings.showBorder, spellName, spellData, sourceGUID, "nonTargetedPlayer")
+                icon:SetAlpha(barSettings.unusedAlpha)
+                self:ArrangeIcons(barFrame, barSettings)
+            end
+        end
+            
+        self:OnCooldownUsed(barFrame, barSettings, "nonTargetedPlayer", sourceGUID, spellName, spellData, playerCache[spellName])   
+    end
 end

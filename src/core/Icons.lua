@@ -168,7 +168,7 @@ function OmniBar:SetUnitNameText(icon, cachedSpell, barSettings, unit)
     if barSettings.trackedUnit ~= "allEnemies" then return end
     
     if self.zone ~= "arena" then
-        if UnitExists("target") and UnitExists("focus") then
+        if unit == "nonTargetedPlayer" or UnitExists("target") and UnitExists("focus") then
             local playerName = cachedSpell and cachedSpell.playerName or GetUnitName(unit)
             icon.playerNameText:SetText(playerName)
         end
