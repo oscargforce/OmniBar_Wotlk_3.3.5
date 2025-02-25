@@ -78,6 +78,7 @@ function OmniBar:OnInitialize()
     self.isDuelInProgress = false
     self.testModeEnabled = false 
     self.localPlayerName = GetUnitName("player")
+    self.localPlayerGUID = UnitGUID("player")
     self.db.RegisterCallback(self, "OnProfileChanged", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileCopied", "OnEnable")
 	self.db.RegisterCallback(self, "OnProfileReset", "OnEnable")

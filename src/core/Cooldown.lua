@@ -100,7 +100,8 @@ local function RemoveInactiveIconsInWorldZone(icon, barFrame, barSettings)
     if barSettings.trackedUnit ~= "allEnemies" then return end
     if barFrame.isInTestMode then return end
     
-    local currentUnitGUID = UnitGUID(icon.unitType)
+    -- Always remove nonTargetedPlayers icons
+    local currentUnitGUID = icon.unitType == "nonTargetedPlayer" and "123" or UnitGUID(icon.unitType)
 
     if icon.unitGUID ~= currentUnitGUID or
         (icon.unitType == "target" and not UnitExists("target")) or
