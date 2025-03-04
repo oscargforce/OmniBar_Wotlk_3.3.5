@@ -33,7 +33,9 @@ addon.specDefiningAuras = {
         ["Arcane Empowerment"] = "arcane"
     },
     ["Warlock"] = {
-        ["Nether Protection"] = "destro"
+        ["Eradication"] = "affli",
+        ["Nether Protection"] = "destro",
+        ["Shadow Trance"] = "affli",
     },
     ["Shaman"] = {
         ["Totem of Wrath"] = "ele",
@@ -54,11 +56,17 @@ addon.specDefiningAuras = {
 }
 
 addon.crossSpecSpells = {
-    ["Aimed Shot"] = { mm = true, survival = true, bm = true },
+    -- Hunter
+    -- ["Aimed Shot"] = { mm = true, survival = true, bm = true }, After consideration, its better to always show aim shot regardless of spec is detected or not.
     ["Readiness"] = { mm = true, bm = true },
     ["Scatter Shot"] =  { mm = true, survival = true },
+    -- Death Knight
     ["Lichborne"] =  { frostDk = true, blood = true, unholy = true },
     ["Bone Shield"] =  { frostDk = true, blood = true, unholy = true },
+    -- Priest
+    ["Desperate Prayer"] = { holyPriest = true, disc = true },
+    -- Warlock
+    ["Fel Domination"] = { affli = true, demo = true, destro = true }
 }
 
 addon.specDefiningSpells = {
@@ -121,7 +129,6 @@ addon.specDefiningSpells = {
 
     -- Priest
     ["Dispersion"] = "shadow",
-    ["Desperate Prayer"] = "holyPriest",
     ["Guardian Spirit"] = "holyPriest",
     ["Inner Focus"] = "disc",
     ["Lightwell"] = "holyPriest",
@@ -157,10 +164,11 @@ addon.specDefiningSpells = {
     ["Chaos Bolt"] = "destro",
     ["Conflagrate"] = "destro",
     ["Demonic Empowerment"] = "demo",
-    ["Fel Domination"] = "demo",
+    ["Haunt"] = "affli",
     ["Metamorphosis"] = "demo",
     ["Shadowburn"] = "destro",
     ["Shadowfury"] = "destro",
+    ["Unstable Affliction"] = "affli",
 
     -- Warrior
     ["Bladestorm"] = "arms",
