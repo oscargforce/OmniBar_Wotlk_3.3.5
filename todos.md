@@ -4,11 +4,12 @@ TODOS:
 
     2) Update unit aura detection in world if I want to have that there. If so need to update OnPlayerTargetChanged, OnUnitAura, SpecDetection
 
-1. Add all spells to spell table
-2. Add disable/enable depending on zone "show in bg/arenas/world"
+1. Add all spells to spell table -- done
+2. Add disable/enable depending on zone "show in bg/arenas/world" -- DONE
 3. Add export/import profile
-4. Add Copy from another bar settings
-5. Add Spells
+4. Add Copy from another bar settings -- DONE
+5. Add more spells to crossSpecSpells
+
 6. test Nature's Swiftness from shamans and resto druids, what icon is shown if both are tracked?
 7. test Heroism and bloodlust, we only wantto show 1 icon depending on faction.
 

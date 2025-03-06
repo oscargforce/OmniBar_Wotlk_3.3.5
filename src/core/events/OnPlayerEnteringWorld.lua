@@ -22,4 +22,6 @@ function OmniBar:PLAYER_ENTERING_WORLD()
     if self.zone == "arena" then
         self:HandleMidGameReloadsForArenaUpdate()
     end
+    
+    self:SetBarVisibilityForZone()
 end

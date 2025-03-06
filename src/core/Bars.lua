@@ -257,3 +257,19 @@ function OmniBar:UpdateMaxIcons(barKey)
         self:SetupBarIcons(barFrame, barSettings)
     end
 end
+
+function OmniBar:SetBarVisibilityForZone()
+    for barKey, barFrame in pairs(self.barFrames) do
+        local barSettings = self.db.profile.bars[barKey]
+
+        if self.zone == "arena" and not barSettings.showInArenas then
+            barFrame:Hide()
+        elseif self.zone == "pvp" and not barSettings.showInBattlegrounds then
+            barFrame:Hide()
+        elseif self.zone == "none" and not barSettings.showInWorld then
+            barFrame:Hide()
+        else
+            barFrame:Show()
+        end
+    end
+end
