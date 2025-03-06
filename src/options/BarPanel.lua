@@ -71,9 +71,9 @@ function OmniBar:AddBarToOptions(barKey)
                     local barKeys = {}
                     local currentBarKey = barKey
                 
-                    for key, bar in pairs(self.db.profile.bars) do
+                    for key, barSettings in pairs(self.db.profile.bars) do
                         if key ~= currentBarKey then
-                            barKeys[key] = bar.name
+                            barKeys[key] = barSettings.name
                         end
                     end
 
