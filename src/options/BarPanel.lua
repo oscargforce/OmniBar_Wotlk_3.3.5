@@ -82,9 +82,20 @@ function OmniBar:AddBarToOptions(barKey)
                 get = function() return "" end,
                 set = function(info, selectedBarKey)
                     local bars = self.db.profile.bars
-                    local copiedSettings = self:DeepCopyTable(bars[selectedBarKey])
-                    copiedSettings.name = bars[barKey].name
+                    local selectedBar = bars[selectedBarKey]
+                    local targetBar = bars[barKey]
+
+                    local copiedSettings = self:DeepCopyTable(selectedBar)
+                    copiedSettings.name = targetBar.name
+                    copiedSettings.position = {
+                        point = targetBar.position.point,
+                        relativePoint = targetBar.position.relativePoint,
+                        x = targetBar.position.x,
+                        y = targetBar.position.y,
+                    }
+
                     bars[barKey] = copiedSettings
+                    print(string.format("|cff00ff00OmniBar copied settings from |cffffd700%s |cff00ff00to |cffffd700%s|r", selectedBar.name, targetBar.name))
                 end,
                 order = 1,
             },
