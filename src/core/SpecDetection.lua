@@ -64,7 +64,6 @@ function OmniBar:DetectSpecByAbility(spellName, unit, barFrame, barSettings, uni
         local definedSpec = specDefiningSpells[spellName]
         if definedSpec then
             opponent.spec = definedSpec
-            print(barSettings.name, "Detected spec for " .. unit .. ": " .. definedSpec .. " via " .. spellName)
         end
     end
     
@@ -100,7 +99,7 @@ function OmniBar:DetectSpecByAura(unit, barFrame, barSettings)
     if HasBarProcessedUnit(barKey, unit) then return end
 
     local opponent = self.arenaOpponents[unit]
-    if not opponent then print(barSettings.name, "returns cuz no opponent"); return end
+    if not opponent then return end
 
     local auras = specDefiningAuras[opponent.className]
     local unitSpec = opponent.spec or false
@@ -110,7 +109,6 @@ function OmniBar:DetectSpecByAura(unit, barFrame, barSettings)
         for auraName, spec in pairs(auras) do
             local hasAura = UnitAura(unit, auraName)
             if hasAura then
-                print(barSettings.name,"Detected spec for " .. unit .. ": " .. spec .. " via " .. hasAura)
                 unitSpec = spec
                 opponent.spec = spec
                 break
@@ -122,7 +120,6 @@ function OmniBar:DetectSpecByAura(unit, barFrame, barSettings)
     if unitSpec then
         self:OnSpecDetected(unit, opponent, barFrame, barSettings)
         MarkBarAsProcessed(barKey, unit)    
-        print(barSettings.name,"MarkBarAsProcessed")
     end
 end
 
@@ -131,13 +128,16 @@ local function SpellBelongsToSpec(spellData, opponent, spellName)
         return false 
     end
 
+    if spellData.partySpecOnly then
+        return false
+    end
+
     if spellData.className ~= opponent.className then
         return false
     end
 
     local crossSpecInfo = crossSpecSpells[spellName]
     if crossSpecInfo and crossSpecInfo[opponent.spec] then
-        print("Allowing cross-spec spell: " .. spellName)
         return true
     end
 
@@ -151,7 +151,6 @@ function OmniBar:OnSpecDetected(unit, opponent, barFrame, barSettings)
     if barSettings.showUnusedIcons then
         for spellName, spellData in pairs(barFrame.trackedSpells) do
             if SpellBelongsToSpec(spellData, opponent, spellName) then
-                print("OnSpecDetected:", spellName)
                 local icon = self:CreateIconToBar(barFrame, barSettings.showBorder, spellName, spellData, opponent.unitGUID, unit)
                 needsAlphaUpdate = true
 
@@ -181,7 +180,6 @@ function OmniBar:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, spec, barS
             local spellData = barFrame.trackedSpells[icon.spellName]
             if spellData.adjust and spellData.adjust[spec] then
                icon.duration = spellData.adjust[spec]
-               print("AdjustUnusedIconsCooldownForSpec", icon.spellName, "to", spellData.adjust[spec], "seconds")
                -- Update the cooldown timer for active icons when spec detection changes the cooldown duration.
                if barFrame.activeIcons[icon] then
                    self:ActivateIcon(barFrame, barSettings, icon, {
@@ -204,24 +202,19 @@ function OmniBar:AdjustCooldownForSpec(icon, spellData, unit, barFrame, barSetti
         local spec = self.arenaOpponents[unit] and self.arenaOpponents[unit].spec or self.partyMemberSpecs[unit]
 
         if not spellData.adjust[spec] then return end
-        print("spec", spec )
         icon.duration = spellData.adjust[spec]
-        print("AdjustCooldownForSpecArena", icon.spellName, "to", spellData.adjust[spec], "seconds")
         return
     end 
 
     -- World PvP spec handling
     if unit:match("^party[1-4]$") then
-        print("AdjustCooldownForSpecWorldParty", barFrame.key, unit, self.partyMemberSpecs[unit])
         local spec = self.partyMemberSpecs[unit]
 
         -- If party spec detection failed, use combatLogCache as last resort
         if spec and spec ~= "" then 
-
             if not spellData.adjust[spec] then return end
     
             icon.duration = spellData.adjust[spec]
-            print("AdjustCooldownForSpecWorldParty", icon.spellName, "to", spellData.adjust[spec], "seconds")
             return
         end
     end
@@ -231,7 +224,6 @@ function OmniBar:AdjustCooldownForSpec(icon, spellData, unit, barFrame, barSetti
     local hasCachedSpec = cachedData and cachedData.spec
 
     if hasCachedSpec and spellData.adjust[cachedData.spec] then
-        print("AdjustCooldownForSpecWorld", icon.spellName, "to", spellData.adjust[cachedData.spec], "seconds")
         icon.duration = spellData.adjust[cachedData.spec]
     end
 end

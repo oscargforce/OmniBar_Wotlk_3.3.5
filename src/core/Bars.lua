@@ -11,8 +11,6 @@ function OmniBar:CreateBar()
     local barKey = self:GenerateUniqueKey()
     self:InitializeBar(barKey)
     self:AddBarToOptions(barKey)
-
-    print("Bar created with key:", barKey)
 end
 
 function OmniBar:SetPosition(barFrame, newPosition)
@@ -99,7 +97,7 @@ function OmniBar:AddSpellToTrackedSpells(trackedSpells, className, spellName, sp
     local spellData = spellTable[className][spellName]
 
     if not spellData then  
-        print(spellName, "does not exist in the table: trackedSpells. Add it to the table then preform /relod")
+        print("OmniBar", spellName, "does not exist in the table: trackedSpells. Add it to the table then preform /relod")
         return
     end
 
@@ -116,6 +114,7 @@ function OmniBar:AddSpellToTrackedSpells(trackedSpells, className, spellName, sp
             spec = spellData.spec or nil,
             item = spellData.item or nil,
             adjust = spellData.adjust or nil,
+            partySpecOnly = spellData.partySpecOnly or nil,
         }
     end
 end
@@ -178,7 +177,6 @@ function OmniBar:UpdateBorders(barKey)
     for i, icon in ipairs(barFrame.icons) do
         self:UpdateIconBorder(barSettings.showBorder, icon)
     end
-    print("Border: Icons left in pool:", #self.iconPool)
 end
 
 function OmniBar:RefreshIconVisibility(barFrame, barSettings)
@@ -255,5 +253,21 @@ function OmniBar:UpdateMaxIcons(barKey)
         self:TestIcons(barSettings, barFrame, barFrame.testModeClasses)
     elseif currentIcons > 0 and currentIcons < maxIcons and currentIcons >= (maxIcons - 20) then -- Threshold to prevent unnecessary function calls. Set to 20 to ensure icons are created if the slider is moved quickly.
         self:SetupBarIcons(barFrame, barSettings)
+    end
+end
+
+function OmniBar:SetBarVisibilityForZone()
+    for barKey, barFrame in pairs(self.barFrames) do
+        local barSettings = self.db.profile.bars[barKey]
+
+        if self.zone == "arena" and not barSettings.showInArenas then
+            barFrame:Hide()
+        elseif self.zone == "pvp" and not barSettings.showInBattlegrounds then
+            barFrame:Hide()
+        elseif self.zone == "none" and not barSettings.showInWorld then
+            barFrame:Hide()
+        else
+            barFrame:Show()
+        end
     end
 end

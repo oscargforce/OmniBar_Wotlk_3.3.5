@@ -25,15 +25,12 @@ function OmniBar:OnUnitInventoryChanged(barFrame, event, unit)
     
     if trackedUnit ~= unit then return end
     
-    print("OnUnitInventoryChanged")
-
     local unitTrinkets = {}
     local didInspect = false
     local needsRearranging = false
 
     if CheckInteractDistance(trackedUnit, 1) then 
         NotifyInspect(trackedUnit)
-        print("OnUnitInventoryChanged NotifyInspect", trackedUnit)
         unitTrinkets = self:GetPartyUnitsTrinkets(trackedUnit) 
         didInspect = true
     end
@@ -73,5 +70,4 @@ function OmniBar:OnUnitInventoryChanged(barFrame, event, unit)
         self:ArrangeIcons(barFrame, barSettings)
         self:UpdateUnusedAlpha(barFrame, barSettings)
     end
-    print("OnUnitInventoryChanged DONE")
 end

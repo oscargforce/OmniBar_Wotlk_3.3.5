@@ -9,6 +9,25 @@ local function TestShowNamesFeature(barSettings, icon)
     end
 end
 
+local function TestHighlightFeature(barSettings, icon)
+    icon.targetHighlight:Hide()
+    icon.focusHighlight:Hide()
+    
+    if barSettings.highlightTarget or barSettings.highlightFocus then
+        local showHighlight = math.random(1, 3)  -- 1: no highlight, 2: target, 3: focus
+        
+        if showHighlight == 2 and barSettings.highlightTarget then
+            local targetColor = barSettings.targetHighlightColor
+            icon.targetHighlight:SetVertexColor(targetColor.r, targetColor.g, targetColor.b, targetColor.a)
+            icon.targetHighlight:Show()
+        elseif showHighlight == 3 and barSettings.highlightFocus then
+            local focusColor = barSettings.focusHighlightColor
+            icon.focusHighlight:SetVertexColor(focusColor.r, focusColor.g, focusColor.b, focusColor.a)
+            icon.focusHighlight:Show()
+        end
+    end
+end
+
 local function PlayCooldownAnimation(barFrame, barSettings)
     local interval = 0.5
     local timeElapsed = 0
@@ -44,6 +63,7 @@ local function PlayCooldownAnimation(barFrame, barSettings)
                 if not barFrame.activeIcons[icon] then
                     OmniBar:ActivateIcon(barFrame, barSettings, icon, nil , randomNumber)
                     TestShowNamesFeature(barSettings, icon)
+                    TestHighlightFeature(barSettings, icon)
                 end
             end 
         end
@@ -91,6 +111,7 @@ local function PlayHiddenCooldownAnimation(barFrame, barSettings, spellsToPlay)
             OmniBar:ActivateIcon(barFrame, barSettings, icon, nil , randomNumber)
             OmniBar:ArrangeIcons(barFrame, barSettings)
             TestShowNamesFeature(barSettings, icon)
+            TestHighlightFeature(barSettings, icon)
             index = index + 1
            
         end

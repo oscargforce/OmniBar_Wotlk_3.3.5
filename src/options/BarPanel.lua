@@ -63,6 +63,45 @@ function OmniBar:AddBarToOptions(barKey)
                 arg = barKey,
                 order = 0,
             },
+            copyFrom = {
+                name = "Copy From:",
+                type = "select",
+                desc = "Copies all settings/spells from the selected OmniBar",
+                values = function()
+                    local barKeys = {}
+                    local currentBarKey = barKey
+                
+                    for key, barSettings in pairs(self.db.profile.bars) do
+                        if key ~= currentBarKey then
+                            barKeys[key] = barSettings.name
+                        end
+                    end
+
+                    return barKeys
+                end,
+                get = function() return "" end,
+                set = function(info, selectedBarKey)
+                    local bars = self.db.profile.bars
+                    local selectedBar = bars[selectedBarKey]
+                    local targetBar = bars[barKey]
+                    local barFrame = self.barFrames[barKey]
+
+                    local copiedSettings = self:DeepCopyTable(selectedBar)
+                    copiedSettings.name = targetBar.name
+                    copiedSettings.position = {
+                        point = targetBar.position.point,
+                        relativePoint = targetBar.position.relativePoint,
+                        x = targetBar.position.x,
+                        y = targetBar.position.y,
+                    }
+
+                    bars[barKey] = copiedSettings
+                    self:BuildTrackedSpells(barFrame, copiedSettings)
+                    self:InitializeEventsTracking(barFrame, copiedSettings)
+                    print(string.format("|cff00ff00OmniBar copied settings from |cffffd700%s |cff00ff00to |cffffd700%s|r", selectedBar.name, targetBar.name))
+                end,
+                order = 1,
+            },
             name = {
                 name = "Name",
                 desc = "Set the name of the bar",
@@ -74,7 +113,7 @@ function OmniBar:AddBarToOptions(barKey)
                     self.options.args[barKey].name = value
                     self:UpdateBarName(barKey)
                 end,
-                order = 1,
+                order = 2,
             },
             trackedUnit = {
                 name = "Track",
@@ -308,6 +347,42 @@ function OmniBar:AddBarToOptions(barKey)
                     self.db.profile.bars[barKey].showNames = value
                 end,
                 disabled = function() return self.db.profile.bars[barKey].trackedUnit ~= "allEnemies" end,
+            },
+            showInWorld = {
+                name = "Show in World",
+                desc = "Enable/disable the bar in the world",
+                width = "normal",
+                type = "toggle",
+                order = 15.6,  
+                get = function() return self.db.profile.bars[barKey].showInWorld end, 
+                set = function(info, value)
+                    self.db.profile.bars[barKey].showInWorld = value
+                    self:SetBarVisibilityForZone()
+                end,
+            },
+            showInArenas = {
+                name = "Show in Arenas",
+                desc = "Enable/disable the bar in arenas",
+                width = "normal",
+                type = "toggle",
+                order = 15.7,  
+                get = function() return self.db.profile.bars[barKey].showInArenas end, 
+                set = function(info, value)
+                    self.db.profile.bars[barKey].showInArenas = value
+                    self:SetBarVisibilityForZone()
+                end,
+            },
+            showInBgs = {
+                name = "Show in Battlegrounds",
+                desc = "Enable/disable the bar in battlegrounds",
+                width = "normal",
+                type = "toggle",
+                order = 15.8,  
+                get = function() return self.db.profile.bars[barKey].showInBgs end, 
+                set = function(info, value)
+                    self.db.profile.bars[barKey].showInBgs = value
+                    self:SetBarVisibilityForZone()
+                end,
             },
             size = {
                 name = "Size",

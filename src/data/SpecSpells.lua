@@ -33,7 +33,9 @@ addon.specDefiningAuras = {
         ["Arcane Empowerment"] = "arcane"
     },
     ["Warlock"] = {
-        ["Nether Protection"] = "destro"
+        ["Eradication"] = "affli",
+        ["Nether Protection"] = "destro",
+        ["Shadow Trance"] = "affli",
     },
     ["Shaman"] = {
         ["Totem of Wrath"] = "ele",
@@ -53,12 +55,18 @@ addon.specDefiningAuras = {
     }
 }
 
+-- Do not include spells in table "crossSpecSpells" that are marked with "partySpecOnly" in SpellTable.lua
 addon.crossSpecSpells = {
-    ["Aimed Shot"] = { mm = true, survival = true, bm = true },
-    ["Readiness"] = { mm = true, bm = true },
-    ["Scatter Shot"] =  { mm = true, survival = true },
+    -- Death Knight
     ["Lichborne"] =  { frostDk = true, blood = true, unholy = true },
     ["Bone Shield"] =  { frostDk = true, blood = true, unholy = true },
+    -- Hunter
+    ["Readiness"] = { mm = true, bm = true },
+    ["Scatter Shot"] =  { mm = true, survival = true },
+    -- Priest
+    ["Desperate Prayer"] = { holyPriest = true, disc = true },
+    -- Warlock
+    ["Fel Domination"] = { affli = true, demo = true, destro = true }
 }
 
 addon.specDefiningSpells = {
@@ -112,7 +120,6 @@ addon.specDefiningSpells = {
     ["Crusader Strike"] = "retri",
     ["Divine Favor"] = "holy",
     ["Divine Illumination"] = "holy",
-    ["Divine Sacrifice"] = "protPala",
     ["Divine Storm"] = "retri",
     ["Hammer of the Righteous"] = "protPala",
     ["Holy Shield"] = "protPala",
@@ -121,7 +128,6 @@ addon.specDefiningSpells = {
 
     -- Priest
     ["Dispersion"] = "shadow",
-    ["Desperate Prayer"] = "holyPriest",
     ["Guardian Spirit"] = "holyPriest",
     ["Inner Focus"] = "disc",
     ["Lightwell"] = "holyPriest",
@@ -157,10 +163,11 @@ addon.specDefiningSpells = {
     ["Chaos Bolt"] = "destro",
     ["Conflagrate"] = "destro",
     ["Demonic Empowerment"] = "demo",
-    ["Fel Domination"] = "demo",
+    ["Haunt"] = "affli",
     ["Metamorphosis"] = "demo",
     ["Shadowburn"] = "destro",
     ["Shadowfury"] = "destro",
+    ["Unstable Affliction"] = "affli",
 
     -- Warrior
     ["Bladestorm"] = "arms",

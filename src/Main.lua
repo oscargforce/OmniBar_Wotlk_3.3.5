@@ -44,6 +44,9 @@ local DEFAULT_BAR_SETTINGS = {
     swipeAlpha = 0.65,
     trackedUnit = "allEnemies",
     showNames = false,
+    showInWorld = true,
+    showInBgs = true,
+    showInArenas = true,
     cooldowns = {},
 }
  
@@ -92,21 +95,20 @@ end
 
 -- runs after OmniBar:OnInitialize()
 function OmniBar:OnEnable()
+    wipe(self.iconPool)
+    
     -- Step 1: Clean up existing bars, 
     for barKey, barFrame in pairs(self.barFrames) do
-        print("Cleaning up bar:", barKey)
         self:DeleteBar(barKey, barFrame, true)
     end
 
     -- Step 2: Create a default bar if none exist
     if next(self.db.profile.bars) == nil then
-        print("Creating default bar")
         local defaultKey = self:GenerateUniqueKey()
         self:InitializeBar(defaultKey)
     else
         -- Else initialize existing bars from the database
         for barKey, barSettings in pairs(self.db.profile.bars) do
-            print("Adding existing bars")
             self:InitializeBar(barKey, barSettings)
         end
 
@@ -116,7 +118,6 @@ function OmniBar:OnEnable()
     for barKey, _ in pairs(self.db.profile.bars) do
         self:AddBarToOptions(barKey)
     end
-    print("OnEnabled: Icons left in pool:", #self.iconPool)
 end
 
 function OmniBar:DeleteBar(barKey, barFrame, keepProfile)
@@ -124,13 +125,12 @@ function OmniBar:DeleteBar(barKey, barFrame, keepProfile)
 
     targetFrame:Hide()
     self:UnregisterAllBarEvents(targetFrame)
-
+    
     if not keepProfile then
         self.db.profile.bars[barKey] = nil 
-        self.options.args[barKey] = nil
     end
 
-    targetFrame.anchor:Hide()
+    self.options.args[barKey] = nil
     wipe(targetFrame.icons)
     wipe(targetFrame.activeIcons)
     targetFrame.anchor = nil
@@ -147,27 +147,15 @@ function OmniBar:GenerateUniqueKey()
         key = "OmniBar" .. self.barIndex
         self.barIndex = self.barIndex + 1
     until not self.db.profile.bars[key]
-    print("Key name:", key)
+    
     return key
-end
-
-local function DeepCopyTable(tbl)
-    local copy = {}
-    for k, v in pairs(tbl) do
-        if type(v) == "table" then
-            copy[k] = DeepCopyTable(v)  -- Recursively copy tables
-        else
-            copy[k] = v
-        end
-    end
-    return copy
 end
 
 function OmniBar:InitializeBar(barKey, settings)
     if (not self.db.profile.bars[barKey]) then
         self.db.profile.bars[barKey] = {}
 
-        local defaultBarSettings = DeepCopyTable(DEFAULT_BAR_SETTINGS)
+        local defaultBarSettings = self:DeepCopyTable(DEFAULT_BAR_SETTINGS)
 
 		for k, v in pairs(defaultBarSettings) do
 			self.db.profile.bars[barKey][k] = v
@@ -192,8 +180,10 @@ function OmniBar:InitializeBar(barKey, settings)
     if barSettings.showUnusedIcons then
         self:SetupBarIcons(barFrame, barSettings)
     else
-        self:CreateIconsToPool(barFrame)
-
+        if #self.iconPool < 200 then
+            self:CreateIconsToPool(barFrame)
+        end
+       
         -- Trigger the event "party members changed" to detect the party members specs after a reload
         if barSettings.trackedUnit:match("^party[1-4]$") then
             self:SetupBarIcons(barFrame, barSettings)
@@ -201,4 +191,16 @@ function OmniBar:InitializeBar(barKey, settings)
     end  
 
     self:ToggleAnchorVisibility(barFrame)
+end
+
+function OmniBar:DeepCopyTable(tbl)
+    local copy = {}
+    for k, v in pairs(tbl) do
+        if type(v) == "table" then
+            copy[k] = self:DeepCopyTable(v)  -- Recursively copy tables
+        else
+            copy[k] = v
+        end
+    end
+    return copy
 end

@@ -13,10 +13,8 @@ local function SetSpellTrackingEventForBar(barFrame, trackedUnit, zone)
     
     -- Event: UnitSpellCastSucceeded can handle all scenarios in arenas
     if zone == "arena" then
-        print("Unregister COMBAT_LOG_EVENT_UNFILTERED") 
         barFrame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     else
-        print("Registered COMBAT_LOG_EVENT_UNFILTERED") 
         barFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     end
 end
