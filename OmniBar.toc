@@ -6,7 +6,6 @@
 ## SavedVariables: OMNIBAR_TEST
 
 embeds.xml
-ViewTable.lua
 load.xml
 
 
