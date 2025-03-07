@@ -7,6 +7,11 @@ The Omnibar Addon has been **REWRITTEN** with several new features, bringing imp
 ## How to install the addon
 [Read the guide here](https://github.com/oscargforce/OmniBar_Wotlk_3.3.5/wiki/How-to-install-the-addon)
 
+## 🛠️ **Set Up Your OmniBar Configuration**  
+
+For a detailed step-by-step guide on configuring your **OmniBar**, visit:  
+[📖 **Read More Here**](https://github.com/oscargforce/OmniBar_Wotlk_3.3.5/wiki)  
+
 ## Implemented Features
 
 ### 1. Spec Detection
