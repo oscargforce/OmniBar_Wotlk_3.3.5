@@ -126,7 +126,7 @@ addon.spellTable = {
         ["Invisibility"] = { isTracking = false, duration = 180, spellId = 66, adjust = { arcane = 126 } },
         ["Mana gem"] = { isTracking = false, duration = 120, spellId = 42987 },
         ["Mirror Image"] = { isTracking = false, duration = 180, spellId = 55342 },
-        ["Pet Nova (Freeze)"] = { isTracking = false, duration = 25, spellId = 33395 },
+        ["Freeze"] = { isTracking = false, duration = 25, spellId = 33395 },
         ["Presence of Mind"] = { isTracking = false, duration = 84, spellId = 12043, spec = "arcane" },
         ["Summon Water Elemental"] = { isTracking = false, duration = 144, spellId = 31687, spec = "frost" },
     },

@@ -262,7 +262,7 @@ function OmniBar:SetBarVisibilityForZone()
 
         if self.zone == "arena" and not barSettings.showInArenas then
             barFrame:Hide()
-        elseif self.zone == "pvp" and not barSettings.showInBattlegrounds then
+        elseif self.zone == "pvp" and not barSettings.showInBgs then
             barFrame:Hide()
         elseif self.zone == "none" and not barSettings.showInWorld then
             barFrame:Hide()
