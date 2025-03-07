@@ -48,12 +48,22 @@ For a detailed step-by-step guide on configuring your **OmniBar**, visit:
 ### 11. Additional Font Choices
 - Introduces new fonts for cooldown timers to enhance readability and customization.
 
-### 12. Reworked 'AllEnemies' Unit Tracking
-- Improved behavior outside of 'arena' zones:
-  - Shows only target and focus.
-  - Displays non-targeted players only if the source of the ability is the local player.
+### 12. Reworked 'AllEnemies' Unit Tracking  
+- Improved behavior outside of **arena** zones:  
+  - Displays only target and focus cooldowns.  
+  - Shows cooldowns for non-targeted players only if you were affected by the spell.  
+    - *For example:* If a Death Knight uses **Mind Freeze** on you.  
+  - When switching target or focus, previously used cooldowns of the old target/focus will persist.
+  - This is excellent for tracking enemy cooldowns in battlegrounds while keeping the UI clean and organized.
 
 ### 13. Afflicted Style Look
 - Choose to add an 'Afflicted' style visual option for a fresh and unique look to the cooldown bar.
+
+### 14. Blackrock Dueling Support  
+- Automatically resets all cooldowns at the start of a new duel.
+
+### 15. Clutter-Free UI  
+- When not in a duel or arena and out of combat for more than 30 seconds, all cooldowns are cleared.  
+  - This is especially useful in battlegrounds to maintain a clean and organized UI.
 
 
