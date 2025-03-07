@@ -68,8 +68,14 @@ function OmniBar:SetupOptions()
                 name = "General Settings",
                 order = 0,
                 args = {
+                    notificationHeader = {
+                        order = 0,
+                        type = "header",
+                        name = "Notification Settings",
+                    },
                     showOutOfRangeMessages = {
                         type = "toggle",
+                        width = "full",
                         name = "Show Out of Range Messages",
                         desc = "When enabled, a message will be displayed when OmniBar is out of range to inspect a unit.",
                         get = function() return self.db.profile.showOutOfRangeMessages end,
