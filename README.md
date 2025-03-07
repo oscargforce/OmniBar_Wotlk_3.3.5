@@ -4,6 +4,8 @@
 The Omnibar Addon has been **REWRITTEN** with several new features, bringing improved functionality, customization, and usability to your gaming experience. Below is an overview of the latest features added to the addon.
 
 ---
+## How to install the addon
+[Read the guide here](https://github.com/oscargforce/OmniBar_Wotlk_3.3.5/wiki/How-to-install-the-addon)
 
 ## Implemented Features
 
