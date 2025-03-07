@@ -94,7 +94,6 @@ local function IsFirstSpellCast(unit, spellName, barKey)
     end
 
     if lastCastTimes[barKey][unit][spellName] and (currentTime - lastCastTimes[barKey][unit][spellName]) < 2.2 then
-        print("BLOCKED:", unit, spellName)
         return false
     end
 
@@ -152,6 +151,5 @@ function OmniBar:OnUnitSpellCastSucceeded(barFrame, event, unit, spellName, spel
         return 
     end
 
-    print("PASSED:", mappedUnit, spellName)
     self:OnCooldownUsed(barFrame, barSettings, mappedUnit, unitGUID, spellName, spellData)
 end

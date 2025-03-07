@@ -48,7 +48,6 @@ end
 
 function InspectQueueOmniBar:IsUnitInRange(unit)
     local distance = CheckInteractDistance(unit, 1)
-    print("IsUnitInRange", unit, distance == 1)
     return distance == 1
 end
 
@@ -61,9 +60,7 @@ function InspectQueueOmniBar:FindNextInRangeUnit()
 end
 
 function InspectQueueOmniBar:ProcessQueue()
-    print(self.isProcessing, #self.queue)
     if self.isProcessing or #self.queue == 0 then 
-        print("ProcessQueue HIDING FRAME")
         self.frame:Hide()
         return 
     end
@@ -78,7 +75,6 @@ function InspectQueueOmniBar:ProcessQueue()
         end
 
         local item = self.queue[1]
-        print("Processing", item.bar.key)
         self.currentInspect = item
         item.bar:RegisterEvent("INSPECT_TALENT_READY")
         NotifyInspect(item.unit)
@@ -94,13 +90,11 @@ function InspectQueueOmniBar:OnUpdate(elapsed)
         self.timeElapsed = 0
 
         if #self.queue == 0 then
-            print("Queue is 0 on Update, hiding frame")
             self.frame:Hide()
             return 
         end
 
         local timeLeft = self.queue[1].endTime - GetTime()
-        print("No current inspect", timeLeft)
 
         if timeLeft > 0 then
             if not self.currentInspect then
@@ -122,7 +116,6 @@ function InspectQueueOmniBar:InspectComplete()
     self.isProcessing = false
     table.remove(self.queue, 1)
     self.frame:Show()
-    print("InspectComplete")
     self:ProcessQueue()
 end 
 

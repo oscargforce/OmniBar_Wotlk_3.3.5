@@ -31,7 +31,6 @@ local inspectQueue = InspectQueueOmniBar:New()
 function OmniBar:OnPartyMembersChanged(barFrame, event, isInEditMode)
     local barKey = barFrame.key
     local barSettings = self.db.profile.bars[barKey]
-    print("OnPartyMembersChanged:", barKey )
 
     local trackedUnit = barSettings.trackedUnit
     local currentPartyGUID = UnitGUID(trackedUnit)
@@ -52,7 +51,6 @@ function OmniBar:OnPartyMembersChanged(barFrame, event, isInEditMode)
  
     -- If the tracked unit is no longer in the party, reset icons
     if not currentPartyGUID then
-        print(barKey, "If the tracked unit is no longer in the party, reset icons")
         partyMemberGUIDs[barKey][trackedUnit] = ""
         self.partyMemberSpecs[trackedUnit] = ""
         inspectQueue:RemoveBarFromQueue(barFrame)
@@ -63,13 +61,11 @@ function OmniBar:OnPartyMembersChanged(barFrame, event, isInEditMode)
 
     -- If the same player is still in the same party slot and we're not in edit mode then no changes required as the unit hasn't changed
     if not isInEditMode and previousPartyGUID ~= "" and currentPartyGUID == previousPartyGUID then
-        print(barKey, trackedUnit, "If same player then return, no changes for this unit during this event")
         return
     end
 
     -- If a new player is now occupying this party slot (the party unit has changed),
     -- we need to update the bar to reflect the abilities and cooldowns of the new player.
-    print(barKey,"new partyUnit player update the bar")
     self:ResetIcons(barFrame)
     partyMemberGUIDs[barKey][trackedUnit] = currentPartyGUID
 
@@ -102,7 +98,7 @@ end
 function OmniBar:OnInspectTalentReady(barFrame, event, ...)
     local barKey = barFrame.key
     local barSettings = self.db.profile.bars[barKey]
-    print("OnInspectTalentReady", barSettings.name)
+    
     local trackedUnit = barSettings.trackedUnit
     local showUnusedIcons = barSettings.showUnusedIcons
 
@@ -122,10 +118,7 @@ function OmniBar:OnInspectTalentReady(barFrame, event, ...)
                 shouldTrack = self:CheckSpecAbilitiesForUnit(className, spellName)
                 if shouldTrack and not specFound then
                     spec = self:GetSpecFromSpellTable(spellName)
-                    local t = spec or "nil"
-                    print("|cFFFFFF00" .. "spec = " .. t .. "|r")
                     if spec and spec ~= "" then 
-                        print("|cFFFF0000" .. "I should print once" .. "|r")
                         specFound = true 
                     end
                 end
@@ -153,11 +146,9 @@ function OmniBar:OnInspectTalentReady(barFrame, event, ...)
 
     if not spec or spec == "" then
         spec = BackUpSpecDetection(className)
-        print("|cFFFFFF00".."partyMemberSpec after backup ".. spec .. "|r")
     end
     
     if showUnusedIcons and spec ~= "" then
-        print("|cFFFFFF00".."showUnusedIcons partyMemberSpec ".. spec .. "|r")
         self:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, spec, barSettings)
     end
 
@@ -199,7 +190,6 @@ function OmniBar:CheckSpecAbilitiesForUnit(className, spellName)
             GetActiveTalentGroup(true) -- Inspect unit's active spec [eg primary or secondary spec]
         )) > 0
 
-    print("hasTalent:", spellName, hasTalent)
     return hasTalent
 end
 

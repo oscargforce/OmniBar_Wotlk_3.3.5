@@ -11,8 +11,6 @@ function OmniBar:CreateBar()
     local barKey = self:GenerateUniqueKey()
     self:InitializeBar(barKey)
     self:AddBarToOptions(barKey)
-
-    print("Bar created with key:", barKey)
 end
 
 function OmniBar:SetPosition(barFrame, newPosition)
@@ -99,7 +97,7 @@ function OmniBar:AddSpellToTrackedSpells(trackedSpells, className, spellName, sp
     local spellData = spellTable[className][spellName]
 
     if not spellData then  
-        print(spellName, "does not exist in the table: trackedSpells. Add it to the table then preform /relod")
+        print("OmniBar", spellName, "does not exist in the table: trackedSpells. Add it to the table then preform /relod")
         return
     end
 
@@ -179,7 +177,6 @@ function OmniBar:UpdateBorders(barKey)
     for i, icon in ipairs(barFrame.icons) do
         self:UpdateIconBorder(barSettings.showBorder, icon)
     end
-    print("Border: Icons left in pool:", #self.iconPool)
 end
 
 function OmniBar:RefreshIconVisibility(barFrame, barSettings)

@@ -82,8 +82,6 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
     -- 3) Get cached data+
     local cachedSpells = self.combatLogCache[unitName]
     local cachedSpec = cachedSpells and cachedSpells.spec
-    local t = cachedSpec and cachedSpells.spec or "no spec"
-    print("|cFFFFFF00" .. "cachedSpec = " .. t .. "|r")
 
     -- 4) Process tracked spells
     local unusedAlpha = barSettings.unusedAlpha

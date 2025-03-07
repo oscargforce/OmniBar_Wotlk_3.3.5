@@ -56,11 +56,10 @@ end
 
 function OmniBar:CreateIconsToPool(barFrame)
     for spellName, spellData in pairs(barFrame.trackedSpells) do
-        -- change this later to if spellData then... and remove the print
-        if not spellData then print(spellName,"Does not exist in spellTable") end
-
-        local icon = barFrame.CreateOmniBarIcon()
-        self:ReturnIconToPool(icon)
+        if spellData then  
+            local icon = barFrame.CreateOmniBarIcon()
+            self:ReturnIconToPool(icon)
+        end
     end
 end
 

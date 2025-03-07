@@ -147,7 +147,7 @@ function OmniBar:GenerateUniqueKey()
         key = "OmniBar" .. self.barIndex
         self.barIndex = self.barIndex + 1
     until not self.db.profile.bars[key]
-    print("Key name:", key)
+    
     return key
 end
 

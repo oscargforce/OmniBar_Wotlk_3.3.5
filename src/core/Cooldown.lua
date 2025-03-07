@@ -106,7 +106,7 @@ local function RemoveInactiveIconsInWorldZone(icon, barFrame, barSettings)
     if icon.unitGUID ~= currentUnitGUID or
         (icon.unitType == "target" and not UnitExists("target")) or
         (icon.unitType == "focus" and not UnitExists("focus")) then
-        print("RemoveInactiveIconsInWorldZone removing icon", icon.spellName, "from", icon.unitType, GetUnitName(icon.unitType))
+
         OmniBar:ReturnIconToPool(icon)
         for i = #barFrame.icons, 1, -1 do
             if barFrame.icons[i] == icon then
@@ -142,7 +142,6 @@ function OmniBar:SharedCooldownsHandler(barFrame, barSettings, unit, unitGUID, s
                     local icon = self:CreateIconToBar(barFrame, barSettings.showBorder, spell, spellData, unitGUID, unit)
                     local sharedDuration = spellConfig.sharedDuration or nil
                     self:ActivateIcon(barFrame, barSettings, icon, cachedSpell, sharedDuration)
-                    print("Hidden shared cd cooldown for", icon.spellName)
                     self:ArrangeIcons(barFrame, barSettings)
                 end
             end
@@ -183,7 +182,6 @@ function OmniBar:ResetCooldownsForSpell(barFrame, barSettings, unitGUID, spellNa
     for i = #barFrame.icons, 1, -1 do
         local icon = barFrame.icons[i]
         if resetSpells[icon.spellName] and barFrame.activeIcons[icon] and icon.unitGUID == unitGUID then
-            print("Resetting cooldown for", icon.spellName)
             -- Reset the cooldown
             self:ResetIconState(icon)
             barFrame.activeIcons[icon] = nil

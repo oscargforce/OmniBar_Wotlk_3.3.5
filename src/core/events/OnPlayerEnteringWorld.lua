@@ -3,7 +3,6 @@ local IsInInstance = IsInInstance
 local wipe = wipe
 
 function OmniBar:PLAYER_ENTERING_WORLD()
-    print("OnPlayerEnteringWorld")
     local _, zone = IsInInstance()
   
     -- Prevent unnecessary refresh on login or reload if the zone hasn't changed.
@@ -11,7 +10,6 @@ function OmniBar:PLAYER_ENTERING_WORLD()
         self:RefreshBarsWithActiveIcons()
         self:ClearPartyMemberGUIDs()
         wipe(self.combatLogCache)
-        print("PLAYER_ENTERING_WORLD: RefreshBarsWithActiveIcons")  
     end
     
     self.zone = zone
