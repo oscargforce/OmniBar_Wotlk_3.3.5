@@ -21,7 +21,7 @@ For a detailed step-by-step guide on configuring your **OmniBar**, visit:
 - Allows filtering of cooldowns and abilities based on the race of players.
 
 ### 3. Trinket Filtering for Party Members
-- Offers the ability to filter cooldowns for trinkets specifically within party members, enhancing focus and strategy.
+- The addon first checks which trinkets are equipped and then adds the corresponding icons.
 
 ### 4. Shared Cooldowns
 - Displays shared cooldowns to provide better clarity on ability usage and timing.
@@ -31,7 +31,8 @@ For a detailed step-by-step guide on configuring your **OmniBar**, visit:
 - Dynamically alters active cooldowns displayed on the bar based on spec-influenced durations.
 
 ### 6. Custom Icon Ordering/Sorting
-- Enables manual ordering of icons on the bar, when 'Show Unused Icons' is active.
+- Enables manual ordering/sorting of icons on the bar, when 'Show Unused Icons' is active.
+- Use the "Priority" tab to set the sorting order.
 
 ### 7. Time-Based Sorting for Hidden Icons
 - Allows sorting by time remaining instead of the default 'time added' when icons are hidden.
