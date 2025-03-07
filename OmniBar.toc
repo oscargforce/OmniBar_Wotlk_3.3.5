@@ -3,7 +3,7 @@
 ## Notes: Tracks enemy cooldowns
 ## Version: 3.3.5a Version
 ## Author: Oscargforce
-## SavedVariables: OMNIBAR_TEST
+## SavedVariables: OmniBarDatabase
 
 embeds.xml
 load.xml

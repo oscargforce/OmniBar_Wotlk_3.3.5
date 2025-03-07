@@ -98,7 +98,7 @@ addon.spellTable = {
         ["Intimidation"] = { isTracking = false, duration = 60, spellId = 19577, spec = "bm" },
         ["Master's Call"] = { isTracking = false, duration = 60, spellId = 53271 },
         ["Pet Intervene"] = { isTracking = false, duration = 30, spellId = 53476 },
-        ["Pet Pummel"] = { isTracking = false, duration = 30, spellId = 26090 },
+      --  ["Pet Pummel"] = { isTracking = false, duration = 30, spellId = 26090 },
         ["Rapid Fire"] = { isTracking = false, duration = 300, spellId = 3045 },
         ["Readiness"] = { isTracking = false, duration = 180, spellId = 23989, spec = "mm" },
         ["Roar of Sacrifice"] = { isTracking = false, duration = 60, spellId = 53480 },

@@ -31,7 +31,7 @@ local DEFAULT_BAR_SETTINGS = {
     glowSetting = "default",
     position = { point = "CENTER", relativePoint = "CENTER", x = 0, y = 0 },
     showBorder = true,
-    isRowGrowingUpwards = true,
+    isRowGrowingUpwards = false,
     highlightTarget = false,
     targetHighlightColor = { r = 0.639, g = 0.207, b = 0.933, a = 1 }, 
     focusHighlightColor = { r = 1, g = 0.843, b = 0, a = 1 }, 
@@ -68,7 +68,7 @@ end
 
 -- Register options and initialize the addon
 function OmniBar:OnInitialize()
-    self.db = LibStub("AceDB-3.0"):New("OMNIBAR_TEST", DEFAULT_PROFILE_SETTINGS)
+    self.db = LibStub("AceDB-3.0"):New("OmniBarDatabase", DEFAULT_PROFILE_SETTINGS)
     self.barFrames = {}
     self.barIndex = 1
     self.iconPool = {}

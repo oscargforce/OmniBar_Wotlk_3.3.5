@@ -188,9 +188,9 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
     -- Add the icon to the bar for non-targeted players
     if spellData and self.localPlayerGUID == destGUID and barSettings.trackedUnit == "allEnemies" then
         if not IsSourceHostile(sourceFlags) then return end
-
+        
         if sourceGUID == UnitGUID("target") or sourceGUID == UnitGUID("focus") then return end
-
+        
         if barSettings.showUnusedIcons then
             local shouldAddNewIcon = true
             for icon, _ in pairs(barFrame.activeIcons) do
@@ -199,14 +199,14 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
                     break
                 end
             end
-
+            
             if shouldAddNewIcon then
                 local icon = self:CreateIconToBar(barFrame, barSettings.showBorder, spellName, spellData, sourceGUID, "nonTargetedPlayer")
                 icon:SetAlpha(barSettings.unusedAlpha)
                 self:ArrangeIcons(barFrame, barSettings)
             end
         end
-            
+        
         self:OnCooldownUsed(barFrame, barSettings, "nonTargetedPlayer", sourceGUID, spellName, spellData, playerCache[spellName])   
     end
 end
