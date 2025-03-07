@@ -10,7 +10,16 @@ The Omnibar Addon has been **REWRITTEN** with several new features, bringing imp
 ## 🛠️ **Set Up Your OmniBar Configuration**  
 
 For a detailed step-by-step guide on configuring your **OmniBar**, visit:  
-[📖 **Read More Here**](https://github.com/oscargforce/OmniBar_Wotlk_3.3.5/wiki)  
+[📖 **Read More Here**](https://github.com/oscargforce/OmniBar_Wotlk_3.3.5/wiki) 
+
+## Commands
+| Command              | Description                              |
+|----------------------|------------------------------------------|
+| `/ob`                | Opens the options menu                   |
+| `/ob test`           | Opens the test panel                     |
+| `/ob test stop`      | Stops the test mode                      |
+| `/ob reset`          | Resets any active cooldowns on the bar   |
+
 
 ## Implemented Features
 
