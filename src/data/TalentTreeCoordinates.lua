@@ -111,10 +111,10 @@ addon.talentTreeCoordinates = {
         },
     },
     ["Hunter"] = {
-      --[[   ["Aimed Shot"] = {  Always showing aim shot regardless of spec detection.
+        ["Aimed Shot"] = { 
             talentGroup = 2,
             index = 9,
-        }, ]]
+        }, 
         ["Bestial Wrath"] = {
             talentGroup = 1,
             index = 18,

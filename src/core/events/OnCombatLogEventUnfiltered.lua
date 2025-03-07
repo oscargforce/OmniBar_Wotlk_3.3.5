@@ -131,22 +131,23 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
         if not className then return end
         local spellDetails = spellTable[className][spellName]
         local duration = spellDetails.adjust and spellDetails.adjust[playerCache.spec] or spellDetails.duration
-
-        playerCache[spellName] = {
+    
+        playerCache[spellName] = playerCache[spellName] or{
             duration = duration, 
             expires = now + duration, 
             timestamp = now, 
             playerName = playerName, 
             sharedCds = sharedCd,
-            createIcon = false
+            createIcon = {}
         }
+        playerCache[spellName].createIcon[barFrame.key] = false
         return
     end
 
     local duration = GetSpellDuration(spellData, playerSpec)
 
     -- 4.2) Add the spell to the cache so that if we switch targets to this unit, the cooldown is already saved for display.
-    playerCache[spellName] = {
+    playerCache[spellName] = playerCache[spellName] or {
         duration = duration, -- actually using this property, dont think this is needed anymore. Im using icon.duration
         event = subEvent,
         expires = now + duration, -- actually using this property
@@ -159,8 +160,9 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
         timestamp = now, -- actually using this property
         playerName = playerName, -- using ths property
         sharedCds = sharedCd or nil,
-        createIcon = true,
+        createIcon = {},
     }
+    playerCache[spellName].createIcon[barFrame.key] = true
 
     -- 5) Activate icons for enemy pet abilities. The event UnitSpellCastSucceeded is not triggered by enemy pets in the open world (though it does work in arenas). 
     -- Similarly, Feign Death is not registered in the combat log. To work around this, the two events need to support each other.

@@ -116,6 +116,7 @@ function OmniBar:AddSpellToTrackedSpells(trackedSpells, className, spellName, sp
             spec = spellData.spec or nil,
             item = spellData.item or nil,
             adjust = spellData.adjust or nil,
+            partySpecOnly = spellData.partySpecOnly or nil,
         }
     end
 end

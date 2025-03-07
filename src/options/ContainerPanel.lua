@@ -1,5 +1,6 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
 local wipe = wipe
+local LibStub = LibStub
 
 function OmniBar:SetupOptions()
     self.options = {
@@ -9,7 +10,7 @@ function OmniBar:SetupOptions()
             Desc = {
                 type = "description",
                 order = 1,
-                name = "OmniBar is a simple cooldown tracking addon for World of Warcraft. Originally created by Jordan, it has been completely rewritten by Oscargforce for 3.3.5. https://github.com/oscargforce for questions or feedback.",
+                name = "Rewritten OmniBar for 3.3.5 by Oscargforce. https://github.com/oscargforce for questions or feedback.",
             },
             header = {
                 order = 2,
@@ -75,24 +76,8 @@ function OmniBar:SetupOptions()
                         set = function(info, value) self.db.profile.showOutOfRangeMessages = value end,
                         order = 1,
                     },
---[[                     showInArena = {
-                        type = "toggle",
-                        name = "Show Bars in Arena",
-                        desc = "Enable this option to show the cooldown bars in arena matches.",
-                        set = function(info, value) self.db.profile.showInArena = value end,
-                        get = function(info) return self.db.profile.showInArena end,
-                        order = 2,
-                    },
-                    showInWorld = {
-                        type = "toggle",
-                        name = "Show in World and Battlegrounds",
-                        desc = "Enable this option to show the cooldown bars in the world and battlegrounds.",
-                        set = function(info, value) self.db.profile.showInWorld = value end,
-                        get = function(info) return self.db.profile.showInWorld end,
-                        order = 3,
-                    }, ]]
                     fontHeader = {
-                        order = 4,
+                        order = 2,
                         type = "header",
                         name = "Font Settings",
                     }, 
@@ -108,22 +93,22 @@ function OmniBar:SetupOptions()
                         },
                         get = function() return self.db.profile.fontStyle end,
                         set = function(info, value) self.db.profile.fontStyle = value end,
-                        order = 5,
+                        order = 3,
                     },
                     lineBreak1 = {
                         name = " ",
                         type = "description",
-                        order = 5.5,
+                        order = 4,
                     },
                     descColor = {
                         name = "Color and Font Size Settings",
                         type = "description",
-                        order = 5.6,
+                        order = 5,
                     },
                     lineBreak2 = {
                         name = " ",
                         type = "description",
-                        order = 5.7,
+                        order = 6,
                     },
                     fontColorExpire = {
                         type = "color",
@@ -136,7 +121,7 @@ function OmniBar:SetupOptions()
                         set = function(info, r, g, b, a) 
                             self.db.profile.fontColorExpire = { r = r, g = g, b = b, a = a } 
                         end,
-                        order = 6,
+                        order = 7,
                     },
                     fontSizeExpire = {
                         type = "range",
@@ -149,7 +134,7 @@ function OmniBar:SetupOptions()
                         get = function() return self.db.profile.fontSizeExpire end,
                         set = function(info, value) 
                             self.db.profile.fontSizeExpire = value end,
-                        order = 7,
+                        order = 8,
                     },
                     fontColorSeconds = {
                         type = "color",
@@ -162,7 +147,7 @@ function OmniBar:SetupOptions()
                         set = function(info, r, g, b, a)
                             self.db.profile.fontColorSeconds = { r = r, g = g, b = b, a = a } 
                         end,
-                        order = 8,
+                        order = 9,
                     },
                     fontSizeSeconds = {
                         type = "range",
@@ -174,7 +159,7 @@ function OmniBar:SetupOptions()
                         step = 1,
                         get = function() return self.db.profile.fontSizeSeconds end,
                         set = function(info, value) self.db.profile.fontSizeSeconds = value end,
-                        order = 9,
+                        order = 10,
                     },
                     fontColorMinutes = {
                         type = "color",
@@ -187,7 +172,7 @@ function OmniBar:SetupOptions()
                         set = function(info, r, g, b, a) 
                             self.db.profile.fontColorMinutes = { r = r, g = g, b = b, a = a } 
                         end,
-                        order = 10,
+                        order = 11,
                     },
                     fontSizeMinutes = {
                         type = "range",
@@ -199,10 +184,11 @@ function OmniBar:SetupOptions()
                         step = 1,
                         get = function() return self.db.profile.fontSizeMinutes end,
                         set = function(info, value) self.db.profile.fontSizeMinutes = value end,
-                        order = 11,
+                        order = 12,
                     },                    
                 },
             },
+            profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db) 
         },
     }
 

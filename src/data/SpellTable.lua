@@ -1,4 +1,18 @@
 local addonName, addon = ...
+--[[
+    You can add your own spells to the spellTable by following the format below. OBS, all strings are case sensetive!
+    ["NameOfSpell"] ? {
+        isTracking = false,
+        duration = number in seconds,
+        spellId = check wowhead for spellId,
+        item = boolean, only add this property if you want to add a trinket,
+        race = "RaceName", only add this property if you want to add a racial,
+        spec = "SpecName", check previous examples for how to add this property. Also add the talent coordinates in TalentTreeCoordinates.lua table
+        adjust = { SpecName = number }, only add this property if you want to adjust the duration for a specific spec,
+        partySpecOnly = boolean, only add this property if the "spec" property exists. This property ensures that the spell is only checked for party members if they 
+                        have the specified talent. However, the spell should always be added for enemies. For example, Aimed Shot for hunters is used in all PvP specs, 
+                        so for enemies, we want to add the spell to the bar instantly.
+]]
 
 addon.spellTable = { 
     ["General"] = {
@@ -70,7 +84,7 @@ addon.spellTable = {
         ["Typhoon"] = { isTracking = false, duration = 20, spellId = 61384, spec = "balance" },
     },
     ["Hunter"] = {
-        ["Aimed Shot"] = { isTracking = false, duration = 8, spellId = 49050 },
+        ["Aimed Shot"] = { isTracking = false, duration = 8, spellId = 49050, spec = "mm", partySpecOnly = true },
         ["Bestial Wrath"] = { isTracking = false, duration = 120, spellId = 19574, spec = "bm" },
         ["Black Arrow"] = { isTracking = false, duration = 22, spellId = 63672, spec = "survival" },
         ["Chimera Shot"] = { isTracking = false, duration = 10, spellId = 53209, spec = "mm" },
@@ -126,7 +140,7 @@ addon.spellTable = {
         ["Divine Illumination"] = { isTracking = false, duration = 180, spellId = 31842, spec = "holy" },
         ["Divine Plea"] = { isTracking = false, duration = 60, spellId = 54428 },
         ["Divine Protection"] = { isTracking = false, duration = 180, spellId = 498, adjust = { protPala = 120 } },
-        ["Divine Sacrifice"] = { isTracking = false, duration = 120, spellId = 64205, spec = "protPala" },
+        ["Divine Sacrifice"] = { isTracking = false, duration = 120, spellId = 64205, spec = "protPala", partySpecOnly = true },
         ["Divine Shield"] = { isTracking = false, duration = 300, spellId = 642, adjust = { protPala = 240 } },
         ["Divine Storm"] = { isTracking = false, duration = 10, spellId = 53385, spec = "retri" },
         ["Hammer of Justice"] = { isTracking = false, duration = 40, spellId = 10308, adjust = { protPala = 30 } },

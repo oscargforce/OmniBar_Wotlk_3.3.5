@@ -84,6 +84,7 @@ function OmniBar:AddBarToOptions(barKey)
                     local bars = self.db.profile.bars
                     local selectedBar = bars[selectedBarKey]
                     local targetBar = bars[barKey]
+                    local barFrame = self.barFrames[barKey]
 
                     local copiedSettings = self:DeepCopyTable(selectedBar)
                     copiedSettings.name = targetBar.name
@@ -95,6 +96,8 @@ function OmniBar:AddBarToOptions(barKey)
                     }
 
                     bars[barKey] = copiedSettings
+                    self:BuildTrackedSpells(barFrame, copiedSettings)
+                    self:InitializeEventsTracking(barFrame, copiedSettings)
                     print(string.format("|cff00ff00OmniBar copied settings from |cffffd700%s |cff00ff00to |cffffd700%s|r", selectedBar.name, targetBar.name))
                 end,
                 order = 1,

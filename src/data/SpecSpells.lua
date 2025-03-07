@@ -55,14 +55,14 @@ addon.specDefiningAuras = {
     }
 }
 
+-- Do not include spells in table "crossSpecSpells" that are marked with "partySpecOnly" in SpellTable.lua
 addon.crossSpecSpells = {
-    -- Hunter
-    -- ["Aimed Shot"] = { mm = true, survival = true, bm = true }, After consideration, its better to always show aim shot regardless of spec is detected or not.
-    ["Readiness"] = { mm = true, bm = true },
-    ["Scatter Shot"] =  { mm = true, survival = true },
     -- Death Knight
     ["Lichborne"] =  { frostDk = true, blood = true, unholy = true },
     ["Bone Shield"] =  { frostDk = true, blood = true, unholy = true },
+    -- Hunter
+    ["Readiness"] = { mm = true, bm = true },
+    ["Scatter Shot"] =  { mm = true, survival = true },
     -- Priest
     ["Desperate Prayer"] = { holyPriest = true, disc = true },
     -- Warlock
@@ -120,7 +120,6 @@ addon.specDefiningSpells = {
     ["Crusader Strike"] = "retri",
     ["Divine Favor"] = "holy",
     ["Divine Illumination"] = "holy",
-    ["Divine Sacrifice"] = "protPala",
     ["Divine Storm"] = "retri",
     ["Hammer of the Righteous"] = "protPala",
     ["Holy Shield"] = "protPala",

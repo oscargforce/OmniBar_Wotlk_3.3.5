@@ -131,6 +131,10 @@ local function SpellBelongsToSpec(spellData, opponent, spellName)
         return false 
     end
 
+    if spellData.partySpecOnly then
+        return false
+    end
+
     if spellData.className ~= opponent.className then
         return false
     end

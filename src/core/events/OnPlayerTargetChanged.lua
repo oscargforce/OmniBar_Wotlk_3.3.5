@@ -1,4 +1,6 @@
 local OmniBar = LibStub("AceAddon-3.0"):GetAddon("OmniBar")
+local addonName, addon = ...
+local crossSpecSpells = addon.crossSpecSpells
 local UnitIsPlayer = UnitIsPlayer
 local UnitIsEnemy = UnitIsEnemy
 local UnitIsUnit = UnitIsUnit
@@ -9,9 +11,15 @@ local UnitGUID = UnitGUID
 
 local function ShouldTrackSpell(spellName, spellData, unitClass, unitRace, spec)
     if unitClass == spellData.className then
-        if spellData.spec then
+        if spellData.spec and not spellData.partySpecOnly then
+            local crossSpecInfo = crossSpecSpells[spellName]
+            if spec and crossSpecInfo and crossSpecInfo[spec] then
+                return true
+            end
+
             return spec and spellData.spec == spec
         end
+
         return true
     end
 
@@ -44,7 +52,8 @@ end
 
 function OmniBar:OnPlayerTargetChanged(barFrame, event)
     local unit = (event == "PLAYER_TARGET_CHANGED" and "target") or (event == "PLAYER_FOCUS_CHANGED" and "focus")
-    local barSettings = self.db.profile.bars[barFrame.key]
+    local barKey = barFrame.key
+    local barSettings = self.db.profile.bars[barKey]
 
     if self.zone == "arena" and barSettings.trackedUnit == "allEnemies" then
         self:UpdateArenaUnitHighlights(barFrame, barSettings, unit)
@@ -56,7 +65,7 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
     self:ClearSpecProcessedData(unit)
 
     if barSettings.trackedUnit == "allEnemies" then
-        self:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
+        self:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings, barKey)
         return
     end
    
@@ -80,7 +89,7 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
     local unusedAlpha = barSettings.unusedAlpha
     
     for spellName, spellData in pairs(barFrame.trackedSpells) do
-        local hasCachedCooldown = cachedSpells and cachedSpells[spellName] and cachedSpells[spellName].createIcon
+        local hasCachedCooldown = cachedSpells and cachedSpells[spellName] and cachedSpells[spellName].createIcon[barKey]
 
         if barSettings.showUnusedIcons then
             if ShouldTrackSpell(spellName, spellData, unitClass, unitRace, cachedSpec) then
@@ -88,7 +97,7 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
                 icon:SetAlpha(unusedAlpha)
             end
         end
-
+       
         if hasCachedCooldown then
             self:OnCooldownUsed(barFrame, barSettings, unit, unitGUID, spellName, spellData, cachedSpells[spellName])
         end
@@ -116,7 +125,7 @@ function OmniBar:OnPlayerTargetChanged(barFrame, event)
 end
 
 
-function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)    
+function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings, barKey)    
     if IsFriendlyPlayer(unit) then
         return
     end
@@ -189,7 +198,7 @@ function OmniBar:ProcessAllEnemiesTargetChange(unit, barFrame, barSettings)
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         local iconKey = spellName .. unitGUID
         local existingIcon = existingIcons[iconKey]
-        local hasCachedCooldown = cachedSpells and cachedSpells[spellName] and cachedSpells[spellName].createIcon
+        local hasCachedCooldown = cachedSpells and cachedSpells[spellName] and cachedSpells[spellName].createIcon[barKey]
     
         if not existingIcon then
             if showUnusedIcons then
