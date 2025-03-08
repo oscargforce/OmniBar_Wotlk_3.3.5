@@ -9,6 +9,7 @@ local classList = {
     "Death Knight",
     "Druid",
     "Hunter",
+    "General",
     "Mage",
     "Paladin",
     "Priest",
@@ -81,20 +82,15 @@ for i, class in ipairs(classList) do
     testPanel:AddChild(classCheckbox)
 end
 
-local spacer3 = AceGUI:Create("Label")
-spacer2:SetText(" ")  
-spacer2:SetFullWidth(true)
-testPanel:AddChild(spacer3)
-
 local animationHeading = AceGUI:Create("Label")
 animationHeading:SetText("Animations")
 animationHeading:SetColor(1, 1, 0)
 testPanel:AddChild(animationHeading)
 
-local spacer4 = AceGUI:Create("Label")
-spacer4:SetText(" ")  
-spacer4:SetFullWidth(true)
-testPanel:AddChild(spacer4)
+local spacer3 = AceGUI:Create("Label")
+spacer3:SetText(" ")  
+spacer3:SetFullWidth(true)
+testPanel:AddChild(spacer3)
 
 local cooldownCheckbox = AceGUI:Create("CheckBox")
 cooldownCheckbox:SetLabel("Show Cooldowns")
