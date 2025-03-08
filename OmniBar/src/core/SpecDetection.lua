@@ -102,6 +102,8 @@ function OmniBar:DetectSpecByAura(unit, barFrame, barSettings)
     if not opponent then return end
 
     local auras = specDefiningAuras[opponent.className]
+    if not auras then return end
+    
     local unitSpec = opponent.spec or false
     
     -- Detect spec if not already detected
