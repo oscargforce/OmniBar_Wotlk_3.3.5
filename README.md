@@ -44,7 +44,7 @@ For a detailed step-by-step guide on configuring your **OmniBar**, visit:
 
 ### 5. Dynamic Cooldown Adjustment  
 - Automatically modifies cooldown durations based on the enemy's specialization. For example, if the enemy is identified as a Survival Hunter, trap cooldowns adjust from 28 seconds to 22 seconds accordingly.  
-- Dynamically updates active cooldowns displayed on the bar to reflect spec-based adjustments. For instance, if a Survival Hunter uses Freezing Trap before their specialization is identified and the timer shows 25 seconds (28-3), the cooldown will automatically adjust to 19 seconds (22-3) once the spec is recognized.
+- Dynamically updates active cooldowns displayed on the bar to reflect spec-based adjustments. For instance, if a Survival Hunter uses Freezing Trap before their specialization is identified, the timer initially shows 25 seconds (28-3, accounting for the 3 seconds elapsed before spec identification). Once the spec is recognized, the cooldown will automatically adjust to 19 seconds (22-3).
 
 ### 6. Custom Icon Ordering/Sorting
 - Enables manual ordering/sorting of icons on the bar, when 'Show Unused Icons' is active.
