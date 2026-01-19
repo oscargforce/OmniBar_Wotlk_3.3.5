@@ -139,7 +139,18 @@ function OmniBar:OnInspectTalentReady(barFrame, event, ...)
         end
 
         if shouldTrack and showUnusedIcons then
-            self:CreateIconToBar(barFrame, barSettings.showBorder, spellName, spellData, unitGUID, trackedUnit)
+             -- Check if icon already exists before creating
+            local iconExists = false
+            for _, icon in ipairs(barFrame.icons) do
+                if icon.spellName == spellName and icon.unitGUID == unitGUID then
+                    iconExists = true
+                    break
+                end
+            end
+            
+            if not iconExists then
+                self:CreateIconToBar(barFrame, barSettings.showBorder, spellName, spellData, unitGUID, trackedUnit)
+            end
         end
 
     end

@@ -564,9 +564,6 @@ function OmniBar:AddBarToOptions(barKey)
                     local spellDescription = GetSpellTooltipDescription(spellData.spellId, isItem) or "No description available"
                     local cooldownText = spellData.duration > 0 and SecondsToTime(spellData.duration) or "Instant"
                     
-                    local extra = "\n\n|cffffd700 ".."Cooldown:".."|r "..cooldownText..
-                    "\n\n|cffffd700 ".."Spell ID:".."|r "..spellData.spellId
-                    
                     local tooltip = string.format(
                         "\n|cffffd700Cooldown:|r %s\n\n%s\n\n|cffffd700Spell ID:|r %d",
                         cooldownText,
@@ -575,7 +572,6 @@ function OmniBar:AddBarToOptions(barKey)
                     )
 
                    return tooltip
-                  -- return spellDescription..extra
                 end,
                 get = function()  
                     local bar = self.db.profile.bars[barKey]

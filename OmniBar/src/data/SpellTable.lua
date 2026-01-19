@@ -12,22 +12,25 @@ local addonName, addon = ...
         partySpecOnly = boolean, only add this property if the "spec" property exists. This property ensures that the spell is only checked for party members if they 
                         have the specified talent. However, the spell should always be added for enemies. For example, Aimed Shot for hunters is used in all PvP specs, 
                         so for enemies, we want to add the spell to the bar instantly.
+        icon = "path to icon", only add for trinkets since GetItemInfo on warmane is buggy https://www.warmane.com/bugtracker/report/130423.
+
+    
 ]]
 
 addon.spellTable = { 
     ["General"] = {
         ["Arcane Torrent"] = { isTracking = false, duration = 120, spellId = 28730, race = "Blood Elf" },
-        ["Bauble of True Blood"] = { isTracking = false, duration = 120, spellId = 50726, item = true },
+        ["Bauble of True Blood"] = { isTracking = false, duration = 120, spellId = 50726, item = true, icon = "Interface\\Icons\\inv_jewelcrafting_gem_28" },
         ["Berserking"] = { isTracking = false, duration = 180, spellId = 26297, race = "Troll" },
         ["Blood Fury"] = { isTracking = false, duration = 120, spellId = 20572, race = "Orc" },
-        ["Corroded Skeleton Key"] = { isTracking = false, duration = 120, spellId = 50356, item = true },
+        ["Corroded Skeleton Key"] = { isTracking = false, duration = 120, spellId = 50356, item = true, icon = "Interface\\Icons\\inv_misc_key_15" },
         ["Escape Artist"] = { isTracking = false, duration = 60, spellId = 20589, race = "Gnome" },
         ["Every Man for Himself"] = { isTracking = false, duration = 120, spellId = 59752, race = "Human" },
         ["Gift of the Naaru"] = { isTracking = false, duration = 180, spellId = 28880, race = "Draenei" },
-        ["PvP Trinket"] = { isTracking = false, duration = 120, spellId = 51377, item = true },
-        ["Satrina's Impeding Scarab"] = { isTracking = false, duration = 180, spellId = 47088, item = true },
+        ["PvP Trinket"] = { isTracking = false, duration = 120, spellId = 51377, item = true, icon = "Interface\\Icons\\INV_Jewelry_TrinketPVP_01" },
+        ["Satrina's Impeding Scarab"] = { isTracking = false, duration = 180, spellId = 47088, item = true, icon = "Interface\\Icons\\inv_scarab_crystal" },
         ["Shadowmeld"] = { isTracking = false, duration = 120, spellId = 58984, race = "Night Elf" },
-        ["Sindragosa's Flawless Fang"] = { isTracking = false, duration = 60, spellId = 50364, item = true },
+        ["Sindragosa's Flawless Fang"] = { isTracking = false, duration = 60, spellId = 50364, item = true, icon = "Interface\\Icons\\inv_jewelry_trinket_06" },
         ["Stoneform"] = { isTracking = false, duration = 120, spellId = 20594, race = "Dwarf" },
         ["War Stomp"] = { isTracking = false, duration = 120, spellId = 20549, race = "Tauren" },
         ["Will of the Forsaken"] = { isTracking = false, duration = 120, spellId = 7744, race = "Undead" },

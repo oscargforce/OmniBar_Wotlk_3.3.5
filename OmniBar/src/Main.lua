@@ -53,15 +53,11 @@ local DEFAULT_BAR_SETTINGS = {
 local function AddIconsToSpellTable()
     for className, spells in pairs(spellTable) do
         for spellName, spellData in pairs(spells) do
-            local icon
             if not spellData.item then 
                 local _, _, spellIcon = GetSpellInfo(spellData.spellId)  
-                icon = spellIcon 
-            else
-                local _, _, _, _, _, _, _, _, _, itemIcon = GetItemInfo(spellData.spellId)
-                icon = itemIcon
+                spellData.icon = spellIcon 
             end
-            spellData.icon = icon
+            -- items should have their icons hardcoded in spellData.icon already
         end
     end
 end
@@ -203,4 +199,66 @@ function OmniBar:DeepCopyTable(tbl)
         end
     end
     return copy
+end
+
+function OmniBar:ExportProfile()
+    local LibDeflate = LibStub:GetLibrary("LibDeflate")
+    local AceSerializer = LibStub:GetLibrary("AceSerializer-3.0")
+    
+    local data = {
+        addon = "OscarsOmniBar",
+        profile = self.db.profile,
+        version = 10
+    }
+    
+    local serialized = AceSerializer:Serialize(data)
+    if not serialized then return end
+    
+    local compressed = LibDeflate:CompressZlib(serialized)
+    if not compressed then return end
+    
+    return LibDeflate:EncodeForPrint(compressed)
+end
+
+function OmniBar:DecodeProfile(encoded)
+    local LibDeflate = LibStub:GetLibrary("LibDeflate")
+    local AceSerializer = LibStub:GetLibrary("AceSerializer-3.0")
+    
+    local decoded = LibDeflate:DecodeForPrint(encoded)
+    if not decoded then return nil, "DecodeForPrint failed" end
+    
+    local decompressed = LibDeflate:DecompressZlib(decoded)
+    if not decompressed then return nil, "DecompressZlib failed" end
+    
+    local success, deserialized = AceSerializer:Deserialize(decompressed)
+    if not success then return nil, "Deserialize failed" end
+    
+    return deserialized, nil
+end
+
+function OmniBar:ImportProfile(data)
+    if data.addon ~= "OscarsOmniBar" then
+        return false, "Profile from a different OmniBar addon. Only profiles from this backported OmniBar are supported. https://github.com/oscargforce/OmniBar_Wotlk_3.3.5"
+    end
+    
+    if data.version ~= 10 then 
+        return false, "Invalid version" 
+    end
+    
+    -- Create a new profile with timestamp
+    local profileName = string.format("Imported (%s)", date("%Y-%m-%d %H:%M:%S"))
+    
+    -- Save the imported data to a new profile
+    self.db.profiles[profileName] = data.profile
+    
+    -- Switch to the new profile
+    self.db:SetProfile(profileName)
+    
+    -- Reinitialize the addon with the new profile
+    self:OnEnable()
+    
+    -- Notify the config system to refresh
+    LibStub("AceConfigRegistry-3.0"):NotifyChange("OmniBar")
+    
+    return true, profileName
 end

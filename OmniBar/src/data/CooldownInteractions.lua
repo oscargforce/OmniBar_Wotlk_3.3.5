@@ -68,7 +68,11 @@ addon.sharedCds = {
     -- PvP Trinkets
     ["PvP Trinket"] = {
         ["Will of the Forsaken"] = { sharedDuration = 45, showWhenHidden = true },
+        ["Every Man for Himself"] = { sharedDuration = 120 }
     }, 
+    ["Every Man for Himself"] = {
+        ["PvP Trinket"] = { sharedDuration = 120 }
+    },
     ["Will of the Forsaken"] = {
         ["PvP Trinket"] = { sharedDuration = 45, showWhenHidden = true },
     }, 

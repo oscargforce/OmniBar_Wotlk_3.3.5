@@ -37,14 +37,39 @@ function OmniBar:SetupOptions()
                 width = 0.7,
                 func = function()
                     if not self.testModeEnabled then
+                        if self.zone == "arena" then
+                            print("|cffff0000OmniBar:|r Test mode is not available in arenas.")
+                            self:StopTestMode()
+                            return
+                        end
                         self:OpenTestPanel()
                     else
                         self:StopTestMode()
                     end
                 end,
             },
-            lockBarsButton = {
+            exportButton = {
                 order = 4,
+                type = "execute",
+                name = "Export Profile",
+                desc = "Export current profile to share with others",
+                width = 0.7,
+                func = function()
+                    self:ShowExport()
+                end,
+            },
+            importButton = {
+                order = 5,
+                type = "execute",
+                name = "Import Profile",
+                desc = "Import a profile from a code",
+                width = 0.7,
+                func = function()
+                    self:ShowImport()
+                end,
+            },
+            lockBarsButton = {
+                order = 6,
                 type = "execute",
                 name = function()
                     return self.db.profile.isBarsLocked and "Unlock Bars" or "Lock Bars" 

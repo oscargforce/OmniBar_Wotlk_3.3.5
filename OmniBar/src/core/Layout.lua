@@ -5,7 +5,7 @@ local BASE_ICON_SIZE = 36
 local function SortIconsByPriority(barFrame)
     table.sort(barFrame.icons, function(a, b)
         -- First sort alphabetically by className
-        --[[ if a.className ~= b.className then
+       --[[  if a.className ~= b.className then
             return a.className < b.className 
         end ]]
         

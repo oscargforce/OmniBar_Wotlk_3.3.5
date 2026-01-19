@@ -7,6 +7,7 @@ function OmniBar:PLAYER_ENTERING_WORLD()
   
     -- Prevent unnecessary refresh on login or reload if the zone hasn't changed.
     if self.zone and self.zone ~= zone then
+        self:StopTestMode()
         self:RefreshBarsWithActiveIcons()
         self:ClearPartyMemberGUIDs()
         wipe(self.combatLogCache)
@@ -23,3 +24,4 @@ function OmniBar:PLAYER_ENTERING_WORLD()
     
     self:SetBarVisibilityForZone()
 end
+
