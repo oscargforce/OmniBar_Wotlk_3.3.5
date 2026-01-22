@@ -39,5 +39,5 @@
     <Script file="src\options\ContainerPanel.lua"/>
     <Script file="src\options\BarPanel.lua"/>
     <Script file="src\options\TestPanel.lua"/>
-
+    <Script file="src\options\ImportExport.lua"/>
 </Ui>
