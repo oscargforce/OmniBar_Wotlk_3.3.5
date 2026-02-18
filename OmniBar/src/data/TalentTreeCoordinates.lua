@@ -480,7 +480,7 @@ addon.talentTreeCoordinates = {
             spec = "fury",
         },
         ["Last Stand"] = {
-            talentGroup = 2,
+            talentGroup = 3,
             index = 6,
             spec = "protWar",
         },

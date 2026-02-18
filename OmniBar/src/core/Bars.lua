@@ -271,3 +271,15 @@ function OmniBar:SetBarVisibilityForZone()
         end
     end
 end
+
+function OmniBar:isBarActiveInZone(barSettings)
+    if self.zone == "arena" and not barSettings.showInArenas then
+        return false
+    elseif self.zone == "pvp" and not barSettings.showInBgs then
+        return false
+    elseif self.zone == "none" and not barSettings.showInWorld then
+        return false
+    end
+
+    return true
+end
