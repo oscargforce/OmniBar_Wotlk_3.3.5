@@ -10,6 +10,7 @@ InspectQueueOmniBar =  {
     isProcessing = false,
     retryInterval = 1, -- seconds between retry attempts
     maxRetryTime = 45, -- maximum seconds to retry
+    initialInspectDelay = 0.8, -- seconds to wait after queueing before inspect
     timeElapsed = 0,
     currentInspect = nil,
     frame = nil
@@ -34,10 +35,12 @@ function InspectQueueOmniBar:AddToQueue(unit, bar)
         end
     end
 
+    local now = GetTime() 
     table.insert(self.queue, {
         unit = unit,
         bar = bar,
         timeAdded = GetTime(),
+        availableAt = now + self.initialInspectDelay, 
         endTime = GetTime() + self.maxRetryTime,
     })
 
@@ -65,8 +68,15 @@ function InspectQueueOmniBar:ProcessQueue()
         return 
     end
     
+    local now = GetTime() 
     local inRangeIndex = self:FindNextInRangeUnit()
     if inRangeIndex then
+        -- Wait for talent data to sync before sending inspect request
+        if self.queue[inRangeIndex].availableAt and now < self.queue[inRangeIndex].availableAt then
+            self.frame:Show()
+            return
+        end
+
         self.isProcessing = true
 
         if inRangeIndex > 1 then

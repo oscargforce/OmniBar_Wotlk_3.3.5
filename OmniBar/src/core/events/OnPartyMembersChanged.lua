@@ -32,6 +32,10 @@ function OmniBar:OnPartyMembersChanged(barFrame, event, isInEditMode)
     local barKey = barFrame.key
     local barSettings = self.db.profile.bars[barKey]
 
+    if not self:isBarActiveInZone(barSettings) then
+        return
+    end
+    
     local trackedUnit = barSettings.trackedUnit
     local currentPartyGUID = UnitGUID(trackedUnit)
     local partyMemberGUIDs = self.partyMemberGUIDs
@@ -113,7 +117,6 @@ function OmniBar:OnInspectTalentReady(barFrame, event, ...)
         local shouldTrack = false
         if className == spellData.className then
             shouldTrack = true
-
             if spellData.spec then
                 shouldTrack = self:CheckSpecAbilitiesForUnit(className, spellName)
                 if shouldTrack and not specFound then
