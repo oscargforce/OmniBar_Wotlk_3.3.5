@@ -94,6 +94,7 @@ addon.spellTable = {
         ["Deterrence"] = { isTracking = false, duration = 90, spellId = 19263 },
         ["Explosive Trap"] = { isTracking = false, duration = 28, spellId = 49067, adjust = { survival = 22 } },
         ["Feign Death"] = { isTracking = false, duration = 25, spellId = 5384 },
+        ["Flare"] = { isTracking = false, duration = 20, spellId = 1543 },
         ["Freezing Arrow"] = { isTracking = false, duration = 28, spellId = 60192, adjust = { survival = 22 } },
         ["Freezing Trap"] = { isTracking = false, duration = 28, spellId = 14311, adjust = { survival = 22 } },
         ["Frost Trap"] = { isTracking = false, duration = 28, spellId = 13809, adjust = { survival = 22 } },
