@@ -79,6 +79,8 @@ end
 local function BackUpSpecDetection(className)
     local talents = talentTreeCoordinates[className]
 
+    if not talents then return "" end
+
     for _, talentInfo in pairs(talents) do
         if talentInfo.spec then
             local hasTalent = select(5, GetTalentInfo(
@@ -112,6 +114,16 @@ function OmniBar:OnInspectTalentReady(barFrame, event, ...)
     local unitTrinkets = self:GetPartyUnitsTrinkets(trackedUnit) 
     local spec = self.partyMemberSpecs[trackedUnit]
     local specFound = spec ~= ""
+
+    -- Check upfront if this class has any spec-specific spells being tracked.
+    -- Used later to decide whether empty spec detection means data wasn't ready.
+    local hasSpecSpellsForClass = false
+    for _, spellData in pairs(barFrame.trackedSpells) do
+        if spellData.className == className and spellData.spec then
+            hasSpecSpellsForClass = true
+            break
+        end
+    end
   
     for spellName, spellData in pairs(barFrame.trackedSpells) do
         local shouldTrack = false
@@ -161,7 +173,15 @@ function OmniBar:OnInspectTalentReady(barFrame, event, ...)
     if not spec or spec == "" then
         spec = BackUpSpecDetection(className)
     end
-    
+
+    -- If spec is still empty but this class has spec spells, GetTalentInfo data wasn't
+    -- ready yet (INSPECT_TALENT_READY can fire before the cache is populated).
+    -- Retry: keep item in queue and let the OnUpdate ticker call NotifyInspect again.
+    if hasSpecSpellsForClass and (not spec or spec == "") then
+        inspectQueue:RetryInspect()
+        return
+    end
+
     if showUnusedIcons and spec ~= "" then
         self:AdjustUnusedIconsCooldownForSpec(barFrame, unitGUID, spec, barSettings)
     end

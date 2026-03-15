@@ -118,6 +118,18 @@ addon.sharedCds = {
     ["Divine Shield"] = {
         ["Avenging Wrath"] = { sharedDuration = 30 },
     },
+    ["Judgement of Light"] = {
+        ["Judgement of Justice"] = {},
+        ["Judgement of Wisdom"] = {},
+    },
+    ["Judgement of Justice"] = {
+        ["Judgement of Light"] = {},
+        ["Judgement of Wisdom"] = {},
+    },
+    ["Judgement of Wisdom"] = {
+        ["Judgement of Light"] = {},
+        ["Judgement of Justice"] = {},
+    },
     ["Lay on Hands"] = {
         ["Avenging Wrath"] = { sharedDuration = 30 },
     },

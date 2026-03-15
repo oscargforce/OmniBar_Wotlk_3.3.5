@@ -10,7 +10,6 @@ InspectQueueOmniBar =  {
     isProcessing = false,
     retryInterval = 1, -- seconds between retry attempts
     maxRetryTime = 45, -- maximum seconds to retry
-    initialInspectDelay = 0.9, -- seconds to wait after queueing before inspect
     timeElapsed = 0,
     currentInspect = nil,
     frame = nil
@@ -35,12 +34,9 @@ function InspectQueueOmniBar:AddToQueue(unit, bar)
         end
     end
 
-    local now = GetTime() 
     table.insert(self.queue, {
         unit = unit,
         bar = bar,
-        timeAdded = GetTime(),
-        availableAt = now + self.initialInspectDelay, 
         endTime = GetTime() + self.maxRetryTime,
     })
 
@@ -68,15 +64,8 @@ function InspectQueueOmniBar:ProcessQueue()
         return 
     end
     
-    local now = GetTime() 
     local inRangeIndex = self:FindNextInRangeUnit()
     if inRangeIndex then
-        -- Wait for talent data to sync before sending inspect request
-        if self.queue[inRangeIndex].availableAt and now < self.queue[inRangeIndex].availableAt then
-            self.frame:Show()
-            return
-        end
-
         self.isProcessing = true
 
         if inRangeIndex > 1 then
@@ -117,6 +106,15 @@ function InspectQueueOmniBar:OnUpdate(elapsed)
         end
     end
 
+end
+
+-- Called when spec data was empty; keeps item in queue so OnUpdate retries on next tick
+function InspectQueueOmniBar:RetryInspect()
+    ClearInspectPlayer()
+    self.currentInspect.bar:UnregisterEvent("INSPECT_TALENT_READY")
+    self.currentInspect = nil
+    self.isProcessing = false
+    -- item stays in queue; OnUpdate will call ProcessQueue on the next retryInterval tick
 end
 
 function InspectQueueOmniBar:InspectComplete()
