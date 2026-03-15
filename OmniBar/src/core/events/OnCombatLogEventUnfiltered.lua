@@ -130,6 +130,7 @@ function OmniBar:OnCombatLogEventUnfiltered(barFrame, event, ...)
         local className = GENERAL_SPELLS[spellName] and "General" or GetPlayerInfoByGUID(sourceGUID)
         if not className then return end
         local spellDetails = spellTable[className][spellName]
+        if not spellDetails then return end
         local duration = spellDetails.adjust and spellDetails.adjust[playerCache.spec] or spellDetails.duration
     
         playerCache[spellName] = playerCache[spellName] or{
